@@ -1,0 +1,113 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="bootstrap.css">
+<link rel="stylesheet" type="text/css" href="loader.css">
+<link rel="stylesheet" type="text/css" href="loader2.css">
+<div class="navbar navbar-inverse" style="background-color:rgba(70,130,180,0.95);" >
+  <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-inverse-collapse">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="index.html">SPARK RDF ANALYSIS</a>
+    <a id="slash" class="navbar-brand" href="#">/</a>
+    <a id="GraphName" class="navbar-brand" href="#"><b>reading...</b></a>
+  </div>
+  <div class="navbar-collapse collapse navbar-inverse-collapse">
+   
+    <ul class="nav navbar-nav navbar-right">
+    </ul>
+  </div>
+</div>
+</head>
+<script>
+function getGraphName()
+{
+	var name = getCookie('graphName');
+	document.getElementById("GraphName").innerHTML = name;
+}
+function getCookie(name) {
+  var value = "; " + document.cookie;
+  var parts = value.split("; " + name + "=");
+  if (parts.length == 2) return parts.pop().split(";").shift();
+}
+function startJob(taskName)
+{
+  document.getElementById("result").className="loader2"
+  document.getElementById("result").innerHTML = "";
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (xhttp.readyState == 4 && xhttp.status == 200) {
+	  document.getElementById("result").className="alert alert-info"
+	  document.getElementById("result").innerHTML = xhttp.responseText;
+    }
+  }
+  
+  try {
+    document.getElementById(getCookie('activeButton')).className="";
+	}
+	catch(err) {
+    }
+  var buttonName = taskName+"Li";
+  document.getElementById(buttonName).className="active";
+  var strCookie = "activeButton ="+buttonName; 
+  document.cookie=strCookie;
+  var selectedTaskValue = taskName;
+  
+
+  var selectedGraphValue = getCookie('graphName');
+  
+  
+  xhttp.open("GET", "http://isydney.informatik.uni-freiburg.de:8080/spark-rdfanalyzer2/rest/ALL/"+selectedTaskValue+"/"+selectedGraphValue, true);
+  xhttp.send();
+  
+  
+  
+}
+</script>
+<body onload="getGraphName()" background="./img/bg.jpg" style="-webkit-background-size: cover; -moz-background-size: cover; -o-background-size: cover; background-size: cover;">
+ 
+   
+  <form id="IDbardh" class="form-horizontal col-md-8 col-md-offset-2" style=" padding-bottom:20px; background-color:rgba(70,130,180,0.95); border-radius:15px"
+  action = "" method="post">
+    <br>
+  <fieldset>
+    <nav class="navbar navbar-default">
+  <div class="container">
+    <ul class="nav navbar-nav"> 
+  	<li class="active"><a href="statistics.html"><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>&nbsp;Statistics</a></li> 
+    	<li ><a href="structure.html"><span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>&nbsp;Structure</a></li> 
+    	<li><a href="./conviewer/index.html"><span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span>&nbsp;Connectivity Viewer</a></li>
+    	<li><a href="visualizer.html"><span class="glyphicon glyphicon-dashboard" aria-hidden="true"></span>&nbsp;Schema Visualizer</a></li>
+     </ul>
+  </div>
+	</nav>
+
+	<table width="100%">
+	<tr>
+	<td id="Menu" style="vertical-align:top; text-align:left;" width="35%">
+	<ul style="margin-top:20px; background-color:#FFFFFF; opacity:1.0; border-radius:7px; padding-left:20px; padding:2px;" class="nav nav-pills nav-stacked">
+  	<li role="presentation" id="countEdgesLi" onClick="startJob('countEdges')"><a href="#"><span class="glyphicon glyphicon-sound-5-1" aria-hidden="true"></span>&nbsp;Number of Edges</a></li>
+  	<li role="presentation" id="countNodesLi" onClick="startJob('countNodes')"><a href="#"><span class="glyphicon glyphicon-sound-5-1" aria-hidden="true"></span>&nbsp;Number of Nodes (Distinct Literals) </a></li>
+  	<li role="presentation" id="countNodesV2Li" onClick="startJob('countNodesV2')"><a href="#"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>&nbsp;Number of Nodes (Detailed)</a></li>
+  	<li role="presentation" id="getClassesLi" onClick="startJob('getClasses')"><a href="#"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span>&nbsp;Classes</a></li>
+	</ul>
+	</td>
+	<td style="vertical-align:middle; text-align:center" width="65%">
+	<div  style="margin:10px; margin-left:40px; margin-right:30px;"><div id="result"><img width="200px" height="200px" src = "./img/pb.png" alt="Pause"></div></div>
+	</td>
+	</tr>
+	</table>
+	
+	<div style="text-align:center; align-items: center; align:center;"></div>
+	
+   
+    
+	
+   
+    
+  </fieldset>
+</form>
+</body>
+</html>

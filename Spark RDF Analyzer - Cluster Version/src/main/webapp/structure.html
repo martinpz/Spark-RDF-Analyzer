@@ -1,0 +1,166 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="bootstrap.css">
+<link rel="stylesheet" type="text/css" href="loader.css">
+<link rel="stylesheet" type="text/css" href="loader2.css">
+<script type="text/javascript" src="canvasjs.min.js"></script>
+<script type="text/javascript" src="generateGraph.js"></script>
+<div class="navbar navbar-inverse" style="background-color:rgba(70,130,180,0.95);" >
+  <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-inverse-collapse">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="index.html">SPARK RDF ANALYSIS</a>
+    <a id="slash" class="navbar-brand" href="#">/</a>
+    <a id="GraphName" class="navbar-brand" href="#"><b>reading...</b></a>
+  </div>
+  <div class="navbar-collapse collapse navbar-inverse-collapse">
+   
+    <ul class="nav navbar-nav navbar-right">
+    </ul>
+  </div>
+</div>
+</head>
+<script>
+function getGraphName()
+{
+	var name = getCookie('graphName');
+	document.getElementById("GraphName").innerHTML = name;
+}
+function getCookie(name) {
+  var value = "; " + document.cookie;
+  var parts = value.split("; " + name + "=");
+  if (parts.length == 2) return parts.pop().split(";").shift();
+}
+function startJob(taskName,viewType)
+{
+  document.getElementById("tdResult").style.verticalAlign = "middle";
+  document.getElementById("result").className="loader2"
+  document.getElementById("result").innerHTML = "";
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (xhttp.readyState == 4 && xhttp.status == 200) {
+    	if(viewType=="Table" || viewType=="AVG" || viewType=="MIN" || viewType=="MAX")
+    	{
+    		
+		  	document.getElementById("result").className="alert alert-info"
+		  	document.getElementById("result").innerHTML = xhttp.responseText;
+		 }
+		 else if (viewType=="Chart")
+		 {
+		 document.getElementById("tdResult").style.verticalAlign = "top";
+		 document.getElementById("result").className=" "
+		  var response = xhttp.responseText;
+	
+		  var axis = response.split("$");
+		  var X = axis[0].split("|");
+		  X.splice(X.length-1,1);
+	
+		  var Y = axis[1].split("|");
+		  Y.splice(Y.length-1,1);
+	
+		  for(var i =0; i<Y.length;i++)
+		  {
+		    Y[i] = parseInt(Y[i]); 
+		  }
+		  generateGraph(X,Y);
+		 }
+    }
+  }
+  
+  try {
+    document.getElementById(getCookie('activeButton')).className="";
+	}
+	catch(err) {
+    }
+  var buttonName = viewType+taskName+"Li";
+  if(viewType=="AVG" || viewType=="MIN" || viewType=="MAX")
+  {
+  document.getElementById(buttonName).className="alert alert-success";
+  }
+  else
+  {
+  document.getElementById(buttonName).className="active";
+  }
+  var strCookie = "activeButton ="+buttonName; 
+  document.cookie=strCookie;
+  var selectedTaskValue = taskName;
+  
+
+  var selectedGraphValue = getCookie('graphName');
+  
+  
+  xhttp.open("GET", "http://isydney.informatik.uni-freiburg.de:8080/spark-rdfanalyzer2/rest/ALL/"+selectedTaskValue+"/"+selectedGraphValue+"/"+viewType, true);
+  xhttp.send();
+  
+  
+  
+}
+</script>
+<body onload="getGraphName()" background="./img/bg.jpg" style="-webkit-background-size: cover; -moz-background-size: cover; -o-background-size: cover; background-size: cover;">
+ 
+   
+  <form id="IDbardh" class="form-horizontal col-md-8 col-md-offset-2" style=" padding-bottom:20px; background-color:rgba(70,130,180,0.95); border-radius:15px"
+  action = "" method="post">
+    <br>
+  <fieldset>
+    <nav class="navbar navbar-default">
+  <div class="container">
+    <ul class="nav navbar-nav"> 
+    	<li><a href="statistics.html"><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>&nbsp;Statistics</a></li> 
+    	<li class="active"><a href="structure.html"><span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>&nbsp;Structure</a></li> 
+    	<li><a href="./conviewer/index.html"><span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span>&nbsp;Connectivity Viewer</a></li>
+    	<li><a href="visualizer.html"><span class="glyphicon glyphicon-dashboard" aria-hidden="true"></span>&nbsp;Schema Visualizer</a></li>
+     </ul>
+  </div>
+	</nav>
+
+	<table width="100%">
+	<tr>
+	<td id="Menu" style="vertical-align:top; text-align:left" width="30%">
+	<ul style="margin-top:20px; background-color:#FFFFFF; opacity:1.0; border-radius:7px; padding-left:20px; padding:2px;" class="nav nav-pills nav-stacked ">
+	
+	<li role="presentation" ><a href="#" class="bg-info"><span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span>&nbsp;Predicate Distribution</a> </li>
+  	<li role="presentation" id="TablepredicateDistributionLi" onClick="startJob('predicateDistribution','Table')"><a href="#"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>&nbsp;Table</a></li>
+  	<li role="presentation" id="ChartpredicateDistributionLi" onClick="startJob('predicateDistribution','Chart')"><a href="#"><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>&nbsp;Chart</a></li>
+  	
+  	<li role="presentation" ><a href="#" class="bg-info"><span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span>&nbsp;Class Distribution</a> </li>
+  	<li role="presentation" id="TableclassDistributionLi" onClick="startJob('classDistribution','Table')"><a href="#"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>&nbsp;Table</a></li>
+  	<li role="presentation" id="ChartclassDistributionLi" onClick="startJob('classDistribution','Chart')"><a href="#"><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>&nbsp;Chart</a></li>
+  	
+  	<li role="presentation" ><a href="#" class="bg-info"><span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span>&nbsp;Degree Distribution</a> </li>
+  	<li role="presentation" id="TabledegreeDistributionLi" onClick="startJob('degreeDistribution','Table')"><a href="#"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>&nbsp;Table</a></li>
+  	<li role="presentation" id="ChartdegreeDistributionLi" onClick="startJob('degreeDistribution','Chart')"><a href="#"><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>&nbsp;Chart</a></li>
+  	
+  	<li role="presentation" ><a href="#" class="bg-info"><span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span>&nbsp;In Degree</a> </li>
+  	<span style="display:inline; padding:0px 12px 0px 12px;" id="AVGinDegreeLi" onClick="startJob('inDegree','AVG')"><a href="#"><span class="glyphicon glyphicon-tasks" aria-hidden="true"></span>&nbsp;AVG</a></span>
+  	<span  style="display:inline;  padding:0px 12px 0px 12px;  " id="MINinDegreeLi" onClick="startJob('inDegree','MIN')"><a href="#"><span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>&nbsp;MIN</a></span>
+  	<span  style="display:inline;   padding:0px 12px 0px 12px; " id="MAXinDegreeLi" onClick="startJob('inDegree','MAX')"><a href="#"><span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>&nbsp;MAX</a></span>
+  	
+  	<li role="presentation" ><a href="#" class="bg-info"><span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span>&nbsp;Out Degree</a> </li>
+  	<span style="display:inline; padding:0px 12px 0px 12px; " id="AVGoutDegreeLi" onClick="startJob('outDegree','AVG')"><a href="#"><span class="glyphicon glyphicon-tasks" aria-hidden="true"></span>&nbsp;AVG</a></span>
+  	<span style="display:inline; padding:0px 12px 0px 12px;" id="MINoutDegreeLi" onClick="startJob('outDegree','MIN')"><a href="#"><span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>&nbsp;MIN</a></span>
+  	<span style="display:inline; padding:0px 12px 0px 12px;" id="MAXoutDegreeLi" onClick="startJob('outDegree','MAX')"><a href="#"><span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>&nbsp;MAX</a></span>
+  	
+  	
+	</ul>
+	</td>
+	<td id="tdResult" style="vertical-align:middle; text-align:center" width="70%">
+	<div  style="margin:10px; margin-top:20px; margin-left:30px; margin-right:20px;"><div id="result"><img width="200px" height="200px" src = "./img/pb.png" alt="Pause"></div></div>
+	</td>
+	</tr>
+	</table>
+	
+	<div style="text-align:center; align-items: center; align:center;"></div>
+	
+   
+    
+	
+   
+    
+  </fieldset>
+</form>
+</body>
+</html>

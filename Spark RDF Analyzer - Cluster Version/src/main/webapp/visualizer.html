@@ -1,0 +1,241 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="bootstrap.css">
+<link rel="stylesheet" type="text/css" href="loader.css">
+<link rel="stylesheet" type="text/css" href="loader2.css">
+<script type="text/javascript" src="chord.js"></script>
+<script type="text/javascript" src="d3.v2.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<div class="navbar navbar-inverse" style="background-color:rgba(70,130,180,0.95);" >
+  <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-inverse-collapse">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+	<a class="navbar-brand" href="index.html">SPARK RDF ANALYSIS</a>
+    <a id="slash" class="navbar-brand" href="#">/</a>
+    <a id="GraphName" class="navbar-brand" href="#"><b>reading...</b></a>
+  </div>
+  <div class="navbar-collapse collapse navbar-inverse-collapse">
+   
+    <ul class="nav navbar-nav navbar-right">
+    </ul>
+  </div>
+</div>
+<style>
+text
+{
+    white-space: normal;
+
+}
+</style>
+</head>
+
+<script>
+
+
+function getGraphName()
+{
+	var name = getCookie('graphName');
+	document.getElementById("GraphName").innerHTML = name;
+}
+function getCookie(name) {
+  var value = "; " + document.cookie;
+  var parts = value.split("; " + name + "=");
+  if (parts.length == 2) return parts.pop().split(";").shift();
+}
+function startJob(taskName,viewType,logScale)
+{
+  document.getElementById("result").className="loader2"
+  document.getElementById("result").innerHTML = "";
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (xhttp.readyState == 4 && xhttp.status == 200) {
+	 	
+	 	if(viewType=="Table")
+    	{
+		  	document.getElementById("result").className="alert alert-info"
+		  	document.getElementById("result").innerHTML = xhttp.responseText;
+		 }
+		 else if (viewType=="Chart")
+		 {
+			document.getElementById("result").className="alert alert-info"
+		    var response = xhttp.responseText;
+			 	
+			  var strParts = response.split("&");
+			  var strClasses = strParts[1].split(",");
+			
+			  var x = new Array(strClasses.length);
+			  for (var i = 0; i < strClasses.length; i++) {	 
+			 	 x[i] = new Array(strClasses.length);
+				}
+			  
+			  var strRows = strParts[0].split("$");	
+			  
+			  for (var i = 0; i < strClasses.length; i++) 
+			  {
+			    var values = strRows[i].split(","); 
+			  	for (var j = 0; j < strClasses.length; j++) 
+			  	{
+			  	  if(logScale=="1" && parseInt(values[j])!=0)
+			  	  {
+			  	   
+			  	   x[i][j] = Math.log(parseInt(values[j]));
+			  	  }
+			  	  else
+			  	  {
+			  	  	x[i][j] = parseInt(values[j]);
+			  	  }
+			  	}
+			  }
+			  var theArray2 = [];
+			  updateM(x,strClasses,theArray2);
+				generateChord(x,strClasses,theArray2);
+		  }
+		  
+	 
+    }
+  }
+
+  	document.getElementById("result2").className="";
+    document.getElementById("result2").style.height = "0px"; 
+
+  try {
+    document.getElementById(getCookie('activeButton')).className="";
+	}
+	catch(err) {
+    }
+  var buttonName = viewType+taskName+"Li";
+  document.getElementById(buttonName).className="active";
+  var strCookie = "activeButton ="+buttonName; 
+  document.cookie=strCookie;
+  
+  try {
+    document.getElementById(getCookie('activeScaling')).className="";
+	}
+	catch(err) {
+    }
+  var scalingName = viewType+taskName+"Li";
+  if(logScale=="1")
+  {
+  	scalingName = "Log"+scalingName;
+  }
+  else
+  {
+  	scalingName = "Normal"+scalingName;
+  }
+  try {
+    document.getElementById(scalingName).className="alert alert-success";
+  strCookie = "activeScaling ="+scalingName; 
+  document.cookie=strCookie;
+	}
+	catch(err) {
+    }
+  
+  
+  
+  
+  
+  
+  var selectedTaskValue = taskName;
+  var strCookie2 = "taskName ="+selectedTaskValue; 
+  document.cookie=strCookie2;
+  
+
+  var selectedGraphValue = getCookie('graphName');
+  
+  
+  xhttp.open("GET", "http://isydney.informatik.uni-freiburg.de:8080/spark-rdfanalyzer2/rest/ALL/"+selectedTaskValue+"/"+selectedGraphValue+"/"+viewType, true);
+  xhttp.send();
+  
+}
+
+function getTable(name)
+{
+
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (xhttp.readyState == 4 && xhttp.status == 200) {
+	 	  	document.getElementById("result2").className="alert alert-info";
+	 	  	document.getElementById("result2").style.height = "300px"; 
+	 	  	 	  	
+		  	document.getElementById("result2").innerHTML = xhttp.responseText;
+	 
+    }
+  }
+  var task = getCookie('taskName');
+  xhttp.open("GET", "http://isydney.informatik.uni-freiburg.de:8080/spark-rdfanalyzer2/rest/ALL/partialRead/"+name+"/"+task, true);
+  xhttp.send();
+  
+	
+	
+}
+
+
+
+
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();   
+});
+</script>
+<body onload="getGraphName()" background="./img/bg.jpg" style="-webkit-background-size: cover; -moz-background-size: cover; -o-background-size: cover; background-size: cover;">
+ 
+   
+  <form id="IDbardh" class="form-horizontal col-md-8 col-md-offset-2" style=" padding-bottom:20px; background-color:rgba(70,130,180,0.95); border-radius:15px"
+  action = "" method="post">
+    <br>
+  <fieldset>
+    <nav class="navbar navbar-default">
+  <div class="container">
+    <ul class="nav navbar-nav"> 
+	<li ><a href="statistics.html"><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>&nbsp;Statistics</a></li> 
+    	<li ><a href="structure.html"><span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>&nbsp;Structure</a></li> 
+    	<li><a href="./conviewer/index.html"><span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span>&nbsp;Connectivity Viewer</a></li>
+    	<li class="active"><a href="visualizer.html"><span class="glyphicon glyphicon-dashboard" aria-hidden="true"></span>&nbsp;Schema Visualizer</a></li>
+    
+     </ul>
+  </div>
+	</nav>
+
+	<table width="100%">
+	<tr>
+	<td id="Menu" rowspan="2" style="vertical-align:top;  text-align:left" width="30%">
+	<ul style="margin-top:20px; background-color:#FFFFFF; opacity:1.0; border-radius:7px; padding:2px;" class="nav nav-pills nav-stacked ">
+	<li role="presentation" ><a href="#" class="bg-info"><span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span>&nbsp;Chord Data</a> </li>
+	<li role="presentation" id="TableedgeFinderLi" onClick="startJob('edgeFinder','Table','0')"><a href="#"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>&nbsp;Table Data</a></li>
+	<li role="presentation" id="ChartedgeFinderLi" ><a href="#"><span class="glyphicon glyphicon-dashboard" aria-hidden="true"></span>&nbsp;Chord Diagram</a></li>
+	<span style="display:inline; margin-left:10px; padding:0px 15px 0px 15px;" id="NormalChartedgeFinderLi" onClick="startJob('edgeFinder','Chart','0')"><a href="#"><span class="glyphicon glyphicon-th" aria-hidden="true"></span>&nbsp;Normal</a></span>
+	<span style="display:inline; margin-left:10px; padding:0px 15px 0px 15px;" id="LogChartedgeFinderLi" onClick="startJob('edgeFinder','Chart','1')"><a href="#"><span class="glyphicon glyphicon-equalizer" aria-hidden="true"></span>&nbsp;LOG</a></span>
+	<li role="presentation" ><a href="#" class="bg-info"><span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span>&nbsp;Collapsed Chord Data</a> </li>
+  	<li role="presentation" id="TablecollapsedGraphLi" onClick="startJob('collapsedGraph','Table','0')"><a href="#"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>&nbsp;Table Data</a></li>
+	<li role="presentation" id="ChartcollapsedGraphLi"><a href="#"><span class="glyphicon glyphicon-dashboard" aria-hidden="true"></span>&nbsp;Chord Diagram</a></li>
+	<span style="display:inline; margin-left:10px; padding:0px 15px 0px 15px;" id="NormalChartcollapsedGraphLi" onClick="startJob('collapsedGraph','Chart','0')"><a href="#"><span class="glyphicon glyphicon-th" aria-hidden="true"></span>&nbsp;Normal</a></span>
+	<span style="display:inline; margin-left:10px; padding:0px 15px 0px 15px;" id="LogChartcollapsedGraphLi" onClick="startJob('collapsedGraph','Chart','1')"><a href="#"><span class="glyphicon glyphicon-equalizer" aria-hidden="true"></span>&nbsp;LOG</a></span>
+	
+	</ul>
+	</td>
+	<td style="vertical-align:middle; text-align:center" width="70%">
+	<div  style="margin:10px; margin-bottom:0px; padding-bottom:0px; margin-left:40px; margin-right:30px;"><div style="margin-bottom:5px;" id="result"><img width="200px" height="200px" src = "./img/pb.png" alt="Pause"></div><h3 id="placeri" class="alert alert-info" style="visibility:hidden;position:relative; margin:0px; padding:0px;  color:#31708f; width:100%; text-align:center" ></h3></div>
+	</td>
+	</tr>
+	<tr>
+	<td style="vertical-align:middle; text-align:center" width="70%">
+	<div  style="margin:10px; margin-left:40px; margin-right:30px;"><div style="overflow-x:hidden;overflow-y:scroll;" id="result2"></div></div>
+	</td>
+	</tr>
+	
+	</table>
+	
+	<div style="text-align:center; align-items: center; align:center;"></div>
+	
+   
+    
+	
+   
+    
+  </fieldset>
+</form>
+</body>
+</html>
