@@ -1,0 +1,88 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="bootstrap.css">
+<link rel="stylesheet" type="text/css" href="loader.css">
+<link rel="stylesheet" type="text/css" href="loader2.css">
+<div class="navbar navbar-inverse" style="background-color:rgba(70,130,180,0.95);" >
+  <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-inverse-collapse">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="#">SPARK RDF ANALYSIS</a>
+  </div>
+  <div class="navbar-collapse collapse navbar-inverse-collapse">
+   
+    <ul class="nav navbar-nav navbar-right">
+    </ul>
+  </div>
+</div>
+</head>
+<script>
+
+function chooseGraph(graphName)
+{
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (xhttp.readyState == 4 && xhttp.status == 200) {
+    
+    }
+  }
+  
+  xhttp.open("GET", "http://192.168.42.133:8080/spark-rdfanalyzer2/rest/ALL/countEdges/"+graphName, true);
+  xhttp.send();
+  
+  document.cookie="graphName="+graphName;
+  window.location.href = "statistics.html";
+}
+function deleteGraph(graphName)
+{
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (xhttp.readyState == 4 && xhttp.status == 200) {
+      location.reload();
+    }
+  }
+  if (confirm('Are you sure you want to delete graph: '+graphName)) {
+    xhttp.open("GET", "http://192.168.42.133:8080/spark-rdfanalyzer2/rest/ALL/deleteGraph/"+graphName, true);
+  xhttp.send();
+} else {
+    // Do nothing!
+}
+ 
+}
+
+function getGraphs()
+{
+  document.getElementById("result").className="loader2"
+  document.getElementById("result").innerHTML = "";
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (xhttp.readyState == 4 && xhttp.status == 200) {
+    document.getElementById("result").className="row"
+	  document.getElementById("result").innerHTML = xhttp.responseText;
+    }
+  }
+  
+  xhttp.open("GET", "http://192.168.42.133:8080/spark-rdfanalyzer2/rest/ALL/getGraphs", true);
+  xhttp.send();
+}
+
+</script>
+<body onload="getGraphs()" background="./img/bg.jpg" style="-webkit-background-size: cover; -moz-background-size: cover; -o-background-size: cover; background-size: cover;">
+ 
+   
+  <form id="IDbardh" class="form-horizontal col-md-8 col-md-offset-2" style=" padding-bottom:20px; background-color:rgba(70,130,180,0.95); border-radius:15px"
+  action = "" method="post">
+    <br>
+  <fieldset>
+    
+ <div id="result" class="row">
+  
+    </div>
+
+  </fieldset>
+</form>
+</body>
+</html>
