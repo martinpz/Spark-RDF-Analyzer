@@ -25,7 +25,7 @@ function checkNode(Node)
       }
       else
       {
-    	   xhttp.open("GET", "http://192.168.42.133:8080/spark-rdfanalyzer2/rest/ALL/autoComplete/"+selectedGraphValue+"/"+inputNode+"/"+Node, true);
+    	   xhttp.open("GET", REST_API + "autoComplete/"+selectedGraphValue+"/"+inputNode+"/"+Node, true);
      	   xhttp.send();  
       }
 }
@@ -162,7 +162,7 @@ function startJob()
  
   checkEnable();
   
-  xhttp.open("GET", "http://192.168.42.133:8080/spark-rdfanalyzer2/rest/ALL/connViewer/"+Node1+"/"+Node2+"/"+selectedGraphValue+"/"+Predicate+"/"+Pattern, true);
+  xhttp.open("GET", REST_API + "connViewer/"+Node1+"/"+Node2+"/"+selectedGraphValue+"/"+Predicate+"/"+Pattern, true);
   xhttp.send();
 
 }
@@ -212,7 +212,7 @@ function getResult()
   }
   
     
-  xhttp.open("GET", "http://192.168.42.133:8080/spark-rdfanalyzer2/rest/ALL/connViewerResult", true);
+  xhttp.open("GET", REST_API + "connViewerResult", true);
   xhttp.send();
 
 }

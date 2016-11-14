@@ -3,8 +3,11 @@
 <link rel="stylesheet" type="text/css" href="bootstrap.css">
 <link rel="stylesheet" type="text/css" href="loader.css">
 <link rel="stylesheet" type="text/css" href="loader2.css">
+
+<script type="text/javascript" src="js/app-config.js"></script>
 <script type="text/javascript" src="canvasjs.min.js"></script>
 <script type="text/javascript" src="generateGraph.js"></script>
+
 <div class="navbar navbar-inverse" style="background-color:rgba(70,130,180,0.95);" >
   <div class="navbar-header">
     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-inverse-collapse">
@@ -92,7 +95,7 @@ function startJob(taskName,viewType)
   var selectedGraphValue = getCookie('graphName');
   
   
-  xhttp.open("GET", "http://192.168.42.133:8080/spark-rdfanalyzer2/rest/ALL/"+selectedTaskValue+"/"+selectedGraphValue+"/"+viewType, true);
+  xhttp.open("GET", REST_API + selectedTaskValue+"/"+selectedGraphValue+"/"+viewType, true);
   xhttp.send();
   
   

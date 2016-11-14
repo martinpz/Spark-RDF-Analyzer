@@ -3,8 +3,11 @@
 <link rel="stylesheet" type="text/css" href="bootstrap.css">
 <link rel="stylesheet" type="text/css" href="loader.css">
 <link rel="stylesheet" type="text/css" href="loader2.css">
+
+<script type="text/javascript" src="js/app-config.js"></script>
 <script type="text/javascript" src="chord.js"></script>
 <script type="text/javascript" src="d3.v2.js"></script>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 <div class="navbar navbar-inverse" style="background-color:rgba(70,130,180,0.95);" >
@@ -147,7 +150,7 @@ function startJob(taskName,viewType,logScale)
   var selectedGraphValue = getCookie('graphName');
   
   
-  xhttp.open("GET", "http://192.168.42.133:8080/spark-rdfanalyzer2/rest/ALL/"+selectedTaskValue+"/"+selectedGraphValue+"/"+viewType, true);
+  xhttp.open("GET", REST_API + selectedTaskValue+"/"+selectedGraphValue+"/"+viewType, true);
   xhttp.send();
   
 }
@@ -166,7 +169,7 @@ function getTable(name)
     }
   }
   var task = getCookie('taskName');
-  xhttp.open("GET", "http://192.168.42.133:8080/spark-rdfanalyzer2/rest/ALL/partialRead/"+name+"/"+task, true);
+  xhttp.open("GET", REST_API + "partialRead/"+name+"/"+task, true);
   xhttp.send();
   
 	

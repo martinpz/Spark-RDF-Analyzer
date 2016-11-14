@@ -3,6 +3,9 @@
 <link rel="stylesheet" type="text/css" href="bootstrap.css">
 <link rel="stylesheet" type="text/css" href="loader.css">
 <link rel="stylesheet" type="text/css" href="loader2.css">
+
+<script type="text/javascript" src="js/app-config.js"></script>
+
 <div class="navbar navbar-inverse" style="background-color:rgba(70,130,180,0.95);" >
   <div class="navbar-header">
     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-inverse-collapse">
@@ -57,7 +60,7 @@ function loadGraph()
          inputFormat = true;
       }
   
-     xhttp.open("GET", "http://192.168.42.133:8080/spark-rdfanalyzer2/rest/ALL/loadGraph/"+inputPath+"/"+inputName+"/"+inputFormat, true);
+     xhttp.open("GET", REST_API + "loadGraph/"+inputPath+"/"+inputName+"/"+inputFormat, true);
      xhttp.send();
 
   
