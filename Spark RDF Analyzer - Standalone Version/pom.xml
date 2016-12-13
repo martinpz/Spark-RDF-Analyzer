@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>rdfanalyzer</groupId>
 	<artifactId>spark-rdfanalyzer2</artifactId>
-	<version>1.0</version>
+	<version>2.0</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -16,7 +16,7 @@
 
 	<packaging>${p.type}</packaging>
 
-	<name>spark-rdfanalyzer2</name>
+	<name>${project.artifactId}</name>
 	<url>http://www.uni-freiburg.de</url>
 
 	<repositories>
@@ -59,8 +59,7 @@
 	</dependencies>
 
 	<build>
-		<!-- Name the WAR file "ROOT" to have it run as Tomcat's native app. -->
-		<finalName>ROOT</finalName>
+		<finalName>${project.name}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -69,6 +68,16 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.tomcat.maven</groupId>
+				<artifactId>tomcat7-maven-plugin</artifactId>
+				<version>2.2</version>
+				<configuration>
+					<url>${tomcat.deploy.url}</url>
+					<server>${tomcat.deploy.server}</server>
+					<path>/${project.build.finalName}</path>
 				</configuration>
 			</plugin>
 		</plugins>
