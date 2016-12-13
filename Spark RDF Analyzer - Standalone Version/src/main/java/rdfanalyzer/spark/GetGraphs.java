@@ -26,40 +26,34 @@ import org.apache.hadoop.fs.Path;
 
 public class GetGraphs {
 	public static String main(String[] args) throws Exception {
-			//
-		 String result = "";
-		 /* 
-		  * Get Folder Names
-		  */
+		String result = "";
+
+		// Get folder names.
 		File directory = new File(Configuration.properties.getProperty("Storage"));
 		File[] subdirs = directory.listFiles();
-		/*
-		 *Generate new graph Thumbnail 
-		 */
-		result += "<div class=\"col-sm-2 col-md-3\">"+
-				 "<div class=\"thumbnail\">"+
-				 "<p><a href=\"#\"  style=\"text-align:right; visibility:hidden; margin:0px;\" class=\"btn btn-danger\" role=\"button\" onClick=\"deleteGraph('')\"><span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span></a></p>"+
-				 "<img src=\"./img/ng.png\" alt=\"\">"+
-				 "<div class=\"caption\" style=\"text-align:center\">"+
-				 "<h3> &nbsp; </h3>"+
-				 "<p><a href=\"newGraph.html\" class=\"btn btn-success\" role=\"button\"><span class=\"glyphicon glyphicon-plus\" aria-hidden=\"true\"></span>&nbsp;Add new Graph</a></p>"+
-				 "</div>"+
-				 "</div>"+
-				 "</div>";
-		/*
-		 * Generate Graph thumbnails
-		 */
-		for(File f : subdirs)
-		 {
-			if(!f.getName().endsWith("Ranking.parquet"))
-			{
-			result += generateThumbnail(f.getName());
+
+		// Generate new graph thumbnail.
+		result += "<div class=\"col-sm-2 col-md-3\">" + "<div class=\"thumbnail\">"
+				+ "<p><a href=\"#\"  style=\"text-align:right; visibility:hidden; margin:0px;\" class=\"btn btn-danger\" role=\"button\" onClick=\"deleteGraph('')\"><span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span></a></p>"
+				+ "<img src=\"./img/ng.png\" alt=\"\">" + "<div class=\"caption\" style=\"text-align:center\">"
+				+ "<h3> &nbsp; </h3>"
+				+ "<p><a href=\"newGraph.html\" class=\"btn btn-success\" role=\"button\"><span class=\"glyphicon glyphicon-plus\" aria-hidden=\"true\"></span>&nbsp;Add new Graph</a></p>"
+				+ "</div>" + "</div>" + "</div>";
+
+		if (subdirs != null) {
+			// Generate graph thumbnails.
+			for (File f : subdirs) {
+				if (!f.getName().endsWith("Ranking.parquet")) {
+					result += generateThumbnail(f.getName());
+				}
 			}
-		 }
+		} else {
+			result += "<p>WARNING: The path, defined in the app.properties is incorrect!</p>";
+		}
 
-	   return result;
+		return result;
+	}
 
-	   }
 public static String generateThumbnail(String graphName)
 {
 	String result = "";
