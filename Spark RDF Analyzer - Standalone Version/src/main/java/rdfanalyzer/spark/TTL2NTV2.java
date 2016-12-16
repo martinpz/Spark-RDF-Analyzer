@@ -108,8 +108,8 @@ public class TTL2NTV2 {
 		 		// Apply a schema to an RDD of Java Beans and register it as a table.
 		 	   DataFrame schemaRDF = WebService.sqlContext.createDataFrame(RDF, RDFgraph.class); 
 		 		   
-		 	   		   	
-		 	   	schemaRDF.saveAsParquetFile("/home/cloudera/Desktop/Parquet/"+Name+".parquet");
+		String storageDir = Configuration.properties.getProperty("Storage");
+		schemaRDF.saveAsParquetFile(storageDir + Name + ".parquet");
 		 	    result = "Success";
 		 	   	
 		 			   
