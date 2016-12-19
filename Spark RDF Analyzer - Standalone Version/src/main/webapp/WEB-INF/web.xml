@@ -4,8 +4,9 @@
 	http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 	<display-name>Restful Web Application</display-name>
 	<welcome-file-list>
-    	<welcome-file>index.html</welcome-file>
- 	 </welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+
 	<servlet>
 		<servlet-name>jersey-serlvet</servlet-name>
 		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
@@ -15,6 +16,10 @@
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
+
+	<listener>
+		<listener-class>rdfanalyzer.spark.DeploymentListener</listener-class>
+	</listener>
 
 	<servlet-mapping>
 		<servlet-name>jersey-serlvet</servlet-name>

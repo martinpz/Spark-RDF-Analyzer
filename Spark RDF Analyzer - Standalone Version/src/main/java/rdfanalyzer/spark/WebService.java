@@ -24,14 +24,12 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SQLContext;
 
- 
 @Path("/ALL")
 public class WebService {
- 
-	public static SparkConf sparkConf = new SparkConf().setAppName("JavaSparkSQL").setMaster("local[*]");
-	public static JavaSparkContext ctx = new JavaSparkContext(sparkConf);
-	public static SQLContext sqlContext = new SQLContext(ctx);
-	public static Configuration configuration = new Configuration();
+	public static SparkConf sparkConf;
+	public static JavaSparkContext ctx;
+	public static SQLContext sqlContext;
+	public static Configuration configuration;
 
 	@GET
 	@Path("/loadGraph/{inputPath}/{inputName}/{inputFormat}")
