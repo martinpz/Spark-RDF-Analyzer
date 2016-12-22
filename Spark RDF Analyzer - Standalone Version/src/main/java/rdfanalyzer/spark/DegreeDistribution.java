@@ -21,7 +21,6 @@ import org.apache.spark.sql.Row;
 
 public class DegreeDistribution {
 	public static String main(String[] args) throws Exception {
-
 		String result = "";
 
 		/*
@@ -68,6 +67,5 @@ public class DegreeDistribution {
 			result = X + "$" + Y;
 		}
 		return result;
-
 	}
 }

@@ -21,7 +21,6 @@ import org.apache.spark.sql.Row;
 
 public class AutoComplete {
 	public static String main(String graphName, String userInput, String Type) throws Exception {
-
 		String result = "";
 		userInput = userInput.toLowerCase();
 
@@ -91,7 +90,6 @@ public class AutoComplete {
 				}
 
 			}
-
 		} else {
 			// SQL can be run over RDDs that have been registered as tables.
 			DataFrame firstRound = WebService.sqlContext
@@ -151,9 +149,7 @@ public class AutoComplete {
 				}
 
 			}
-
 		}
 		return result;
-
 	}
 }

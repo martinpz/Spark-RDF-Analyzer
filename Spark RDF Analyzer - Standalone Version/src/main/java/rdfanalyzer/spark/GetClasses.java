@@ -20,9 +20,7 @@ import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
 public class GetClasses {
-
 	public static String main(String[] args) throws Exception {
-
 		String result = "";
 
 		/*
@@ -54,6 +52,7 @@ public class GetClasses {
 			}
 			result = result.substring(0, result.length() - 1);
 		}
+
 		return result;
 	}
 }

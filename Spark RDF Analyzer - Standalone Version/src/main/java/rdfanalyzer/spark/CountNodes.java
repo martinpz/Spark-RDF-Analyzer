@@ -20,7 +20,6 @@ import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
 public class CountNodes {
-
 	public static String main(String[] args) throws Exception {
 
 		String result = "";
@@ -51,6 +50,5 @@ public class CountNodes {
 		result = Long.toString(rows[0].getLong(0));
 
 		return "<h1>" + result + "</h1>";
-
 	}
 }

@@ -19,7 +19,6 @@ package rdfanalyzer.spark;
 import org.apache.spark.sql.Row;
 
 public class ConnAdapter {
-
 	private String startNode = "";
 	private String endNode = "";
 	public String Edges = "{color:none}\n; choices\n";

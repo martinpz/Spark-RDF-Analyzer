@@ -23,7 +23,6 @@ import java.nio.charset.Charset;
 import java.util.Properties;
 
 public class Configuration {
-
 	public static Properties properties = new Properties();
 
 	public Configuration() {

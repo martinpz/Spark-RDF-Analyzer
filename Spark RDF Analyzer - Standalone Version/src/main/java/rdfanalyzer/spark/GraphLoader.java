@@ -31,9 +31,7 @@ import org.apache.spark.sql.Row;
  * Otherwise the file is first convertit from turtle to nTriple then saved to parquet.
  */
 public class GraphLoader {
-
 	public static String main(String Input, String Name, Boolean nTriple) throws Exception {
-
 		String result = "";
 
 		/*
@@ -80,7 +78,5 @@ public class GraphLoader {
 		CalculateRanking.main(rankingArguments);
 
 		return result;
-
 	}
-
 }

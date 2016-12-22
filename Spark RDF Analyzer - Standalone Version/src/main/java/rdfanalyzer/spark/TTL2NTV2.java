@@ -25,7 +25,6 @@ import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
 public class TTL2NTV2 {
-
 	public static Hashtable<String, String> prefixHashtable = new Hashtable<String, String>();
 	static Broadcast<Hashtable<String, String>> broadcastPrefixes;
 
@@ -129,6 +128,5 @@ public class TTL2NTV2 {
 				return " ";
 			}
 		}
-
 	}
 }

@@ -69,6 +69,5 @@ public class GetGraphs {
 	public static void deleteGraph(String graphName) throws IOException, URISyntaxException {
 		FileSystem fs = FileSystem.get(new URI("hdfs://localhost:8020"), new org.apache.hadoop.conf.Configuration());
 		fs.delete(new Path("/user/cloudera/toDelete"), true);
-
 	}
 }

@@ -20,7 +20,6 @@ import org.apache.spark.sql.DataFrame;
 
 public class CalculateRanking {
 	public static String main(String[] args) throws Exception {
-
 		String result = "";
 
 		/*
@@ -36,6 +35,5 @@ public class CalculateRanking {
 		result = Long.toString(predicatesFrame.count());
 		predicatesFrame.write().parquet(Configuration.properties.getProperty("Storage") + args[0] + "Ranking.parquet");
 		return result;
-
 	}
 }

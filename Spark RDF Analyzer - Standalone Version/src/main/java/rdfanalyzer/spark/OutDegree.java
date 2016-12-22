@@ -21,7 +21,6 @@ import org.apache.spark.sql.Row;
 
 public class OutDegree {
 	public static String main(String[] args) throws Exception {
-
 		String result = "";
 		/*
 		 * Check if arguments have been passed.
@@ -54,6 +53,5 @@ public class OutDegree {
 		}
 
 		return "<h1>" + args[1] + ": " + result + "</h1>";
-
 	}
 }

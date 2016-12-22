@@ -30,7 +30,6 @@ public class CollapsedGraph {
 	public static List<CollapsedEntry> cachedData = new ArrayList<CollapsedEntry>();
 
 	public static String main(String[] args) throws Exception {
-
 		String result = "";
 		/*
 		 * Check if arguments have been passed.

@@ -23,11 +23,9 @@ import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
 public class EdgeFinder {
-
 	public static Row[] cachedRows;
 
 	public static String main(String[] args) throws Exception {
-
 		String result = "";
 
 		/*

@@ -20,9 +20,7 @@ import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
 public class PredicateDistribution {
-
 	public static String main(String[] args) throws Exception {
-
 		String result = "";
 
 		/*
@@ -70,6 +68,5 @@ public class PredicateDistribution {
 			result = X + "$" + Y;
 		}
 		return result;
-
 	}
 }

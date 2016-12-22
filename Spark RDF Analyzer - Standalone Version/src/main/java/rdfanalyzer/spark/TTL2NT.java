@@ -26,7 +26,6 @@ import org.apache.spark.sql.api.java.UDF1;
 import org.apache.spark.sql.types.DataTypes;
 
 public class TTL2NT {
-
 	public static final Hashtable<String, String> prefixHashtable = new Hashtable<String, String>();
 
 	public static DataFrame main() throws Exception {
@@ -95,6 +94,5 @@ public class TTL2NT {
 						+ "FROM Rows ");
 
 		return output;
-
 	}
 }

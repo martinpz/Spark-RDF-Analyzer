@@ -21,7 +21,6 @@ import org.apache.spark.sql.Row;
 
 public class CountNodesV2 {
 	public static String main(String[] args) throws Exception {
-
 		/*
 		 * Check if arguments have been passed.
 		 */
@@ -65,6 +64,5 @@ public class CountNodesV2 {
 				+ Literals
 				+ "</h3><h3><span class=\"glyphicon glyphicon-globe\" aria-hidden=\"true\"></span>&nbsp;All: " + Sum
 				+ "</h3>";
-
 	}
 }

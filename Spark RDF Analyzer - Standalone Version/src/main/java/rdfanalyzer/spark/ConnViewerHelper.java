@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ConnViewerHelper {
-
 	public static String strQuery01;
 	public static String strQuery02;
 	public static String strQuery03;
@@ -115,5 +114,4 @@ public class ConnViewerHelper {
 		updateResultTables.add("tbl28");
 
 	}
-
 }

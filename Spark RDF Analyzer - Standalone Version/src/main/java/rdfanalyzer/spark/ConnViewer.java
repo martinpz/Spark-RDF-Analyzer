@@ -20,7 +20,6 @@ import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
 public class ConnViewer {
-
 	public static ConnAdapter objAdapter = new ConnAdapter();
 	public static boolean Update = false;
 	public static int Counter = 0;
@@ -163,7 +162,5 @@ public class ConnViewer {
 			schemaRDF.cache().registerTempTable("Graph");
 			return "Graph";
 		}
-
 	}
-
 }

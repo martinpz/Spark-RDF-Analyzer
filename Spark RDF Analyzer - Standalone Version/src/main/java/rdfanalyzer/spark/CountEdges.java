@@ -19,9 +19,7 @@ import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
 public class CountEdges {
-
 	public static String main(String[] args) throws Exception {
-
 		String result = "";
 		/*
 		 * Check if arguments have been passed.
@@ -53,6 +51,5 @@ public class CountEdges {
 		Row[] rows = predicatesFrame.collect();
 		result = Long.toString(rows[0].getLong(0));
 		return "<h1>" + result + "</h1>";
-
 	}
 }

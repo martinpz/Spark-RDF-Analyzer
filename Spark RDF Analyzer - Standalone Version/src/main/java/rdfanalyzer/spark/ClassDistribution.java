@@ -21,7 +21,6 @@ import org.apache.spark.sql.Row;
 
 public class ClassDistribution {
 	public static String main(String[] args) throws Exception {
-
 		String result = "";
 		/*
 		 * Read graph from parquet
@@ -64,7 +63,7 @@ public class ClassDistribution {
 			}
 			result = X + "$" + Y;
 		}
-		return result;
 
+		return result;
 	}
 }
