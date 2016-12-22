@@ -19,30 +19,28 @@ package rdfanalyzer.spark;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
+/**
+ * This class deals with autocomplete of URI search for Connectivity Viewer.
+ */
 public class AutoComplete {
 	public static String main(String graphName, String userInput, String Type) throws Exception {
 		String result = "";
 		userInput = userInput.toLowerCase();
 
-		/*
-		 * Read graph from parquet
-		 */
+		// Read graph from parquet
 		DataFrame schemaRDF = WebService.sqlContext
 				.parquetFile(Configuration.properties.getProperty("Storage") + graphName + ".parquet");
 		schemaRDF.cache().registerTempTable("Graph");
 
+		// Predicate OR node Autocomplete.
 		if (Type.equals("Predicate")) {
-
-			/*
-			 * Get predicates
-			 */
-
+			// Get list of predicates
 			// SQL can be run over RDDs that have been registered as tables.
 			DataFrame predicatesListFrame = WebService.sqlContext
 					.sql("SELECT predicate as predicate FROM Graph GROUP BY predicate");
 			predicatesListFrame.cache().registerTempTable("Predicates");
 
-			// SQL can be run over RDDs that have been registered as tables.
+			// Search for matching predicates
 			DataFrame firstRound = WebService.sqlContext
 					.sql("SELECT predicate AS match, regexp_extract(predicate, '([^/]+$)') AS matchExtracted1, regexp_extract(predicate, '([^#]+$)') AS matchExtracted2 FROM Predicates WHERE LOWER(predicate) LIKE '%"
 							+ userInput + "%'");
@@ -58,9 +56,10 @@ public class AutoComplete {
 					+ " WHERE LOWER(matchExtracted2) LIKE '" + userInput + "%') MyTable " + " LIMIT 20");
 
 			// The results of SQL queries are DataFrames and support all the
-			// normal RDD operations.
-			// Save result to file
+			// normal RDD operations. Save result to file
+			// Perform search in multiple rounds.
 			Row[] rows = secondRound.collect();
+
 			if (rows.length > 0) {
 				String shortURI = Configuration.shortenURI(rows[0].getString(0));
 				String fullURI = "<xmp style=\"display : inline\">" + rows[0].getString(0) + "</xmp>";
@@ -69,7 +68,9 @@ public class AutoComplete {
 				result += "<div class=\"radio\"><label><input type=\"radio\" name=\"optradio\" value=\"" + fullValue
 						+ "\">" + fullText + "</label></div>";
 			}
+
 			Row[] rows2 = thirdRound.collect();
+
 			for (Row r : rows2) {
 				if (rows.length > 0) {
 					if (!r.getString(0).equals(rows[0].getString(0))) {
@@ -88,10 +89,8 @@ public class AutoComplete {
 					result += "<div class=\"radio\"><label><input type=\"radio\" name=\"optradio\" value=\"" + fullValue
 							+ "\">" + fullText + "</label></div>";
 				}
-
 			}
 		} else {
-			// SQL can be run over RDDs that have been registered as tables.
 			DataFrame firstRound = WebService.sqlContext
 					.sql("SELECT subject AS match, regexp_extract(subject, '([^/]+$)', 0) AS matchExtracted1, regexp_extract(subject, '([^#]+$)', 0) AS matchExtracted2  FROM Graph WHERE LOWER(subject) LIKE '%"
 							+ userInput + "%' UNION ALL "
@@ -116,10 +115,8 @@ public class AutoComplete {
 			DataFrame fourthRound = WebService.sqlContext.sql("SELECT thirdRound.match FROM " + " thirdRound, Ranking "
 					+ " WHERE thirdRound.match = Ranking.subject " + " ORDER BY Ranking.nr DESC " + " LIMIT 20");
 
-			// The results of SQL queries are DataFrames and support all the
-			// normal RDD operations.
-
 			Row[] rows = secondRound.collect();
+
 			if (rows.length > 0) {
 				String shortURI = Configuration.shortenURI(rows[0].getString(0));
 				String fullURI = "<xmp style=\"display : inline\">" + rows[0].getString(0) + "</xmp>";
@@ -128,7 +125,9 @@ public class AutoComplete {
 				result += "<div class=\"radio\"><label><input type=\"radio\" name=\"optradio\" value=\"" + fullValue
 						+ "\">" + fullText + "</label></div>";
 			}
+
 			Row[] rows2 = fourthRound.collect();
+
 			for (Row r : rows2) {
 				if (rows.length > 0) {
 					if (!r.getString(0).equals(rows[0].getString(0))) {
@@ -147,9 +146,9 @@ public class AutoComplete {
 					result += "<div class=\"radio\"><label><input type=\"radio\" name=\"optradio\" value=\"" + fullValue
 							+ "\">" + fullText + "</label></div>";
 				}
-
 			}
 		}
+
 		return result;
 	}
 }

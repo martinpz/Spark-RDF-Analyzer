@@ -19,12 +19,13 @@ package rdfanalyzer.spark;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
+/**
+ * This class calculates class distribution for a given graph.
+ */
 public class ClassDistribution {
 	public static String main(String[] args) throws Exception {
 		String result = "";
-		/*
-		 * Read graph from parquet
-		 */
+		// Read graph from parquet
 		DataFrame schemaRDF = WebService.sqlContext
 				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + ".parquet");
 		schemaRDF.cache().registerTempTable("Graph");
@@ -33,34 +34,37 @@ public class ClassDistribution {
 		DataFrame predicatesFrame = WebService.sqlContext
 				.sql("SELECT object, COUNT(object) FROM Graph WHERE predicate='<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>'"
 						+ " GROUP BY object");
-		;
 
-		// The results of SQL queries are DataFrames and support all the normal
-		// RDD operations.
-
+		// Format output results. Based if output is table or chart it is
+		// returned into different formats.
 		Row[] resultRows = predicatesFrame.collect();
 
 		if (args[1].equals("Table")) {
 			result = "<table class=\"table table-striped\">";
 			result += "<thead><tr><th style=\"text-align: center;\">Class</th><th style=\"text-align: center;\">Nr. of occurencies</th></tr></thead>";
+
 			for (Row r : resultRows) {
 				result += "<tr><td data-toggle=\"tooltip\" title=\"" + r.getString(0) + "\">"
 						+ Configuration.shortenURI(r.getString(0)) + "</td><td>" + Long.toString(r.getLong(1))
 						+ "</td></tr>";
 			}
+
 			result += "</table>";
 		} else if (args[1].equals("Chart")) {
 			String X = "";
 			String Y = "";
 			int i = 1;
+
 			for (Row r : resultRows) {
 				if (i > 8) {
 					break;
 				}
+
 				i++;
 				X += Configuration.shortenURI(r.getString(0)) + "|";
 				Y += Long.toString(r.getLong(1)) + "|";
 			}
+
 			result = X + "$" + Y;
 		}
 

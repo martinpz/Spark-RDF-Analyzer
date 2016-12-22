@@ -26,13 +26,18 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
+/**
+ * This class calculates Collapsed Chord Data and formats them for required
+ * output Chord or Table.
+ */
 public class CollapsedGraph {
 	public static List<CollapsedEntry> cachedData = new ArrayList<CollapsedEntry>();
 
 	public static String main(String[] args) throws Exception {
 		String result = "";
 		/*
-		 * Check if arguments have been passed.
+		 * Check if arguments have been passed. TODO: This is not done in
+		 * Cluster version.
 		 */
 		if (args.length != 2) {
 			System.out.println("Missing Arguments <INPUT>");
@@ -40,11 +45,13 @@ public class CollapsedGraph {
 		}
 
 		/*
-		 * Read graph from parquet
+		 * Read graph from parquet TODO: This is not done in Cluster Version.
 		 */
-		DataFrame schemaRDF = WebService.sqlContext
-				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + ".parquet");
-		schemaRDF.cache().registerTempTable("Graph");
+
+		// DataFrame schemaRDF = WebService.sqlContext
+		// .parquetFile(Configuration.properties.getProperty("Storage") +
+		// args[0] + ".parquet");
+		// schemaRDF.cache().registerTempTable("Graph");
 
 		// SQL can be run over RDDs that have been registered as tables.
 		DataFrame predicatesFrame = WebService.sqlContext
@@ -54,13 +61,16 @@ public class CollapsedGraph {
 						+ " WHERE (t4.predicate = '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>') AND t3.object = t4.subject) MyTable2"
 						+ " WHERE t1s=t3s AND t1p=t3p AND t1o=t3o GROUP BY t2o, t1p, t4o ORDER BY t1p");
 
+		Row[] resultRows = predicatesFrame.collect();
+
+		// TODO: This is just commented out and deleted in Cluster Version.
 		// DataFrame collapsedFrame = sqlContext.sql("Select * FROM EdgesTable
 		// ORDER BY p");
 		// The results of SQL queries are DataFrames and support all the normal
 		// RDD operations.
 
-		Row[] resultRows = predicatesFrame.collect();
-
+		// Merge Edgefinder data and format output results. Based on if output
+		// is table or chart it is returned into different formats.
 		result = "<table class=\"table table-striped\">";
 		result += "<thead><tr><th style=\"text-align: center;\">Subject</th><th style=\"text-align: center;\">Predicate</th><th style=\"text-align: center;\">Object</th><th style=\"text-align: center;\">Nr. of occurencies</th></tr></thead>";
 
@@ -69,24 +79,27 @@ public class CollapsedGraph {
 		Set<String> objects = new HashSet<String>();
 		Long sum = (long) 0.0;
 		cachedData.clear();
+
 		for (Row r : resultRows) {
 			if (!predicate.equals(r.getString(1))) {
 				if (!predicate.equals("")) {
 					result += generateRow(subjects, predicate, objects, sum, args[1]);
 				}
+
 				predicate = r.getString(1);
 				subjects.clear();
 				objects.clear();
 				sum = (long) 0.0;
 			}
+
 			subjects.add(r.getString(0));
 			objects.add(r.getString(2));
 			sum += r.getLong(3);
-
 		}
 
 		result += generateRow(subjects, predicate, objects, sum, args[1]);
 		result += "</table>";
+
 		if (args[1].equals("Table")) {
 			return result;
 		} else {
@@ -95,42 +108,55 @@ public class CollapsedGraph {
 
 			for (CollapsedEntry objEntry : cachedData) {
 				String tempClass = "";
+
 				for (String s : objEntry.subjects) {
 					tempClass += Configuration.shortenURI(s) + "-";
 				}
+
 				tempClass = tempClass.substring(0, tempClass.length() - 1);
 				classNames.add(tempClass);
 				tempClass = "";
+
 				for (String o : objEntry.objects) {
 					tempClass += Configuration.shortenURI(o) + "-";
 				}
+
 				tempClass = tempClass.substring(0, tempClass.length() - 1);
 				classNames.add(tempClass);
 			}
 
 			int[][] matrix = new int[classNames.size()][classNames.size()];
-			for (int[] row : matrix)
+
+			for (int[] row : matrix) {
 				Arrays.fill(row, 0);
+			}
+
 			String[] classNamesArray = new String[classNames.size()];
 			String strClasses = "";
 			int k = 0;
+
 			for (String s : classNames) {
 				strClasses += s + ",";
 				classNamesArray[k] = s;
+
 				k++;
 			}
+
 			for (CollapsedEntry objEntry : cachedData) {
 				String class1 = "";
 				String class2 = "";
 				Long nrEntries = objEntry.sum;
+
 				for (String s : objEntry.subjects) {
 					class1 += Configuration.shortenURI(s) + "-";
 				}
+
 				class1 = class1.substring(0, class1.length() - 1);
 
 				for (String o : objEntry.objects) {
 					class2 += Configuration.shortenURI(o) + "-";
 				}
+
 				class2 = class2.substring(0, class2.length() - 1);
 
 				matrix[ArrayUtils.indexOf(classNamesArray, class1)][ArrayUtils.indexOf(classNamesArray,
@@ -141,6 +167,7 @@ public class CollapsedGraph {
 				for (int j = 0; j < classNames.size(); j++) {
 					result += Integer.toString(matrix[i][j]) + ",";
 				}
+
 				result = result.substring(0, result.length() - 1);
 				result += "$";
 			}
@@ -148,14 +175,27 @@ public class CollapsedGraph {
 			strClasses = strClasses.substring(0, strClasses.length() - 1);
 			result = result.substring(0, result.length() - 1);
 			result += "&" + strClasses;
+
 			return result;
 		}
 
 	}
 
+	/**
+	 * This method generates a row for given class groups, predicate and sum of
+	 * nr of occurences.
+	 * 
+	 * @param subjects
+	 * @param predicate
+	 * @param objects
+	 * @param sum
+	 * @param Type
+	 * @return
+	 */
 	public static String generateRow(Set<String> subjects, String predicate, Set<String> objects, long sum,
 			String Type) {
 		String result = "";
+
 		if (Type.equals("Table")) {
 			String strSubjects = "";
 			String strObjects = "";
@@ -173,6 +213,7 @@ public class CollapsedGraph {
 			result = "<tr><td>" + strSubjects + "</td><td><span data-toggle=\"tooltip\" title=\"" + predicate + "\">"
 					+ Configuration.shortenURI(predicate) + "</span></td><td>" + strObjects + "</td><td>"
 					+ Long.toString(sum) + "</td></tr>";
+
 			return result;
 		} else {
 			CollapsedEntry objEntry = new CollapsedEntry();
@@ -181,14 +222,22 @@ public class CollapsedGraph {
 			objEntry.objects.addAll(objects);
 			objEntry.predicate = predicate;
 			objEntry.sum = sum;
+
 			cachedData.add(objEntry);
+
 			return "";
 		}
 
 	}
 
+	/**
+	 * This method offers partial reading of results when chord diagram is
+	 * clicked.
+	 * 
+	 * @param inputSubject
+	 * @return
+	 */
 	public static String partialRead(String inputSubject) {
-
 		String result = "";
 
 		result = "<table class=\"table table-striped\">";
@@ -203,22 +252,21 @@ public class CollapsedGraph {
 			for (String s : objEntry.subjects) {
 				subjects += Configuration.shortenURI(s) + "-";
 			}
+
 			subjects = subjects.substring(0, subjects.length() - 1);
 
 			for (String o : objEntry.objects) {
 				objects += Configuration.shortenURI(o) + "-";
 			}
+
 			objects = objects.substring(0, objects.length() - 1);
 
 			if (inputSubject.equals(subjects) || inputSubject.equals(objects)) {
 				result += generateRow(objEntry.subjects, objEntry.predicate, objEntry.objects, objEntry.sum, "Table");
 			}
-
 		}
 
-		result += "</table>";
-
-		return result;
+		return result += "</table>";
 	}
 }
 
@@ -227,5 +275,4 @@ class CollapsedEntry {
 	String predicate = "";
 	Set<String> objects = new HashSet<String>();
 	Long sum = (long) 0.0;
-
 }
