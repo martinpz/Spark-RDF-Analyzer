@@ -2,7 +2,7 @@
 In this tutorial we will show how you can run the Spark RDF Analyzer right from eclipse using a Docker container for the Tomcat webservice.
 
 ## Setup Prerequisites
-- Download Docker from [docker.com](https://www.docker.com/products/docker) and follow their installation instructions.
+- Download Docker from [https://www.docker.com/products/docker](https://www.docker.com/products/docker) and follow their installation instructions.
 - Get an official Tomcat image (we will use Tomcat 8.0 with Java 8):
 
 ```Dockerfile
@@ -77,5 +77,5 @@ This way we can ensure that real credentials are hidden from public and excluded
         - Parameter: p.type=war
 - Click "Run" and check the console output in eclipse. The war file gets deployed to the running Tomcat instance.
 - Go back to the console, where Tomcat logs to and wait for the completion of deploament.
-- Open your web browser at [127.0.0.1:8080/spark-rdfanalyzer2/](127.0.0.1:8080/spark-rdfanalyzer2/) and you should see the RDF Analyzer running.
+- Open your web browser at [http://127.0.0.1:8080/spark-rdfanalyzer2/](http://127.0.0.1:8080/spark-rdfanalyzer2/) and you should see the RDF Analyzer running.
 Unless you changed the mount path, your datasets will be available under <b>/home/data</b> inside the container.
