@@ -23,11 +23,10 @@ import java.nio.charset.Charset;
 import java.util.Properties;
 
 public class Configuration {
- 
+
 	public static Properties properties = new Properties();
-	
-	public Configuration()
-	{
+
+	public Configuration() {
 		try {
 			ClassLoader classloader = Thread.currentThread().getContextClassLoader();
 			InputStream is = classloader.getResourceAsStream("app.properties");
@@ -36,22 +35,19 @@ public class Configuration {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
-	public static String shortenURI(String inputURI)
-	{
+
+	public static String shortenURI(String inputURI) {
 		String result = "";
 		int index1 = inputURI.lastIndexOf('#');
 		int index2 = inputURI.lastIndexOf('/');
-		if(index1>index2)
-		{
-			result = inputURI.substring(index1+1,inputURI.length()-1);
+		if (index1 > index2) {
+			result = inputURI.substring(index1 + 1, inputURI.length() - 1);
+		} else if (index2 > index1) {
+			result = inputURI.substring(index2 + 1, inputURI.length() - 1);
 		}
-		else if(index2>index1)
-		{
-			result = inputURI.substring(index2+1,inputURI.length()-1);
-		}
-		
+
 		try {
 			result = java.net.URLDecoder.decode(result, "UTF-8");
 		} catch (UnsupportedEncodingException e) {

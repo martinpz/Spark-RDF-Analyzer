@@ -18,25 +18,24 @@ package rdfanalyzer.spark;
 
 import org.apache.spark.sql.DataFrame;
 
-
 public class CalculateRanking {
 	public static String main(String[] args) throws Exception {
 
-		 String result = "";
-		
+		String result = "";
+
 		/*
-		 * Read graph from parquet 
+		 * Read graph from parquet
 		 */
-	   DataFrame schemaRDF = WebService.sqlContext.parquetFile(Configuration.properties.getProperty("Storage")+args[0]+".parquet");
-	   schemaRDF.cache().registerTempTable("Graph");
+		DataFrame schemaRDF = WebService.sqlContext
+				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + ".parquet");
+		schemaRDF.cache().registerTempTable("Graph");
 
+		// SQL can be run over RDDs that have been registered as tables.
+		DataFrame predicatesFrame = WebService.sqlContext
+				.sql("SELECT subject, COUNT(*) as nr FROM Graph GROUP BY subject");
+		result = Long.toString(predicatesFrame.count());
+		predicatesFrame.write().parquet(Configuration.properties.getProperty("Storage") + args[0] + "Ranking.parquet");
+		return result;
 
-
-	   // SQL can be run over RDDs that have been registered as tables.
-	   DataFrame predicatesFrame = WebService.sqlContext.sql("SELECT subject, COUNT(*) as nr FROM Graph GROUP BY subject");
-	   result = Long.toString(predicatesFrame.count());
-       predicatesFrame.write().parquet(Configuration.properties.getProperty("Storage")+args[0]+"Ranking.parquet");
-	   return result;
-
-	   }
+	}
 }

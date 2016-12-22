@@ -20,165 +20,140 @@ import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
 public class AutoComplete {
-	 public static String main(String graphName, String userInput,String Type) throws Exception {
+	public static String main(String graphName, String userInput, String Type) throws Exception {
 
-		 String result = "";
-		 userInput = userInput.toLowerCase();
+		String result = "";
+		userInput = userInput.toLowerCase();
 
-	   /*
-		* Read graph from parquet 
-		*/
-		DataFrame schemaRDF = WebService.sqlContext.parquetFile(Configuration.properties.getProperty("Storage")+graphName+".parquet");
+		/*
+		 * Read graph from parquet
+		 */
+		DataFrame schemaRDF = WebService.sqlContext
+				.parquetFile(Configuration.properties.getProperty("Storage") + graphName + ".parquet");
 		schemaRDF.cache().registerTempTable("Graph");
-		 
-		if(Type.equals("Predicate"))
-		{
-			
+
+		if (Type.equals("Predicate")) {
+
 			/*
 			 * Get predicates
 			 */
-			
-		
-		   // SQL can be run over RDDs that have been registered as tables.
-		   DataFrame predicatesListFrame = WebService.sqlContext.sql("SELECT predicate as predicate FROM Graph GROUP BY predicate");
-		   predicatesListFrame.cache().registerTempTable("Predicates");
-			
-			
+
 			// SQL can be run over RDDs that have been registered as tables.
-			 DataFrame firstRound = WebService.sqlContext.sql("SELECT predicate AS match, regexp_extract(predicate, '([^/]+$)') AS matchExtracted1, regexp_extract(predicate, '([^#]+$)') AS matchExtracted2 FROM Predicates WHERE LOWER(predicate) LIKE '%"+userInput+"%'");
-			 firstRound.registerTempTable("firstRound");
-			 						   
-						   DataFrame secondRound = WebService.sqlContext.sql(
-								   "SELECT match "+
-								   " FROM firstRound "+ 
-								   " WHERE matchExtracted1 = '"+userInput+">' OR matchExtracted2 = '"+userInput+">'");
-						   
-						   
-						   DataFrame thirdRound = WebService.sqlContext.sql("SELECT DISTINCT match, matchExtracted FROM "+
-					   "(SELECT match, matchExtracted1 AS matchExtracted"+
-					   " FROM firstRound "+ 
-					   " WHERE LOWER(matchExtracted1) LIKE '"+userInput+"%' "+
-					   " UNION ALL "+ 
-					   " SELECT match, matchExtracted2 AS matchExtracted"+
-					   " FROM firstRound	 "+		 
-					   " WHERE LOWER(matchExtracted2) LIKE '"+userInput+"%') MyTable "+
-					   " LIMIT 20");
-						   
+			DataFrame predicatesListFrame = WebService.sqlContext
+					.sql("SELECT predicate as predicate FROM Graph GROUP BY predicate");
+			predicatesListFrame.cache().registerTempTable("Predicates");
 
-			   
-			   
-			   // The results of SQL queries are DataFrames and support all the normal RDD operations.
-			   // Save result to file   
-						   Row[] rows = secondRound.collect();
-						   if(rows.length>0)
-						   {
-							   String shortURI = Configuration.shortenURI(rows[0].getString(0));
-							   String fullURI = "<xmp style=\"display : inline\">"+rows[0].getString(0)+"</xmp>";
-							   String fullText = "<b>"+shortURI+" :</b> "+fullURI;
-							   String fullValue = shortURI+":"+rows[0].getString(0);
-							  result += "<div class=\"radio\"><label><input type=\"radio\" name=\"optradio\" value=\""+fullValue+"\">"+fullText+"</label></div>";
-						   }
-						   Row[] rows2 = thirdRound.collect();
-						   for( Row r :rows2)
-						   {
-							   if(rows.length>0)
-							   {
-								   if(!r.getString(0).equals(rows[0].getString(0)))
-								   {
-								   String shortURI = Configuration.shortenURI(r.getString(0));
-								   String fullURI = "<xmp style=\"display : inline\">"+r.getString(0)+"</xmp>";
-								   String fullText = "<b>"+shortURI+" :</b> "+fullURI;
-								   String fullValue = shortURI+":"+r.getString(0);		   
-								   result += "<div class=\"radio\"><label><input type=\"radio\" name=\"optradio\" value=\""+fullValue+"\">"+fullText+"</label></div>";
-								   }
-							   }else
-							   {
-								   String shortURI = Configuration.shortenURI(r.getString(0));
-								   String fullURI = "<xmp style=\"display : inline\">"+r.getString(0)+"</xmp>";
-								   String fullText = "<b>"+shortURI+" :</b> "+fullURI;
-								   String fullValue = shortURI+":"+r.getString(0);		   
-								   result += "<div class=\"radio\"><label><input type=\"radio\" name=\"optradio\" value=\""+fullValue+"\">"+fullText+"</label></div>";
-							   }
-							   
-						   }
-			   
-		}
-		else
-		{
 			// SQL can be run over RDDs that have been registered as tables.
-			 DataFrame firstRound = WebService.sqlContext.sql("SELECT subject AS match, regexp_extract(subject, '([^/]+$)', 0) AS matchExtracted1, regexp_extract(subject, '([^#]+$)', 0) AS matchExtracted2  FROM Graph WHERE LOWER(subject) LIKE '%"+userInput+"%' UNION ALL "+
-						"SELECT object AS match, regexp_extract(object, '([^/]+$)', 0) AS matchExtracted1, regexp_extract(object, '([^#]+$)', 0) AS matchExtracted2 FROM Graph WHERE LOWER(object) LIKE '%"+userInput+"%' AND object NOT LIKE '\"%'");
-						   firstRound.registerTempTable("firstRound");
-						   
-						   DataFrame secondRound = WebService.sqlContext.sql(
-								   "SELECT match "+
-								   " FROM firstRound "+ 
-								   " WHERE matchExtracted1 = '"+userInput+">' OR matchExtracted2 = '"+userInput+">'");
-						   
-						   DataFrame thirdRound = WebService.sqlContext.sql("SELECT DISTINCT match, matchExtracted FROM "+
-					   "(SELECT match, matchExtracted1 AS matchExtracted"+
-					   " FROM firstRound "+ 
-					   " WHERE LOWER(matchExtracted1) LIKE '"+userInput+"%' "+
-					   " UNION ALL "+ 
-					   " SELECT match, matchExtracted2 AS matchExtracted"+
-					   " FROM firstRound	 "+		 
-					   " WHERE LOWER(matchExtracted2) LIKE '"+userInput+"%') MyTable ");
-						   thirdRound.registerTempTable("thirdRound");
-						   
-						   schemaRDF = WebService.sqlContext.parquetFile(Configuration.properties.getProperty("Storage")+graphName+"Ranking.parquet");
-						   schemaRDF.cache().registerTempTable("Ranking");
+			DataFrame firstRound = WebService.sqlContext
+					.sql("SELECT predicate AS match, regexp_extract(predicate, '([^/]+$)') AS matchExtracted1, regexp_extract(predicate, '([^#]+$)') AS matchExtracted2 FROM Predicates WHERE LOWER(predicate) LIKE '%"
+							+ userInput + "%'");
+			firstRound.registerTempTable("firstRound");
 
-						
-						   DataFrame fourthRound = WebService.sqlContext.sql("SELECT thirdRound.match FROM "+
-								   " thirdRound, Ranking "+
-								   " WHERE thirdRound.match = Ranking.subject "+ 
-								   " ORDER BY Ranking.nr DESC "+
-								   " LIMIT 20");
-									   
+			DataFrame secondRound = WebService.sqlContext.sql("SELECT match " + " FROM firstRound "
+					+ " WHERE matchExtracted1 = '" + userInput + ">' OR matchExtracted2 = '" + userInput + ">'");
 
-			   
-			   
-						// The results of SQL queries are DataFrames and support all the normal RDD operations.
+			DataFrame thirdRound = WebService.sqlContext.sql("SELECT DISTINCT match, matchExtracted FROM "
+					+ "(SELECT match, matchExtracted1 AS matchExtracted" + " FROM firstRound "
+					+ " WHERE LOWER(matchExtracted1) LIKE '" + userInput + "%' " + " UNION ALL "
+					+ " SELECT match, matchExtracted2 AS matchExtracted" + " FROM firstRound	 "
+					+ " WHERE LOWER(matchExtracted2) LIKE '" + userInput + "%') MyTable " + " LIMIT 20");
 
-						   Row[] rows = secondRound.collect();
-						   if(rows.length>0)
-						   {
-							   String shortURI = Configuration.shortenURI(rows[0].getString(0));
-							   String fullURI = "<xmp style=\"display : inline\">"+rows[0].getString(0)+"</xmp>";
-							   String fullText = "<b>"+shortURI+" :</b> "+fullURI;
-							   String fullValue = shortURI+":"+rows[0].getString(0);
-							  result += "<div class=\"radio\"><label><input type=\"radio\" name=\"optradio\" value=\""+fullValue+"\">"+fullText+"</label></div>";
-						   }
-						   Row[] rows2 = fourthRound.collect();
-						   for( Row r :rows2)
-						   {
-							   if(rows.length>0)
-							   {
-								   if(!r.getString(0).equals(rows[0].getString(0)))
-								   {
-								   String shortURI = Configuration.shortenURI(r.getString(0));
-								   String fullURI = "<xmp style=\"display : inline\">"+r.getString(0)+"</xmp>";
-								   String fullText = "<b>"+shortURI+" :</b> "+fullURI;
-								   String fullValue = shortURI+":"+r.getString(0);		   
-								   result += "<div class=\"radio\"><label><input type=\"radio\" name=\"optradio\" value=\""+fullValue+"\">"+fullText+"</label></div>";
-								   }
-							   }else
-							   {
-								   String shortURI = Configuration.shortenURI(r.getString(0));
-								   String fullURI = "<xmp style=\"display : inline\">"+r.getString(0)+"</xmp>";
-								   String fullText = "<b>"+shortURI+" :</b> "+fullURI;
-								   String fullValue = shortURI+":"+r.getString(0);		   
-								   result += "<div class=\"radio\"><label><input type=\"radio\" name=\"optradio\" value=\""+fullValue+"\">"+fullText+"</label></div>";
-							   }
-							   
-						   }
-						   
+			// The results of SQL queries are DataFrames and support all the
+			// normal RDD operations.
+			// Save result to file
+			Row[] rows = secondRound.collect();
+			if (rows.length > 0) {
+				String shortURI = Configuration.shortenURI(rows[0].getString(0));
+				String fullURI = "<xmp style=\"display : inline\">" + rows[0].getString(0) + "</xmp>";
+				String fullText = "<b>" + shortURI + " :</b> " + fullURI;
+				String fullValue = shortURI + ":" + rows[0].getString(0);
+				result += "<div class=\"radio\"><label><input type=\"radio\" name=\"optradio\" value=\"" + fullValue
+						+ "\">" + fullText + "</label></div>";
+			}
+			Row[] rows2 = thirdRound.collect();
+			for (Row r : rows2) {
+				if (rows.length > 0) {
+					if (!r.getString(0).equals(rows[0].getString(0))) {
+						String shortURI = Configuration.shortenURI(r.getString(0));
+						String fullURI = "<xmp style=\"display : inline\">" + r.getString(0) + "</xmp>";
+						String fullText = "<b>" + shortURI + " :</b> " + fullURI;
+						String fullValue = shortURI + ":" + r.getString(0);
+						result += "<div class=\"radio\"><label><input type=\"radio\" name=\"optradio\" value=\""
+								+ fullValue + "\">" + fullText + "</label></div>";
+					}
+				} else {
+					String shortURI = Configuration.shortenURI(r.getString(0));
+					String fullURI = "<xmp style=\"display : inline\">" + r.getString(0) + "</xmp>";
+					String fullText = "<b>" + shortURI + " :</b> " + fullURI;
+					String fullValue = shortURI + ":" + r.getString(0);
+					result += "<div class=\"radio\"><label><input type=\"radio\" name=\"optradio\" value=\"" + fullValue
+							+ "\">" + fullText + "</label></div>";
+				}
+
+			}
+
+		} else {
+			// SQL can be run over RDDs that have been registered as tables.
+			DataFrame firstRound = WebService.sqlContext
+					.sql("SELECT subject AS match, regexp_extract(subject, '([^/]+$)', 0) AS matchExtracted1, regexp_extract(subject, '([^#]+$)', 0) AS matchExtracted2  FROM Graph WHERE LOWER(subject) LIKE '%"
+							+ userInput + "%' UNION ALL "
+							+ "SELECT object AS match, regexp_extract(object, '([^/]+$)', 0) AS matchExtracted1, regexp_extract(object, '([^#]+$)', 0) AS matchExtracted2 FROM Graph WHERE LOWER(object) LIKE '%"
+							+ userInput + "%' AND object NOT LIKE '\"%'");
+			firstRound.registerTempTable("firstRound");
+
+			DataFrame secondRound = WebService.sqlContext.sql("SELECT match " + " FROM firstRound "
+					+ " WHERE matchExtracted1 = '" + userInput + ">' OR matchExtracted2 = '" + userInput + ">'");
+
+			DataFrame thirdRound = WebService.sqlContext.sql("SELECT DISTINCT match, matchExtracted FROM "
+					+ "(SELECT match, matchExtracted1 AS matchExtracted" + " FROM firstRound "
+					+ " WHERE LOWER(matchExtracted1) LIKE '" + userInput + "%' " + " UNION ALL "
+					+ " SELECT match, matchExtracted2 AS matchExtracted" + " FROM firstRound	 "
+					+ " WHERE LOWER(matchExtracted2) LIKE '" + userInput + "%') MyTable ");
+			thirdRound.registerTempTable("thirdRound");
+
+			schemaRDF = WebService.sqlContext
+					.parquetFile(Configuration.properties.getProperty("Storage") + graphName + "Ranking.parquet");
+			schemaRDF.cache().registerTempTable("Ranking");
+
+			DataFrame fourthRound = WebService.sqlContext.sql("SELECT thirdRound.match FROM " + " thirdRound, Ranking "
+					+ " WHERE thirdRound.match = Ranking.subject " + " ORDER BY Ranking.nr DESC " + " LIMIT 20");
+
+			// The results of SQL queries are DataFrames and support all the
+			// normal RDD operations.
+
+			Row[] rows = secondRound.collect();
+			if (rows.length > 0) {
+				String shortURI = Configuration.shortenURI(rows[0].getString(0));
+				String fullURI = "<xmp style=\"display : inline\">" + rows[0].getString(0) + "</xmp>";
+				String fullText = "<b>" + shortURI + " :</b> " + fullURI;
+				String fullValue = shortURI + ":" + rows[0].getString(0);
+				result += "<div class=\"radio\"><label><input type=\"radio\" name=\"optradio\" value=\"" + fullValue
+						+ "\">" + fullText + "</label></div>";
+			}
+			Row[] rows2 = fourthRound.collect();
+			for (Row r : rows2) {
+				if (rows.length > 0) {
+					if (!r.getString(0).equals(rows[0].getString(0))) {
+						String shortURI = Configuration.shortenURI(r.getString(0));
+						String fullURI = "<xmp style=\"display : inline\">" + r.getString(0) + "</xmp>";
+						String fullText = "<b>" + shortURI + " :</b> " + fullURI;
+						String fullValue = shortURI + ":" + r.getString(0);
+						result += "<div class=\"radio\"><label><input type=\"radio\" name=\"optradio\" value=\""
+								+ fullValue + "\">" + fullText + "</label></div>";
+					}
+				} else {
+					String shortURI = Configuration.shortenURI(r.getString(0));
+					String fullURI = "<xmp style=\"display : inline\">" + r.getString(0) + "</xmp>";
+					String fullText = "<b>" + shortURI + " :</b> " + fullURI;
+					String fullValue = shortURI + ":" + r.getString(0);
+					result += "<div class=\"radio\"><label><input type=\"radio\" name=\"optradio\" value=\"" + fullValue
+							+ "\">" + fullText + "</label></div>";
+				}
+
+			}
 
 		}
 		return result;
 
-
-
-	   
-	   }
+	}
 }

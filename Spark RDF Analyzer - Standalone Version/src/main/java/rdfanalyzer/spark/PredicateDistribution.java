@@ -16,68 +16,60 @@
 
 package rdfanalyzer.spark;
 
-
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
-
 public class PredicateDistribution {
- 
 
- public static String main(String[] args) throws Exception {
+	public static String main(String[] args) throws Exception {
 
-	 String result = "";
+		String result = "";
 
-	 
-	 	/*
-		 * Read graph from parquet 
+		/*
+		 * Read graph from parquet
 		 */
-	   DataFrame schemaRDF = WebService.sqlContext.parquetFile(Configuration.properties.getProperty("Storage")+args[0]+".parquet");
-	   schemaRDF.cache().registerTempTable("Graph");
-   
+		DataFrame schemaRDF = WebService.sqlContext
+				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + ".parquet");
+		schemaRDF.cache().registerTempTable("Graph");
 
+		// SQL can be run over RDDs that have been registered as tables.
+		DataFrame predicatesFrame = WebService.sqlContext
+				.sql("SELECT predicate as p, COUNT(predicate) as cnt FROM Graph GROUP BY predicate ORDER BY cnt DESC");
 
-   // SQL can be run over RDDs that have been registered as tables.
-   DataFrame predicatesFrame = WebService.sqlContext.sql("SELECT predicate as p, COUNT(predicate) as cnt FROM Graph GROUP BY predicate ORDER BY cnt DESC");
+		// The results of SQL queries are DataFrames and support all the normal
+		// RDD operations.
 
-   // The results of SQL queries are DataFrames and support all the normal RDD operations.
-   
-   Row[] resultRows = predicatesFrame.collect();
-   
-   if(args[1].equals("Table"))
-   {
-	   result = "<table class=\"table table-striped\">";
-	   result += "<thead><tr><th style=\"text-align: center;\">Predicate</th><th style=\"text-align: center;\">Nr. of occurencies</th></tr></thead>";
-	   int i=1;
-	   for(Row r : resultRows)
-	   {
-		   if (i>20)
-		   {
-			   break;
-		   }
-		   i++;
-		   result +="<tr><td data-toggle=\"tooltip\" title=\""+r.getString(0)+"\">"+Configuration.shortenURI(r.getString(0))+"</td><td>"+Long.toString(r.getLong(1))+"</td></tr>";
-	   }
-	   result +="</table>";
-   }
-   else if(args[1].equals("Chart"))
-   {
-	   String X = "";
-	   String Y = "";
-	   int i=1;
-	   for(Row r : resultRows)
-	   {
-		   if (i>8)
-		   {
-			   break;
-		   }
-		   i++;
-		   X += Configuration.shortenURI(r.getString(0))+"|";
-		   Y += Long.toString(r.getLong(1))+"|";
-	   }
-	   result = X + "$" + Y;
-   }
-   return result;
-   
-   }
+		Row[] resultRows = predicatesFrame.collect();
+
+		if (args[1].equals("Table")) {
+			result = "<table class=\"table table-striped\">";
+			result += "<thead><tr><th style=\"text-align: center;\">Predicate</th><th style=\"text-align: center;\">Nr. of occurencies</th></tr></thead>";
+			int i = 1;
+			for (Row r : resultRows) {
+				if (i > 20) {
+					break;
+				}
+				i++;
+				result += "<tr><td data-toggle=\"tooltip\" title=\"" + r.getString(0) + "\">"
+						+ Configuration.shortenURI(r.getString(0)) + "</td><td>" + Long.toString(r.getLong(1))
+						+ "</td></tr>";
+			}
+			result += "</table>";
+		} else if (args[1].equals("Chart")) {
+			String X = "";
+			String Y = "";
+			int i = 1;
+			for (Row r : resultRows) {
+				if (i > 8) {
+					break;
+				}
+				i++;
+				X += Configuration.shortenURI(r.getString(0)) + "|";
+				Y += Long.toString(r.getLong(1)) + "|";
+			}
+			result = X + "$" + Y;
+		}
+		return result;
+
+	}
 }

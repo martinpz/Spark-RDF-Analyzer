@@ -58,12 +58,9 @@ public class GetGraphs {
 		graphName = graphName.substring(0, graphName.indexOf('.'));
 		return "<div class=\"col-sm-2 col-md-3\">" + "<div class=\"thumbnail\">"
 				+ "<p><a href=\"#\"  style=\"text-align:right; margin:0px;\" class=\"btn btn-danger\" role=\"button\" onClick=\"deleteGraph('"
-				+ graphName 
-				+ "')\"><span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span></a></p>"
-				+ "<img src=\"./img/nw.jpg\" alt=\"\">" + "<div class=\"caption\" style=\"text-align:center\">" 
-				+ "<h3>"
-				+ graphName 
-				+ "</h3>"
+				+ graphName + "')\"><span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span></a></p>"
+				+ "<img src=\"./img/nw.jpg\" alt=\"\">" + "<div class=\"caption\" style=\"text-align:center\">" + "<h3>"
+				+ graphName + "</h3>"
 				+ "<p><a href=\"#\" class=\"btn btn-primary\" role=\"button\" onClick=\"chooseGraph('" + graphName
 				+ "')\"><span class=\"glyphicon glyphicon-folder-open\" aria-hidden=\"true\"></span>&nbsp;&nbsp;Select</a></p>"
 				+ "</div>" + "</div>" + "</div>";

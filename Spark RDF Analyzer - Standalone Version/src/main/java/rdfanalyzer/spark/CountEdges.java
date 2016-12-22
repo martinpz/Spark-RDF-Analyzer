@@ -15,45 +15,44 @@
  */
 package rdfanalyzer.spark;
 
-
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
 public class CountEdges {
- 
 
- public static String main(String[] args) throws Exception {
+	public static String main(String[] args) throws Exception {
 
-	 String result = "";
-	/*
-	 * Check if arguments have been passed.
-	 */
-	 if(args.length!=1)
-	   {
-		   System.out.println("Missing Arguments <INPUT>");
-		   System.exit(0);
-	   }
-	/*
-	 * Read graph from parquet 
-	 */
-   DataFrame schemaRDF = WebService.sqlContext.parquetFile(Configuration.properties.getProperty("Storage")+args[0]+".parquet");
-   schemaRDF.cache().registerTempTable("Graph");
-   
-   /*
-    * Cache Ranking also
-    */
-   schemaRDF = WebService.sqlContext.parquetFile(Configuration.properties.getProperty("Storage")+args[0]+"Ranking.parquet");
-   schemaRDF.cache().registerTempTable("Ranking");
+		String result = "";
+		/*
+		 * Check if arguments have been passed.
+		 */
+		if (args.length != 1) {
+			System.out.println("Missing Arguments <INPUT>");
+			System.exit(0);
+		}
+		/*
+		 * Read graph from parquet
+		 */
+		DataFrame schemaRDF = WebService.sqlContext
+				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + ".parquet");
+		schemaRDF.cache().registerTempTable("Graph");
 
+		/*
+		 * Cache Ranking also
+		 */
+		schemaRDF = WebService.sqlContext
+				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + "Ranking.parquet");
+		schemaRDF.cache().registerTempTable("Ranking");
 
-   // SQL can be run over RDDs that have been registered as tables.
-   DataFrame predicatesFrame = WebService.sqlContext.sql("SELECT COUNT(*) FROM Graph");
+		// SQL can be run over RDDs that have been registered as tables.
+		DataFrame predicatesFrame = WebService.sqlContext.sql("SELECT COUNT(*) FROM Graph");
 
-   // The results of SQL queries are DataFrames and support all the normal RDD operations.
-   // Save result to file   
-   Row[] rows = predicatesFrame.collect();
-   result = Long.toString(rows[0].getLong(0));
-   return "<h1>"+result+"</h1>";
+		// The results of SQL queries are DataFrames and support all the normal
+		// RDD operations.
+		// Save result to file
+		Row[] rows = predicatesFrame.collect();
+		result = Long.toString(rows[0].getLong(0));
+		return "<h1>" + result + "</h1>";
 
-   }
+	}
 }

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package rdfanalyzer.spark;
 
 import java.io.Serializable;
@@ -22,29 +21,30 @@ import java.io.Serializable;
 public class RDFgraph implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String subject;
-	   private String predicate;
-	   private String object;
+	private String predicate;
+	private String object;
 
-	   public String getSubject() {
-	     return subject;
-	   }
+	public String getSubject() {
+		return subject;
+	}
 
-	   public void setSubject(String subject) {
-	     this.subject = subject;
-	   }
-	   
-	   public String getPredicate() {
-		     return predicate;
-		   }
+	public void setSubject(String subject) {
+		this.subject = subject;
+	}
 
-		public void setPredicate(String predicate) {
-		     this.predicate = predicate;
-		   } 
-		public String getObject() {
-		     return object;
-			   }
+	public String getPredicate() {
+		return predicate;
+	}
 
-		public void setObject(String object) {
-		     this.object = object;
-			   }
+	public void setPredicate(String predicate) {
+		this.predicate = predicate;
+	}
+
+	public String getObject() {
+		return object;
+	}
+
+	public void setObject(String object) {
+		this.object = object;
+	}
 }

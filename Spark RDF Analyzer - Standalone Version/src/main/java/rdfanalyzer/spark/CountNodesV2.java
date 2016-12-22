@@ -22,44 +22,49 @@ import org.apache.spark.sql.Row;
 public class CountNodesV2 {
 	public static String main(String[] args) throws Exception {
 
- 		/*
+		/*
 		 * Check if arguments have been passed.
 		 */
-		 if(args.length!=1)
-		   {
-			   System.out.println("Missing Arguments <INPUT>");
-			   System.exit(0);
-		   }
-		 
-		 	/*
-			 * Read graph from parquet 
-			 */
-		   DataFrame schemaRDF = WebService.sqlContext.parquetFile(Configuration.properties.getProperty("Storage")+args[0]+".parquet");
-		   schemaRDF.cache().registerTempTable("Graph");
+		if (args.length != 1) {
+			System.out.println("Missing Arguments <INPUT>");
+			System.exit(0);
+		}
 
+		/*
+		 * Read graph from parquet
+		 */
+		DataFrame schemaRDF = WebService.sqlContext
+				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + ".parquet");
+		schemaRDF.cache().registerTempTable("Graph");
 
-	   // SQL can be run over RDDs that have been registered as tables.
-	   DataFrame predicatesFrame = WebService.sqlContext.sql("SELECT COUNT(DISTINCT MyTable1.subject) FROM (SELECT subject FROM Graph"
-		   		+ " UNION ALL SELECT object FROM Graph WHERE object NOT LIKE '\"%' "
-		   		+ " ) MyTable1");
+		// SQL can be run over RDDs that have been registered as tables.
+		DataFrame predicatesFrame = WebService.sqlContext
+				.sql("SELECT COUNT(DISTINCT MyTable1.subject) FROM (SELECT subject FROM Graph"
+						+ " UNION ALL SELECT object FROM Graph WHERE object NOT LIKE '\"%' " + " ) MyTable1");
 
-	   // The results of SQL queries are DataFrames and support all the normal RDD operations.
-	   // Save result to file   
-	   Row[] rows = predicatesFrame.collect(); 
-	   String Literals = Long.toString(rows[0].getLong(0));
-	   
-	   // SQL can be run over RDDs that have been registered as tables.
-	   predicatesFrame = WebService.sqlContext.sql("SELECT COUNT(object) FROM Graph WHERE object LIKE '\"%'");
+		// The results of SQL queries are DataFrames and support all the normal
+		// RDD operations.
+		// Save result to file
+		Row[] rows = predicatesFrame.collect();
+		String Literals = Long.toString(rows[0].getLong(0));
 
-	   // The results of SQL queries are DataFrames and support all the normal RDD operations.
-	   // Save result to file   
-	   rows = predicatesFrame.collect();
-	   
-	   String Objects = Long.toString(rows[0].getLong(0));
-	   
-	   String Sum = Integer.toString(Integer.parseInt(Literals)+Integer.parseInt(Objects));
-	   
-	   return "<h3><span class=\"glyphicon glyphicon-file\" aria-hidden=\"true\"></span>&nbsp;Objects: "+Objects+"</h3><h3><span class=\"glyphicon glyphicon-menu-hamburger\" aria-hidden=\"true\"></span>&nbsp;Literals: "+Literals+"</h3><h3><span class=\"glyphicon glyphicon-globe\" aria-hidden=\"true\"></span>&nbsp;All: "+Sum+"</h3>";
+		// SQL can be run over RDDs that have been registered as tables.
+		predicatesFrame = WebService.sqlContext.sql("SELECT COUNT(object) FROM Graph WHERE object LIKE '\"%'");
 
-	   }
+		// The results of SQL queries are DataFrames and support all the normal
+		// RDD operations.
+		// Save result to file
+		rows = predicatesFrame.collect();
+
+		String Objects = Long.toString(rows[0].getLong(0));
+
+		String Sum = Integer.toString(Integer.parseInt(Literals) + Integer.parseInt(Objects));
+
+		return "<h3><span class=\"glyphicon glyphicon-file\" aria-hidden=\"true\"></span>&nbsp;Objects: " + Objects
+				+ "</h3><h3><span class=\"glyphicon glyphicon-menu-hamburger\" aria-hidden=\"true\"></span>&nbsp;Literals: "
+				+ Literals
+				+ "</h3><h3><span class=\"glyphicon glyphicon-globe\" aria-hidden=\"true\"></span>&nbsp;All: " + Sum
+				+ "</h3>";
+
+	}
 }

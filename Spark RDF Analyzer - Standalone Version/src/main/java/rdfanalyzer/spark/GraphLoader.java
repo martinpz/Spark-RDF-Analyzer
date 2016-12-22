@@ -16,7 +16,6 @@
 
 package rdfanalyzer.spark;
 
-
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Hashtable;
@@ -26,9 +25,6 @@ import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
-
-
-
 /*
  * This class loads the graph stored in HDFS.
  * If the graph is already in nTriple format it saves to a parquet file.
@@ -36,63 +32,55 @@ import org.apache.spark.sql.Row;
  */
 public class GraphLoader {
 
-	
 	public static String main(String Input, String Name, Boolean nTriple) throws Exception {
 
-		 String result = "";
-		
-		 /*
-		  * Normalize input
-		  */
-		 Input = Input.replace('$', '/');
-		 
-		 /*
-	 	  * Check if input is in turtle format.	 
-	 	  */
-		  if(!nTriple)
-		  {
-			  TTL2NTV2.prefixHashtable.clear();
-		      result = TTL2NTV2.main(Input,Name);
-		      return result;
-		  }
-		 
-		 
-	   System.out.println("=== Data source: RDD ===");
-	   // Load a text file and convert each line to a Java Bean.
-	   
+		String result = "";
 
-	 JavaRDD<RDFgraph> RDF = WebService.ctx.textFile(Input+"/*",18).map(
-		     new Function<String, RDFgraph>() {
-				public RDFgraph call(String line) {
-			    	   
-			    	   String[] parts = line.split(" (?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+		/*
+		 * Normalize input
+		 */
+		Input = Input.replace('$', '/');
 
-			           RDFgraph entry = new RDFgraph();
-			           	if(parts[1].length()>1)
-			           	{
-				           entry.setSubject(parts[0]);
-				           entry.setPredicate(parts[1]);
-				           entry.setObject(parts[2]);
-			           	}
-				       return entry;
-			         
-			       }
-			     });
-	 
-	 				   
-			   // Apply a schema to an RDD of Java Beans and register it as a table.
-			   DataFrame schemaRDF = WebService.sqlContext.createDataFrame(RDF, RDFgraph.class); 
-			   
+		/*
+		 * Check if input is in turtle format.
+		 */
+		if (!nTriple) {
+			TTL2NTV2.prefixHashtable.clear();
+			result = TTL2NTV2.main(Input, Name);
+			return result;
+		}
+
+		System.out.println("=== Data source: RDD ===");
+		// Load a text file and convert each line to a Java Bean.
+
+		JavaRDD<RDFgraph> RDF = WebService.ctx.textFile(Input + "/*", 18).map(new Function<String, RDFgraph>() {
+			public RDFgraph call(String line) {
+
+				String[] parts = line.split(" (?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+
+				RDFgraph entry = new RDFgraph();
+				if (parts[1].length() > 1) {
+					entry.setSubject(parts[0]);
+					entry.setPredicate(parts[1]);
+					entry.setObject(parts[2]);
+				}
+				return entry;
+
+			}
+		});
+
+		// Apply a schema to an RDD of Java Beans and register it as a table.
+		DataFrame schemaRDF = WebService.sqlContext.createDataFrame(RDF, RDFgraph.class);
+
 		String storageDir = Configuration.properties.getProperty("Storage");
 		schemaRDF.saveAsParquetFile(storageDir + Name + ".parquet");
-			    result = "Success";
-			   	
-			   
-			   String[] rankingArguments = {Name};
-			   CalculateRanking.main(rankingArguments);
-			   
-			   return result;
+		result = "Success";
 
-	   }
-	
+		String[] rankingArguments = { Name };
+		CalculateRanking.main(rankingArguments);
+
+		return result;
+
+	}
+
 }
