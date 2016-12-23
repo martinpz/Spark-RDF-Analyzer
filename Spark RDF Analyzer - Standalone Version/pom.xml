@@ -19,6 +19,32 @@
 	<name>${project.artifactId}</name>
 	<url>http://www.uni-freiburg.de</url>
 
+	<!-- Choose the configuration file, depending on the run profile. -->
+	<profiles>
+		<profile>
+			<id>tomcat-localhost</id>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources/localhost</directory>
+						<targetPath>.</targetPath>
+					</resource>
+				</resources>
+			</build>
+		</profile>
+		<profile>
+			<id>tomcat-cluster</id>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources/cluster</directory>
+						<targetPath>.</targetPath>
+					</resource>
+				</resources>
+			</build>
+		</profile>
+	</profiles>
+
 	<repositories>
 		<repository>
 			<id>cloudera</id>
@@ -56,7 +82,7 @@
 			<artifactId>commons-codec</artifactId>
 			<version>1.10</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.xerial.snappy</groupId>
 			<artifactId>snappy-java</artifactId>
