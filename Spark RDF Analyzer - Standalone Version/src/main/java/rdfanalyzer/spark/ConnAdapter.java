@@ -118,9 +118,9 @@ public class ConnAdapter {
 		if (type.equals("tbl01") || type.equals("tbl02")) {
 			for (Row r : rows) {
 				ConnViewer.Counter++;
-				String Subject = Configuration.shortenURI(r.getString(0));
-				String Predicate = Configuration.shortenURI(r.getString(1));
-				String Object = Configuration.shortenURI(r.getString(2));
+				String Subject = RDFgraph.shortenURI(r.getString(0));
+				String Predicate = RDFgraph.shortenURI(r.getString(1));
+				String Object = RDFgraph.shortenURI(r.getString(2));
 
 				this.Edges += Subject + " -- " + Subject + "_" + Predicate + "_" + Object + "\n";
 				this.Edges += Subject + "_" + Predicate + "_" + Object + " -> " + Object + "\n";
@@ -133,11 +133,11 @@ public class ConnAdapter {
 			for (Row r : rows) {
 				ConnViewer.Counter++;
 
-				String Subject1 = Configuration.shortenURI(r.getString(0));
-				String Predicate1 = Configuration.shortenURI(r.getString(1));
-				String Object = Configuration.shortenURI(r.getString(2));
-				String Predicate2 = Configuration.shortenURI(r.getString(3));
-				String Subject2 = Configuration.shortenURI(r.getString(4));
+				String Subject1 = RDFgraph.shortenURI(r.getString(0));
+				String Predicate1 = RDFgraph.shortenURI(r.getString(1));
+				String Object = RDFgraph.shortenURI(r.getString(2));
+				String Predicate2 = RDFgraph.shortenURI(r.getString(3));
+				String Subject2 = RDFgraph.shortenURI(r.getString(4));
 
 				this.Edges += Subject1 + " -- " + Subject1 + "_" + Predicate1 + "_" + Object + "\n";
 				this.Edges += Subject1 + "_" + Predicate1 + "_" + Object + " -> " + Object + "\n";
@@ -154,11 +154,11 @@ public class ConnAdapter {
 			for (Row r : rows) {
 				ConnViewer.Counter++;
 
-				String Subject1 = Configuration.shortenURI(r.getString(0));
-				String Predicate1 = Configuration.shortenURI(r.getString(1));
-				String Object = Configuration.shortenURI(r.getString(2));
-				String Predicate2 = Configuration.shortenURI(r.getString(3));
-				String Subject2 = Configuration.shortenURI(r.getString(4));
+				String Subject1 = RDFgraph.shortenURI(r.getString(0));
+				String Predicate1 = RDFgraph.shortenURI(r.getString(1));
+				String Object = RDFgraph.shortenURI(r.getString(2));
+				String Predicate2 = RDFgraph.shortenURI(r.getString(3));
+				String Subject2 = RDFgraph.shortenURI(r.getString(4));
 
 				this.Edges += Subject1 + " -- " + Subject1 + "_" + Predicate1 + "_" + Object + "\n";
 				this.Edges += Subject1 + "_" + Predicate1 + "_" + Object + " -> " + Object + "\n";
@@ -175,11 +175,11 @@ public class ConnAdapter {
 			for (Row r : rows) {
 				ConnViewer.Counter++;
 
-				String Subject1 = Configuration.shortenURI(r.getString(0));
-				String Predicate1 = Configuration.shortenURI(r.getString(1));
-				String Object = Configuration.shortenURI(r.getString(2));
-				String Predicate2 = Configuration.shortenURI(r.getString(3));
-				String Subject2 = Configuration.shortenURI(r.getString(4));
+				String Subject1 = RDFgraph.shortenURI(r.getString(0));
+				String Predicate1 = RDFgraph.shortenURI(r.getString(1));
+				String Object = RDFgraph.shortenURI(r.getString(2));
+				String Predicate2 = RDFgraph.shortenURI(r.getString(3));
+				String Subject2 = RDFgraph.shortenURI(r.getString(4));
 
 				this.Edges += Object + " -- " + Object + "_" + Predicate1 + "_" + Subject1 + "\n";
 				this.Edges += Object + "_" + Predicate1 + "_" + Subject1 + " -> " + Subject1 + "\n";
@@ -196,13 +196,13 @@ public class ConnAdapter {
 			for (Row r : rows) {
 				ConnViewer.Counter++;
 
-				String Subject1 = Configuration.shortenURI(r.getString(0));
-				String Predicate1 = Configuration.shortenURI(r.getString(1));
-				String Object1 = Configuration.shortenURI(r.getString(2));
-				String Predicate2 = Configuration.shortenURI(r.getString(3));
-				String Object2 = Configuration.shortenURI(r.getString(4));
-				String Predicate3 = Configuration.shortenURI(r.getString(5));
-				String Subject2 = Configuration.shortenURI(r.getString(6));
+				String Subject1 = RDFgraph.shortenURI(r.getString(0));
+				String Predicate1 = RDFgraph.shortenURI(r.getString(1));
+				String Object1 = RDFgraph.shortenURI(r.getString(2));
+				String Predicate2 = RDFgraph.shortenURI(r.getString(3));
+				String Object2 = RDFgraph.shortenURI(r.getString(4));
+				String Predicate3 = RDFgraph.shortenURI(r.getString(5));
+				String Subject2 = RDFgraph.shortenURI(r.getString(6));
 
 				this.Edges += Subject1 + " -- " + Subject1 + "_" + Predicate1 + "_" + Object1 + "\n";
 				this.Edges += Subject1 + "_" + Predicate1 + "_" + Object1 + " -> " + Object1 + "\n";
@@ -225,13 +225,13 @@ public class ConnAdapter {
 			for (Row r : rows) {
 				ConnViewer.Counter++;
 
-				String Subject1 = Configuration.shortenURI(r.getString(0));
-				String Predicate1 = Configuration.shortenURI(r.getString(1));
-				String Object1 = Configuration.shortenURI(r.getString(2));
-				String Predicate2 = Configuration.shortenURI(r.getString(3));
-				String Object2 = Configuration.shortenURI(r.getString(4));
-				String Predicate3 = Configuration.shortenURI(r.getString(5));
-				String Subject2 = Configuration.shortenURI(r.getString(6));
+				String Subject1 = RDFgraph.shortenURI(r.getString(0));
+				String Predicate1 = RDFgraph.shortenURI(r.getString(1));
+				String Object1 = RDFgraph.shortenURI(r.getString(2));
+				String Predicate2 = RDFgraph.shortenURI(r.getString(3));
+				String Object2 = RDFgraph.shortenURI(r.getString(4));
+				String Predicate3 = RDFgraph.shortenURI(r.getString(5));
+				String Subject2 = RDFgraph.shortenURI(r.getString(6));
 
 				this.Edges += Subject1 + " -- " + Subject1 + "_" + Predicate1 + "_" + Object1 + "\n";
 				this.Edges += Subject1 + "_" + Predicate1 + "_" + Object1 + " -> " + Object1 + "\n";
@@ -254,13 +254,13 @@ public class ConnAdapter {
 			for (Row r : rows) {
 				ConnViewer.Counter++;
 
-				String Subject1 = Configuration.shortenURI(r.getString(0));
-				String Predicate1 = Configuration.shortenURI(r.getString(1));
-				String Object1 = Configuration.shortenURI(r.getString(2));
-				String Predicate2 = Configuration.shortenURI(r.getString(3));
-				String Object2 = Configuration.shortenURI(r.getString(4));
-				String Predicate3 = Configuration.shortenURI(r.getString(5));
-				String Subject2 = Configuration.shortenURI(r.getString(6));
+				String Subject1 = RDFgraph.shortenURI(r.getString(0));
+				String Predicate1 = RDFgraph.shortenURI(r.getString(1));
+				String Object1 = RDFgraph.shortenURI(r.getString(2));
+				String Predicate2 = RDFgraph.shortenURI(r.getString(3));
+				String Object2 = RDFgraph.shortenURI(r.getString(4));
+				String Predicate3 = RDFgraph.shortenURI(r.getString(5));
+				String Subject2 = RDFgraph.shortenURI(r.getString(6));
 
 				this.Edges += Subject1 + " -- " + Subject1 + "_" + Predicate1 + "_" + Object1 + "\n";
 				this.Edges += Subject1 + "_" + Predicate1 + "_" + Object1 + " -> " + Object1 + "\n";
@@ -283,13 +283,13 @@ public class ConnAdapter {
 			for (Row r : rows) {
 				ConnViewer.Counter++;
 
-				String Subject1 = Configuration.shortenURI(r.getString(0));
-				String Predicate1 = Configuration.shortenURI(r.getString(1));
-				String Object1 = Configuration.shortenURI(r.getString(2));
-				String Predicate2 = Configuration.shortenURI(r.getString(3));
-				String Object2 = Configuration.shortenURI(r.getString(4));
-				String Predicate3 = Configuration.shortenURI(r.getString(5));
-				String Subject2 = Configuration.shortenURI(r.getString(6));
+				String Subject1 = RDFgraph.shortenURI(r.getString(0));
+				String Predicate1 = RDFgraph.shortenURI(r.getString(1));
+				String Object1 = RDFgraph.shortenURI(r.getString(2));
+				String Predicate2 = RDFgraph.shortenURI(r.getString(3));
+				String Object2 = RDFgraph.shortenURI(r.getString(4));
+				String Predicate3 = RDFgraph.shortenURI(r.getString(5));
+				String Subject2 = RDFgraph.shortenURI(r.getString(6));
 
 				this.Edges += Object1 + " -- " + Object1 + "_" + Predicate1 + "_" + Subject1 + "\n";
 				this.Edges += Object1 + "_" + Predicate1 + "_" + Subject1 + " -> " + Subject1 + "\n";
@@ -312,13 +312,13 @@ public class ConnAdapter {
 			for (Row r : rows) {
 				ConnViewer.Counter++;
 
-				String Subject1 = Configuration.shortenURI(r.getString(0));
-				String Predicate1 = Configuration.shortenURI(r.getString(1));
-				String Object1 = Configuration.shortenURI(r.getString(2));
-				String Predicate2 = Configuration.shortenURI(r.getString(3));
-				String Object2 = Configuration.shortenURI(r.getString(4));
-				String Predicate3 = Configuration.shortenURI(r.getString(5));
-				String Subject2 = Configuration.shortenURI(r.getString(6));
+				String Subject1 = RDFgraph.shortenURI(r.getString(0));
+				String Predicate1 = RDFgraph.shortenURI(r.getString(1));
+				String Object1 = RDFgraph.shortenURI(r.getString(2));
+				String Predicate2 = RDFgraph.shortenURI(r.getString(3));
+				String Object2 = RDFgraph.shortenURI(r.getString(4));
+				String Predicate3 = RDFgraph.shortenURI(r.getString(5));
+				String Subject2 = RDFgraph.shortenURI(r.getString(6));
 
 				this.Edges += Object1 + " -- " + Object1 + "_" + Predicate1 + "_" + Subject1 + "\n";
 				this.Edges += Object1 + "_" + Predicate1 + "_" + Subject1 + " -> " + Subject1 + "\n";
@@ -341,13 +341,13 @@ public class ConnAdapter {
 			for (Row r : rows) {
 				ConnViewer.Counter++;
 
-				String Subject1 = Configuration.shortenURI(r.getString(0));
-				String Predicate1 = Configuration.shortenURI(r.getString(1));
-				String Object1 = Configuration.shortenURI(r.getString(2));
-				String Predicate2 = Configuration.shortenURI(r.getString(3));
-				String Object2 = Configuration.shortenURI(r.getString(4));
-				String Predicate3 = Configuration.shortenURI(r.getString(5));
-				String Subject2 = Configuration.shortenURI(r.getString(6));
+				String Subject1 = RDFgraph.shortenURI(r.getString(0));
+				String Predicate1 = RDFgraph.shortenURI(r.getString(1));
+				String Object1 = RDFgraph.shortenURI(r.getString(2));
+				String Predicate2 = RDFgraph.shortenURI(r.getString(3));
+				String Object2 = RDFgraph.shortenURI(r.getString(4));
+				String Predicate3 = RDFgraph.shortenURI(r.getString(5));
+				String Subject2 = RDFgraph.shortenURI(r.getString(6));
 
 				this.Edges += Object1 + " -- " + Object1 + "_" + Predicate1 + "_" + Subject1 + "\n";
 				this.Edges += Object1 + "_" + Predicate1 + "_" + Subject1 + " -> " + Subject1 + "\n";

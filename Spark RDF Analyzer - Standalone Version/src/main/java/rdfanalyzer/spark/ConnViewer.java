@@ -37,8 +37,8 @@ public class ConnViewer {
 
 		ConnViewerHelper.generateQueries(startN, endN, calculationGraphName);
 		ConnViewerHelper.fillLists();
-		objAdapter.setStartNode(Configuration.shortenURI(startN));
-		objAdapter.setEndNode(Configuration.shortenURI(endN));
+		objAdapter.setStartNode(RDFgraph.shortenURI(startN));
+		objAdapter.setEndNode(RDFgraph.shortenURI(endN));
 
 		Counter = 0;
 

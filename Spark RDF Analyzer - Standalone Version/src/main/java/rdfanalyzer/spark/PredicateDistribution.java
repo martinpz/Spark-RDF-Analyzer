@@ -53,7 +53,7 @@ public class PredicateDistribution {
 				i++;
 
 				result += "<tr><td data-toggle=\"tooltip\" title=\"" + r.getString(0) + "\">"
-						+ Configuration.shortenURI(r.getString(0)) + "</td><td>" + Long.toString(r.getLong(1))
+						+ RDFgraph.shortenURI(r.getString(0)) + "</td><td>" + Long.toString(r.getLong(1))
 						+ "</td></tr>";
 			}
 
@@ -71,7 +71,7 @@ public class PredicateDistribution {
 
 				i++;
 
-				X += Configuration.shortenURI(r.getString(0)) + "|";
+				X += RDFgraph.shortenURI(r.getString(0)) + "|";
 				Y += Long.toString(r.getLong(1)) + "|";
 			}
 

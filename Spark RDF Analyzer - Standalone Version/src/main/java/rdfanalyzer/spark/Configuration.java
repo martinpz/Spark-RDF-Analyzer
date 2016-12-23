@@ -84,31 +84,4 @@ public class Configuration {
 				"hdfs://sydney.informatik.privat:8020/user/teamprojekt2015/");
 		System.setProperty("HADOOP_USER_NAME", Configuration.properties.getProperty("HadoopUser"));
 	}
-
-	/**
-	 * Converts a URI to a shorter representation which is shown to users.
-	 * 
-	 * @param inputURI
-	 * @return
-	 */
-	public static String shortenURI(String inputURI) {
-		// TODO: Separation of concerns!
-		String result = "";
-		int index1 = inputURI.lastIndexOf('#');
-		int index2 = inputURI.lastIndexOf('/');
-
-		if (index1 > index2) {
-			result = inputURI.substring(index1 + 1, inputURI.length() - 1);
-		} else if (index2 > index1) {
-			result = inputURI.substring(index2 + 1, inputURI.length() - 1);
-		}
-
-		try {
-			result = java.net.URLDecoder.decode(result, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-
-		return result;
-	}
 }

@@ -17,6 +17,7 @@
 package rdfanalyzer.spark;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Serializable class to represent RDF graph.
@@ -50,5 +51,32 @@ public class RDFgraph implements Serializable {
 
 	public void setObject(String object) {
 		this.object = object;
+	}
+
+	/**
+	 * Converts a URI to a shorter representation which is shown to users.
+	 * 
+	 * @param inputURI
+	 * @return
+	 */
+	public static String shortenURI(String inputURI) {
+		String result = "";
+
+		int index1 = inputURI.lastIndexOf('#');
+		int index2 = inputURI.lastIndexOf('/');
+
+		if (index1 > index2) {
+			result = inputURI.substring(index1 + 1, inputURI.length() - 1);
+		} else if (index2 > index1) {
+			result = inputURI.substring(index2 + 1, inputURI.length() - 1);
+		}
+
+		try {
+			result = java.net.URLDecoder.decode(result, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+
+		return result;
 	}
 }

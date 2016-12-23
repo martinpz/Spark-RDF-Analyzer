@@ -45,13 +45,13 @@ public class GetClasses {
 
 			for (Row r : resultRows) {
 				result += "<tr><td data-toggle=\"tooltip\" title=\"" + r.getString(0) + "\">"
-						+ Configuration.shortenURI(r.getString(0)) + "</td></tr>";
+						+ RDFgraph.shortenURI(r.getString(0)) + "</td></tr>";
 			}
 
 			result += "</table>";
 		} else if (args[1].equals("Chart")) {
 			for (Row r : resultRows) {
-				result += Configuration.shortenURI(r.getString(0)) + ",";
+				result += RDFgraph.shortenURI(r.getString(0)) + ",";
 			}
 
 			result = result.substring(0, result.length() - 1);

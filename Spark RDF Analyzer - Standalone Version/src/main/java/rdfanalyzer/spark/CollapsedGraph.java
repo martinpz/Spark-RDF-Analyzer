@@ -110,7 +110,7 @@ public class CollapsedGraph {
 				String tempClass = "";
 
 				for (String s : objEntry.subjects) {
-					tempClass += Configuration.shortenURI(s) + "-";
+					tempClass += RDFgraph.shortenURI(s) + "-";
 				}
 
 				tempClass = tempClass.substring(0, tempClass.length() - 1);
@@ -118,7 +118,7 @@ public class CollapsedGraph {
 				tempClass = "";
 
 				for (String o : objEntry.objects) {
-					tempClass += Configuration.shortenURI(o) + "-";
+					tempClass += RDFgraph.shortenURI(o) + "-";
 				}
 
 				tempClass = tempClass.substring(0, tempClass.length() - 1);
@@ -148,13 +148,13 @@ public class CollapsedGraph {
 				Long nrEntries = objEntry.sum;
 
 				for (String s : objEntry.subjects) {
-					class1 += Configuration.shortenURI(s) + "-";
+					class1 += RDFgraph.shortenURI(s) + "-";
 				}
 
 				class1 = class1.substring(0, class1.length() - 1);
 
 				for (String o : objEntry.objects) {
-					class2 += Configuration.shortenURI(o) + "-";
+					class2 += RDFgraph.shortenURI(o) + "-";
 				}
 
 				class2 = class2.substring(0, class2.length() - 1);
@@ -201,17 +201,17 @@ public class CollapsedGraph {
 			String strObjects = "";
 
 			for (String s : subjects) {
-				strSubjects += "<span data-toggle=\"tooltip\" title=\"" + s + "\">" + Configuration.shortenURI(s)
+				strSubjects += "<span data-toggle=\"tooltip\" title=\"" + s + "\">" + RDFgraph.shortenURI(s)
 						+ "</span><br>";
 			}
 
 			for (String o : objects) {
-				strObjects += "<span data-toggle=\"tooltip\" title=\"" + o + "\">" + Configuration.shortenURI(o)
+				strObjects += "<span data-toggle=\"tooltip\" title=\"" + o + "\">" + RDFgraph.shortenURI(o)
 						+ "</span><br>";
 			}
 
 			result = "<tr><td>" + strSubjects + "</td><td><span data-toggle=\"tooltip\" title=\"" + predicate + "\">"
-					+ Configuration.shortenURI(predicate) + "</span></td><td>" + strObjects + "</td><td>"
+					+ RDFgraph.shortenURI(predicate) + "</span></td><td>" + strObjects + "</td><td>"
 					+ Long.toString(sum) + "</td></tr>";
 
 			return result;
@@ -250,13 +250,13 @@ public class CollapsedGraph {
 			String objects = "";
 
 			for (String s : objEntry.subjects) {
-				subjects += Configuration.shortenURI(s) + "-";
+				subjects += RDFgraph.shortenURI(s) + "-";
 			}
 
 			subjects = subjects.substring(0, subjects.length() - 1);
 
 			for (String o : objEntry.objects) {
-				objects += Configuration.shortenURI(o) + "-";
+				objects += RDFgraph.shortenURI(o) + "-";
 			}
 
 			objects = objects.substring(0, objects.length() - 1);

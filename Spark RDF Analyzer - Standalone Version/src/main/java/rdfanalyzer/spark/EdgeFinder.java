@@ -54,10 +54,10 @@ public class EdgeFinder {
 
 			for (Row r : resultRows) {
 				result += "<tr><td data-toggle=\"tooltip\" title=\"" + r.getString(0) + "\">"
-						+ Configuration.shortenURI(r.getString(0)) + "</td><td data-toggle=\"tooltip\" title=\""
-						+ r.getString(1) + "\">" + Configuration.shortenURI(r.getString(1))
+						+ RDFgraph.shortenURI(r.getString(0)) + "</td><td data-toggle=\"tooltip\" title=\""
+						+ r.getString(1) + "\">" + RDFgraph.shortenURI(r.getString(1))
 						+ "</td><td data-toggle=\"tooltip\" title=\"" + r.getString(2) + "\">"
-						+ Configuration.shortenURI(r.getString(2)) + "</td><td>" + Long.toString(r.getLong(3))
+						+ RDFgraph.shortenURI(r.getString(2)) + "</td><td>" + Long.toString(r.getLong(3))
 						+ "</td></tr>";
 			}
 
@@ -75,8 +75,8 @@ public class EdgeFinder {
 			}
 
 			for (Row r : resultRows) {
-				matrix[ArrayUtils.indexOf(classNames, Configuration.shortenURI(r.getString(0)))][ArrayUtils
-						.indexOf(classNames, Configuration.shortenURI(r.getString(2)))] += Integer
+				matrix[ArrayUtils.indexOf(classNames, RDFgraph.shortenURI(r.getString(0)))][ArrayUtils
+						.indexOf(classNames, RDFgraph.shortenURI(r.getString(2)))] += Integer
 								.parseInt(Long.toString(r.getLong(3)));
 			}
 
@@ -109,13 +109,13 @@ public class EdgeFinder {
 		result += "<tr><th style=\"text-align: center;\">Subject</th><th style=\"text-align: center;\">Predicate</th><th style=\"text-align: center;\">Object</th><th style=\"text-align: center;\">Nr. of occurencies</th></tr></thead>";
 
 		for (Row r : cachedRows) {
-			String Subject = Configuration.shortenURI(r.getString(0));
-			String Object = Configuration.shortenURI(r.getString(2));
+			String Subject = RDFgraph.shortenURI(r.getString(0));
+			String Object = RDFgraph.shortenURI(r.getString(2));
 
 			if (Subject.equals(inputSubject) || Object.equals(inputSubject)) {
 				result += "<tr><td data-toggle=\"tooltip\" title=\"" + r.getString(0) + "\">" + Subject
 						+ "</td><td data-toggle=\"tooltip\" title=\"" + r.getString(1) + "\">"
-						+ Configuration.shortenURI(r.getString(1)) + "</td><td data-toggle=\"tooltip\" title=\""
+						+ RDFgraph.shortenURI(r.getString(1)) + "</td><td data-toggle=\"tooltip\" title=\""
 						+ r.getString(2) + "\">" + Object + "</td><td>" + Long.toString(r.getLong(3)) + "</td></tr>";
 			}
 		}

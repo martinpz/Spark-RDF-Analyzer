@@ -61,7 +61,7 @@ public class AutoComplete {
 			Row[] rows = secondRound.collect();
 
 			if (rows.length > 0) {
-				String shortURI = Configuration.shortenURI(rows[0].getString(0));
+				String shortURI = RDFgraph.shortenURI(rows[0].getString(0));
 				String fullURI = "<xmp style=\"display : inline\">" + rows[0].getString(0) + "</xmp>";
 				String fullText = "<b>" + shortURI + " :</b> " + fullURI;
 				String fullValue = shortURI + ":" + rows[0].getString(0);
@@ -74,7 +74,7 @@ public class AutoComplete {
 			for (Row r : rows2) {
 				if (rows.length > 0) {
 					if (!r.getString(0).equals(rows[0].getString(0))) {
-						String shortURI = Configuration.shortenURI(r.getString(0));
+						String shortURI = RDFgraph.shortenURI(r.getString(0));
 						String fullURI = "<xmp style=\"display : inline\">" + r.getString(0) + "</xmp>";
 						String fullText = "<b>" + shortURI + " :</b> " + fullURI;
 						String fullValue = shortURI + ":" + r.getString(0);
@@ -82,7 +82,7 @@ public class AutoComplete {
 								+ fullValue + "\">" + fullText + "</label></div>";
 					}
 				} else {
-					String shortURI = Configuration.shortenURI(r.getString(0));
+					String shortURI = RDFgraph.shortenURI(r.getString(0));
 					String fullURI = "<xmp style=\"display : inline\">" + r.getString(0) + "</xmp>";
 					String fullText = "<b>" + shortURI + " :</b> " + fullURI;
 					String fullValue = shortURI + ":" + r.getString(0);
@@ -118,7 +118,7 @@ public class AutoComplete {
 			Row[] rows = secondRound.collect();
 
 			if (rows.length > 0) {
-				String shortURI = Configuration.shortenURI(rows[0].getString(0));
+				String shortURI = RDFgraph.shortenURI(rows[0].getString(0));
 				String fullURI = "<xmp style=\"display : inline\">" + rows[0].getString(0) + "</xmp>";
 				String fullText = "<b>" + shortURI + " :</b> " + fullURI;
 				String fullValue = shortURI + ":" + rows[0].getString(0);
@@ -131,7 +131,7 @@ public class AutoComplete {
 			for (Row r : rows2) {
 				if (rows.length > 0) {
 					if (!r.getString(0).equals(rows[0].getString(0))) {
-						String shortURI = Configuration.shortenURI(r.getString(0));
+						String shortURI = RDFgraph.shortenURI(r.getString(0));
 						String fullURI = "<xmp style=\"display : inline\">" + r.getString(0) + "</xmp>";
 						String fullText = "<b>" + shortURI + " :</b> " + fullURI;
 						String fullValue = shortURI + ":" + r.getString(0);
@@ -139,7 +139,7 @@ public class AutoComplete {
 								+ fullValue + "\">" + fullText + "</label></div>";
 					}
 				} else {
-					String shortURI = Configuration.shortenURI(r.getString(0));
+					String shortURI = RDFgraph.shortenURI(r.getString(0));
 					String fullURI = "<xmp style=\"display : inline\">" + r.getString(0) + "</xmp>";
 					String fullText = "<b>" + shortURI + " :</b> " + fullURI;
 					String fullValue = shortURI + ":" + r.getString(0);
