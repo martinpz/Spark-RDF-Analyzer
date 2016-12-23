@@ -72,7 +72,7 @@ This way we can ensure that real credentials are hidden from public and excluded
     - Right click on the project > "Run as" > "Maven build..."
     - Set following properties:
         - Name: RDF Analyzer (Tomcat)
-        - Goals: tomcat7:redeploy
+        - Goals: clean tomcat7:redeploy
         - Profiles: tomcat-localhost
         - Parameter: p.type=war
 - Click "Run" and check the console output in eclipse. The war file gets deployed to the running Tomcat instance.
