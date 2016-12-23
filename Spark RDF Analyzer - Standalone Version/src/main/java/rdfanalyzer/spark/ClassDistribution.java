@@ -26,12 +26,11 @@ public class ClassDistribution {
 	public static String main(String[] args) throws Exception {
 		String result = "";
 		// Read graph from parquet
-		DataFrame schemaRDF = WebService.sqlContext
-				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + ".parquet");
+		DataFrame schemaRDF = Service.sqlCtx().parquetFile(Configuration.props("Storage") + args[0] + ".parquet");
 		schemaRDF.cache().registerTempTable("Graph");
 
 		// SQL can be run over RDDs that have been registered as tables.
-		DataFrame predicatesFrame = WebService.sqlContext
+		DataFrame predicatesFrame = Service.sqlCtx()
 				.sql("SELECT object, COUNT(object) FROM Graph WHERE predicate='<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>'"
 						+ " GROUP BY object");
 

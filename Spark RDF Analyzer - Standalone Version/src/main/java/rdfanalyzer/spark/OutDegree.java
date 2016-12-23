@@ -34,12 +34,11 @@ public class OutDegree {
 		}
 
 		// Read graph from parquet
-		DataFrame graphFrame = WebService.sqlContext
-				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + ".parquet");
+		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.props("Storage") + args[0] + ".parquet");
 		graphFrame.cache().registerTempTable("Graph");
 
 		// Run SQL over loaded Graph.
-		DataFrame resultsFrame = WebService.sqlContext
+		DataFrame resultsFrame = Service.sqlCtx()
 				.sql("SELECT " + args[1] + "(degree) FROM (SELECT subject, COUNT(predicate) AS degree FROM Graph"
 						+ " GROUP BY subject) MyTable1");
 

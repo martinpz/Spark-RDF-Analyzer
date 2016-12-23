@@ -34,12 +34,11 @@ public class CountNodes {
 		}
 
 		// Read graph from parquet
-		DataFrame graphFrame = WebService.sqlContext
-				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + ".parquet");
+		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.props("Storage") + args[0] + ".parquet");
 		graphFrame.cache().registerTempTable("Graph");
 
 		// Run SQL over loaded Graph.
-		DataFrame resultsFrame = WebService.sqlContext
+		DataFrame resultsFrame = Service.sqlCtx()
 				.sql("SELECT COUNT(DISTINCT MyTable1.subject) FROM (SELECT subject FROM Graph"
 						+ " UNION ALL SELECT object FROM Graph" + " ) MyTable1");
 

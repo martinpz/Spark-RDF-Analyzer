@@ -36,7 +36,7 @@ public class TTL2NTV2 {
 		String result = "";
 
 		// Read Prefixes.
-		JavaRDD<RDFgraph> RDF1 = WebService.ctx.textFile(Input + "/*", 18).map(new Function<String, RDFgraph>() {
+		JavaRDD<RDFgraph> RDF1 = Service.sparkCtx().textFile(Input + "/*", 18).map(new Function<String, RDFgraph>() {
 			public RDFgraph call(String line) {
 				String[] parts = line.split(" (?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
 				RDFgraph entry = new RDFgraph();
@@ -55,10 +55,10 @@ public class TTL2NTV2 {
 			}
 		});
 
-		DataFrame schemaRDF1 = WebService.sqlContext.createDataFrame(RDF1, RDFgraph.class);
+		DataFrame schemaRDF1 = Service.sqlCtx().createDataFrame(RDF1, RDFgraph.class);
 		schemaRDF1.registerTempTable("Prefixes");
 
-		DataFrame prefixesFrame = WebService.sqlContext
+		DataFrame prefixesFrame = Service.sqlCtx()
 				.sql("SELECT subject,predicate,object FROM Prefixes Where subject NOT LIKE 'E'");
 		Row[] prefixes = prefixesFrame.collect();
 
@@ -68,10 +68,10 @@ public class TTL2NTV2 {
 		}
 
 		// Broadcast prefixes to all nodes.
-		broadcastPrefixes = WebService.ctx.broadcast(prefixHashtable);
+		broadcastPrefixes = Service.sparkCtx().broadcast(prefixHashtable);
 
 		// Read Graph and replace prefixes
-		JavaRDD<RDFgraph> RDF = WebService.ctx.textFile(Input + "/*", 18).map(new Function<String, RDFgraph>() {
+		JavaRDD<RDFgraph> RDF = Service.sparkCtx().textFile(Input + "/*", 18).map(new Function<String, RDFgraph>() {
 			public RDFgraph call(String line) {
 				String[] parts = line.split(" (?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
 				RDFgraph entry = new RDFgraph();
@@ -87,9 +87,9 @@ public class TTL2NTV2 {
 		});
 
 		// Apply a schema to an RDD of Java Beans and register it as a table.
-		DataFrame schemaRDF = WebService.sqlContext.createDataFrame(RDF, RDFgraph.class);
+		DataFrame schemaRDF = Service.sqlCtx().createDataFrame(RDF, RDFgraph.class);
 
-		String storageDir = Configuration.properties.getProperty("Storage");
+		String storageDir = Configuration.props("Storage");
 		schemaRDF.saveAsParquetFile(storageDir + Name + ".parquet");
 
 		result = "Success";

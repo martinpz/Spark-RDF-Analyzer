@@ -26,13 +26,11 @@ public class CalculateRanking {
 		String result = "";
 
 		// Read graph from parquet
-		DataFrame graphFrame = WebService.sqlContext
-				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + ".parquet");
+		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.props("Storage") + args[0] + ".parquet");
 		graphFrame.cache().registerTempTable("Graph");
 
 		// Run SQL over loaded Graph.
-		DataFrame resultsFrame = WebService.sqlContext
-				.sql("SELECT subject, COUNT(*) as nr FROM Graph GROUP BY subject");
+		DataFrame resultsFrame = Service.sqlCtx().sql("SELECT subject, COUNT(*) as nr FROM Graph GROUP BY subject");
 		result = Long.toString(resultsFrame.count());
 
 		// Write results to parquet.

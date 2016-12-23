@@ -33,17 +33,16 @@ public class CountEdges {
 		}
 
 		// Read graph from parquet
-		DataFrame graphFrame = WebService.sqlContext
-				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + ".parquet");
+		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.props("Storage") + args[0] + ".parquet");
 		graphFrame.cache().registerTempTable("Graph");
 
 		// Run SQL over loaded Graph.
-		DataFrame resultsFrame = WebService.sqlContext.sql("SELECT Count(*) FROM Graph");
+		DataFrame resultsFrame = Service.sqlCtx().sql("SELECT Count(*) FROM Graph");
 
 		// Read Ranking table from parquet (Not needed in this computation but
 		// to cache it for later)
-		DataFrame rankingFrame = WebService.sqlContext
-				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + "Ranking.parquet");
+		DataFrame rankingFrame = Service.sqlCtx()
+				.parquetFile(Configuration.props("Storage") + args[0] + "Ranking.parquet");
 		rankingFrame.cache().registerTempTable("Ranking");
 
 		// Get the results and format them in desired format.

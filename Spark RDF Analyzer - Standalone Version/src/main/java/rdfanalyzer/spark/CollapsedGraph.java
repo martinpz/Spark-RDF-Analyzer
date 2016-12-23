@@ -54,7 +54,7 @@ public class CollapsedGraph {
 		// schemaRDF.cache().registerTempTable("Graph");
 
 		// SQL can be run over RDDs that have been registered as tables.
-		DataFrame predicatesFrame = WebService.sqlContext
+		DataFrame predicatesFrame = Service.sqlCtx()
 				.sql("SELECT t2o AS s, t1p AS p, t4o AS o, Count(*) AS nr FROM (SELECT t1.subject AS t1s, t2.object AS t2o, t1.predicate AS t1p, t1.object AS t1o FROM Graph t1, Graph t2"
 						+ " WHERE (t2.predicate = '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>') AND t1.subject = t2.subject) MyTable1, "
 						+ "(SELECT t3.object AS t3o, t3.subject AS t3s, t3.predicate AS t3p, t4.object AS t4o FROM Graph t3, Graph t4"

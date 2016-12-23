@@ -27,12 +27,11 @@ public class GetClasses {
 		String result = "";
 
 		// Read graph from parquet
-		DataFrame graphFrame = WebService.sqlContext
-				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + ".parquet");
+		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.props("Storage") + args[0] + ".parquet");
 		graphFrame.cache().registerTempTable("Graph");
 
 		// Run SQL over loaded Graph.
-		DataFrame resultsFrame = WebService.sqlContext.sql(
+		DataFrame resultsFrame = Service.sqlCtx().sql(
 				"SELECT DISTINCT object FROM Graph WHERE predicate='<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>'");
 
 		// Format output results. Based if output is table or chart it is

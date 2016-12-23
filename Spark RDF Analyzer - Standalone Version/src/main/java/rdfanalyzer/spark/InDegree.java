@@ -33,12 +33,11 @@ public class InDegree {
 			System.exit(0);
 		}
 		// Read graph from parquet
-		DataFrame graphFrame = WebService.sqlContext
-				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + ".parquet");
+		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.props("Storage") + args[0] + ".parquet");
 		graphFrame.cache().registerTempTable("Graph");
 
 		// Run SQL over loaded Graph.
-		DataFrame resultsFrame = WebService.sqlContext.sql("SELECT " + args[1]
+		DataFrame resultsFrame = Service.sqlCtx().sql("SELECT " + args[1]
 				+ "(degree) FROM (SELECT object, COUNT(predicate) AS degree FROM Graph" + " GROUP BY object) MyTable1");
 
 		// Format output results. Based if input is AVG, MIN or MAX.

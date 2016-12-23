@@ -28,32 +28,32 @@ public class AutoComplete {
 		userInput = userInput.toLowerCase();
 
 		// Read graph from parquet
-		DataFrame schemaRDF = WebService.sqlContext
-				.parquetFile(Configuration.properties.getProperty("Storage") + graphName + ".parquet");
+		DataFrame schemaRDF = Service.sqlCtx().parquetFile(Configuration.props("storage") + graphName + ".parquet");
 		schemaRDF.cache().registerTempTable("Graph");
 
 		// Predicate OR node Autocomplete.
 		if (Type.equals("Predicate")) {
 			// Get list of predicates
 			// SQL can be run over RDDs that have been registered as tables.
-			DataFrame predicatesListFrame = WebService.sqlContext
+			DataFrame predicatesListFrame = Service.sqlCtx()
 					.sql("SELECT predicate as predicate FROM Graph GROUP BY predicate");
 			predicatesListFrame.cache().registerTempTable("Predicates");
 
 			// Search for matching predicates
-			DataFrame firstRound = WebService.sqlContext
+			DataFrame firstRound = Service.sqlCtx()
 					.sql("SELECT predicate AS match, regexp_extract(predicate, '([^/]+$)') AS matchExtracted1, regexp_extract(predicate, '([^#]+$)') AS matchExtracted2 FROM Predicates WHERE LOWER(predicate) LIKE '%"
 							+ userInput + "%'");
 			firstRound.registerTempTable("firstRound");
 
-			DataFrame secondRound = WebService.sqlContext.sql("SELECT match " + " FROM firstRound "
+			DataFrame secondRound = Service.sqlCtx().sql("SELECT match " + " FROM firstRound "
 					+ " WHERE matchExtracted1 = '" + userInput + ">' OR matchExtracted2 = '" + userInput + ">'");
 
-			DataFrame thirdRound = WebService.sqlContext.sql("SELECT DISTINCT match, matchExtracted FROM "
-					+ "(SELECT match, matchExtracted1 AS matchExtracted" + " FROM firstRound "
-					+ " WHERE LOWER(matchExtracted1) LIKE '" + userInput + "%' " + " UNION ALL "
-					+ " SELECT match, matchExtracted2 AS matchExtracted" + " FROM firstRound	 "
-					+ " WHERE LOWER(matchExtracted2) LIKE '" + userInput + "%') MyTable " + " LIMIT 20");
+			DataFrame thirdRound = Service.sqlCtx()
+					.sql("SELECT DISTINCT match, matchExtracted FROM "
+							+ "(SELECT match, matchExtracted1 AS matchExtracted" + " FROM firstRound "
+							+ " WHERE LOWER(matchExtracted1) LIKE '" + userInput + "%' " + " UNION ALL "
+							+ " SELECT match, matchExtracted2 AS matchExtracted" + " FROM firstRound	 "
+							+ " WHERE LOWER(matchExtracted2) LIKE '" + userInput + "%') MyTable " + " LIMIT 20");
 
 			// The results of SQL queries are DataFrames and support all the
 			// normal RDD operations. Save result to file
@@ -91,28 +91,28 @@ public class AutoComplete {
 				}
 			}
 		} else {
-			DataFrame firstRound = WebService.sqlContext
+			DataFrame firstRound = Service.sqlCtx()
 					.sql("SELECT subject AS match, regexp_extract(subject, '([^/]+$)', 0) AS matchExtracted1, regexp_extract(subject, '([^#]+$)', 0) AS matchExtracted2  FROM Graph WHERE LOWER(subject) LIKE '%"
 							+ userInput + "%' UNION ALL "
 							+ "SELECT object AS match, regexp_extract(object, '([^/]+$)', 0) AS matchExtracted1, regexp_extract(object, '([^#]+$)', 0) AS matchExtracted2 FROM Graph WHERE LOWER(object) LIKE '%"
 							+ userInput + "%' AND object NOT LIKE '\"%'");
 			firstRound.registerTempTable("firstRound");
 
-			DataFrame secondRound = WebService.sqlContext.sql("SELECT match " + " FROM firstRound "
+			DataFrame secondRound = Service.sqlCtx().sql("SELECT match " + " FROM firstRound "
 					+ " WHERE matchExtracted1 = '" + userInput + ">' OR matchExtracted2 = '" + userInput + ">'");
 
-			DataFrame thirdRound = WebService.sqlContext.sql("SELECT DISTINCT match, matchExtracted FROM "
-					+ "(SELECT match, matchExtracted1 AS matchExtracted" + " FROM firstRound "
-					+ " WHERE LOWER(matchExtracted1) LIKE '" + userInput + "%' " + " UNION ALL "
-					+ " SELECT match, matchExtracted2 AS matchExtracted" + " FROM firstRound	 "
-					+ " WHERE LOWER(matchExtracted2) LIKE '" + userInput + "%') MyTable ");
+			DataFrame thirdRound = Service.sqlCtx()
+					.sql("SELECT DISTINCT match, matchExtracted FROM "
+							+ "(SELECT match, matchExtracted1 AS matchExtracted" + " FROM firstRound "
+							+ " WHERE LOWER(matchExtracted1) LIKE '" + userInput + "%' " + " UNION ALL "
+							+ " SELECT match, matchExtracted2 AS matchExtracted" + " FROM firstRound	 "
+							+ " WHERE LOWER(matchExtracted2) LIKE '" + userInput + "%') MyTable ");
 			thirdRound.registerTempTable("thirdRound");
 
-			schemaRDF = WebService.sqlContext
-					.parquetFile(Configuration.properties.getProperty("Storage") + graphName + "Ranking.parquet");
+			schemaRDF = Service.sqlCtx().parquetFile(Configuration.props("Storage") + graphName + "Ranking.parquet");
 			schemaRDF.cache().registerTempTable("Ranking");
 
-			DataFrame fourthRound = WebService.sqlContext.sql("SELECT thirdRound.match FROM " + " thirdRound, Ranking "
+			DataFrame fourthRound = Service.sqlCtx().sql("SELECT thirdRound.match FROM " + " thirdRound, Ranking "
 					+ " WHERE thirdRound.match = Ranking.subject " + " ORDER BY Ranking.nr DESC " + " LIMIT 20");
 
 			Row[] rows = secondRound.collect();

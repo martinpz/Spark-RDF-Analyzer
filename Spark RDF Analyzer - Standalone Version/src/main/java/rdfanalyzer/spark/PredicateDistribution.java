@@ -27,12 +27,11 @@ public class PredicateDistribution {
 		String result = "";
 
 		// Read graph from parquet
-		DataFrame graphFrame = WebService.sqlContext
-				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + ".parquet");
+		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.props("Storage") + args[0] + ".parquet");
 		graphFrame.cache().registerTempTable("Graph");
 
 		// Run SQL over loaded Graph.
-		DataFrame resultsFrame = WebService.sqlContext
+		DataFrame resultsFrame = Service.sqlCtx()
 				.sql("SELECT predicate as p, COUNT(predicate) as cnt FROM Graph GROUP BY predicate ORDER BY cnt DESC");
 
 		// Format output results. Based if output is table or chart it is

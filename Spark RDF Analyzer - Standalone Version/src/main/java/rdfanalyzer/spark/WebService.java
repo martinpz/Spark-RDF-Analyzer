@@ -20,30 +20,12 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.SQLContext;
-
 /**
  * This class is the REST web service which handles front end requests by
  * calling the desired module with specified parameters.
  */
 @Path("/ALL")
 public class WebService {
-	public static SparkConf sparkConf;
-	public static JavaSparkContext ctx;
-	public static SQLContext sqlContext;
-	public static Configuration configuration;
-
-	// TODO: Following comes from Cluster:
-	// public static Configuration configuration = new Configuration();
-	// public static SparkConf sparkConf =
-	// SparkConfigurationHelper.getConfiguration();
-	// public static JavaSparkContext ctx = new JavaSparkContext(sparkConf);
-	// public static SQLContext sqlContext = new SQLContext(ctx);
-	// public static ClassLoader classLoader =
-	// WebService.class.getClassLoader();
-
 	@GET
 	@Path("/loadGraph/{inputPath}/{inputName}/{inputFormat}")
 	public String getMsgg(@PathParam("inputPath") String inputPath, @PathParam("inputName") String inputName,
@@ -354,7 +336,7 @@ public class WebService {
 		String objResponse = "";
 
 		try {
-			ctx.close();
+			Service.sparkCtx().close();
 			objResponse = "Context Closed.";
 		} catch (Exception e) {
 			objResponse = "Calculation Failed.<br>" + e.getMessage();

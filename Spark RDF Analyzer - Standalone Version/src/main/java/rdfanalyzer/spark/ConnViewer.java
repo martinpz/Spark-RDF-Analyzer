@@ -106,7 +106,7 @@ public class ConnViewer {
 	 * @param tableName
 	 */
 	public static void createTable(String Query, String tableName) {
-		DataFrame predicatesFrame = WebService.sqlContext.sql(Query);
+		DataFrame predicatesFrame = Service.sqlCtx().sql(Query);
 		predicatesFrame.registerTempTable(tableName);
 
 		if (ConnViewerHelper.outputTables.contains(tableName)) {
@@ -158,19 +158,17 @@ public class ConnViewer {
 			Condition = Condition.substring(0, Condition.length() - 3);
 
 			// Read graph from parquet
-			DataFrame schemaRDF = WebService.sqlContext
-					.parquetFile(Configuration.properties.getProperty("Storage") + graphName + ".parquet");
+			DataFrame schemaRDF = Service.sqlCtx().parquetFile(Configuration.props("Storage") + graphName + ".parquet");
 			schemaRDF.cache().registerTempTable("Graph");
 
-			DataFrame predicatesFrame = WebService.sqlContext
+			DataFrame predicatesFrame = Service.sqlCtx()
 					.sql("SELECT subject, predicate, object FROM Graph WHERE " + Condition);
 			predicatesFrame.registerTempTable("Graph2");
 
 			return "Graph2";
 		} else {
 			// Read graph from parquet
-			DataFrame schemaRDF = WebService.sqlContext
-					.parquetFile(Configuration.properties.getProperty("Storage") + graphName + ".parquet");
+			DataFrame schemaRDF = Service.sqlCtx().parquetFile(Configuration.props("Storage") + graphName + ".parquet");
 			schemaRDF.cache().registerTempTable("Graph");
 
 			return "Graph";

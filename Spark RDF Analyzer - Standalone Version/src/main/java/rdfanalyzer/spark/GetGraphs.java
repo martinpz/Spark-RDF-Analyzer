@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
@@ -33,7 +32,7 @@ public class GetGraphs {
 		String result = "";
 
 		// Get folder names.
-		File directory = new File(Configuration.properties.getProperty("Storage"));
+		File directory = new File(Configuration.props("Storage"));
 		File[] subdirs = directory.listFiles();
 
 		// TODO: Following is from the cluster.
