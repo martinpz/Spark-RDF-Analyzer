@@ -112,14 +112,32 @@ public class Configuration {
 		// Block initialization of this class from other methods.
 	}
 
-	public static Properties props() {
+	/**
+	 * @return Properties object
+	 */
+	private static Properties props() {
 		return ConfigHolder.PROPERTIES;
 	}
 
+	/**
+	 * @param key
+	 *            of the property
+	 * @return value of the property
+	 */
 	public static String props(String key) {
-		return ConfigHolder.PROPERTIES.getProperty(key);
+		return props().getProperty(key);
 	}
 
+	/**
+	 * @return Path of the storage directory
+	 */
+	public static String storage() {
+		return props("storage.dir");
+	}
+
+	/**
+	 * @return Spark Configuration
+	 */
 	public static SparkConf sparkConf() {
 		return ConfigHolder.SPARK_CONF;
 	}

@@ -158,7 +158,7 @@ public class ConnViewer {
 			Condition = Condition.substring(0, Condition.length() - 3);
 
 			// Read graph from parquet
-			DataFrame schemaRDF = Service.sqlCtx().parquetFile(Configuration.props("Storage") + graphName + ".parquet");
+			DataFrame schemaRDF = Service.sqlCtx().parquetFile(Configuration.storage() + graphName + ".parquet");
 			schemaRDF.cache().registerTempTable("Graph");
 
 			DataFrame predicatesFrame = Service.sqlCtx()
@@ -168,7 +168,7 @@ public class ConnViewer {
 			return "Graph2";
 		} else {
 			// Read graph from parquet
-			DataFrame schemaRDF = Service.sqlCtx().parquetFile(Configuration.props("Storage") + graphName + ".parquet");
+			DataFrame schemaRDF = Service.sqlCtx().parquetFile(Configuration.storage() + graphName + ".parquet");
 			schemaRDF.cache().registerTempTable("Graph");
 
 			return "Graph";

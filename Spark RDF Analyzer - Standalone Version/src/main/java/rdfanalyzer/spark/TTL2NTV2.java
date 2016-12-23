@@ -89,7 +89,7 @@ public class TTL2NTV2 {
 		// Apply a schema to an RDD of Java Beans and register it as a table.
 		DataFrame schemaRDF = Service.sqlCtx().createDataFrame(RDF, RDFgraph.class);
 
-		String storageDir = Configuration.props("Storage");
+		String storageDir = Configuration.storage();
 		schemaRDF.saveAsParquetFile(storageDir + Name + ".parquet");
 
 		result = "Success";

@@ -28,7 +28,7 @@ public class AutoComplete {
 		userInput = userInput.toLowerCase();
 
 		// Read graph from parquet
-		DataFrame schemaRDF = Service.sqlCtx().parquetFile(Configuration.props("storage") + graphName + ".parquet");
+		DataFrame schemaRDF = Service.sqlCtx().parquetFile(Configuration.storage() + graphName + ".parquet");
 		schemaRDF.cache().registerTempTable("Graph");
 
 		// Predicate OR node Autocomplete.
@@ -109,7 +109,7 @@ public class AutoComplete {
 							+ " WHERE LOWER(matchExtracted2) LIKE '" + userInput + "%') MyTable ");
 			thirdRound.registerTempTable("thirdRound");
 
-			schemaRDF = Service.sqlCtx().parquetFile(Configuration.props("Storage") + graphName + "Ranking.parquet");
+			schemaRDF = Service.sqlCtx().parquetFile(Configuration.storage() + graphName + "Ranking.parquet");
 			schemaRDF.cache().registerTempTable("Ranking");
 
 			DataFrame fourthRound = Service.sqlCtx().sql("SELECT thirdRound.match FROM " + " thirdRound, Ranking "

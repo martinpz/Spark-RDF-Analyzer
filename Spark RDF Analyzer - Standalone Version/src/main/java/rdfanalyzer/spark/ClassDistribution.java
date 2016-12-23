@@ -26,7 +26,7 @@ public class ClassDistribution {
 	public static String main(String[] args) throws Exception {
 		String result = "";
 		// Read graph from parquet
-		DataFrame schemaRDF = Service.sqlCtx().parquetFile(Configuration.props("Storage") + args[0] + ".parquet");
+		DataFrame schemaRDF = Service.sqlCtx().parquetFile(Configuration.storage() + args[0] + ".parquet");
 		schemaRDF.cache().registerTempTable("Graph");
 
 		// SQL can be run over RDDs that have been registered as tables.

@@ -40,8 +40,6 @@ public class GraphLoader {
 			return result;
 		}
 
-		System.out.println("=== Data source: RDD ===");
-
 		// Load a text file and convert each line to a Java Bean.
 		JavaRDD<RDFgraph> RDF = Service.sparkCtx().textFile(Input + "/*", 18).map(new Function<String, RDFgraph>() {
 			public RDFgraph call(String line) {
@@ -61,7 +59,7 @@ public class GraphLoader {
 		// Apply a schema to an RDD of Java Beans and register it as a table.
 		DataFrame schemaRDF = Service.sqlCtx().createDataFrame(RDF, RDFgraph.class);
 
-		String storageDir = Configuration.props("Storage");
+		String storageDir = Configuration.storage();
 		schemaRDF.saveAsParquetFile(storageDir + Name + ".parquet");
 		// TODO: Following is from Cluster.
 		// schemaRDF.saveAsParquetFile("parquet/"+Name+".parquet");

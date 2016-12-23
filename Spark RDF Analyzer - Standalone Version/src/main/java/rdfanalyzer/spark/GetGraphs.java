@@ -32,7 +32,7 @@ public class GetGraphs {
 		String result = "";
 
 		// Get folder names.
-		File directory = new File(Configuration.props("Storage"));
+		File directory = new File(Configuration.storage());
 		File[] subdirs = directory.listFiles();
 
 		// TODO: Following is from the cluster.
