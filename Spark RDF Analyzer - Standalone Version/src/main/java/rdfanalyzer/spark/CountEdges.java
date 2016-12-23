@@ -41,8 +41,7 @@ public class CountEdges {
 
 		// Read Ranking table from parquet (Not needed in this computation but
 		// to cache it for later)
-		DataFrame rankingFrame = Service.sqlCtx()
-				.parquetFile(Configuration.props("Storage") + args[0] + "Ranking.parquet");
+		DataFrame rankingFrame = Service.sqlCtx().parquetFile(Configuration.storage() + args[0] + "Ranking.parquet");
 		rankingFrame.cache().registerTempTable("Ranking");
 
 		// Get the results and format them in desired format.
