@@ -18,8 +18,12 @@ package rdfanalyzer.spark;
 
 import java.io.Serializable;
 
+/**
+ * Serializable class to represent RDF graph.
+ */
 public class RDFgraph implements Serializable {
 	private static final long serialVersionUID = 1L;
+
 	private String subject;
 	private String predicate;
 	private String object;

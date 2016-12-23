@@ -19,6 +19,11 @@ package rdfanalyzer.spark;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class is a helper for Connectivity Viewer module It generates the
+ * queries for each pattern and lists where the output patterns and all paterns
+ * are noted.
+ */
 public class ConnViewerHelper {
 	public static String strQuery01;
 	public static String strQuery02;

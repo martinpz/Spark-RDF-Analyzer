@@ -23,6 +23,12 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SQLContext;
 
+/**
+ * This class gets called on deploy and undeploy events of Tomcat. It creates
+ * and respectively destroys required services.
+ * 
+ * @author marcoprobst
+ */
 public class DeploymentListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent ctxEvent) {
@@ -30,6 +36,16 @@ public class DeploymentListener implements ServletContextListener {
 		WebService.ctx = new JavaSparkContext(WebService.sparkConf);
 		WebService.sqlContext = new SQLContext(WebService.ctx);
 		WebService.configuration = new Configuration();
+		// TODO: Does Configuration need to be here? Why no static class?
+
+		// TODO: Following comes from Cluster:
+		// public static Configuration configuration = new Configuration();
+		// public static SparkConf sparkConf =
+		// SparkConfigurationHelper.getConfiguration();
+		// public static JavaSparkContext ctx = new JavaSparkContext(sparkConf);
+		// public static SQLContext sqlContext = new SQLContext(ctx);
+		// public static ClassLoader classLoader =
+		// WebService.class.getClassLoader();
 	}
 
 	@Override

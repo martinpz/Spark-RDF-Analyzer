@@ -25,6 +25,8 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.api.java.UDF1;
 import org.apache.spark.sql.types.DataTypes;
 
+// TODO: This class is not even present in the cluster version.
+// Maybe we can simply remove it or keep it fore reference?!
 public class TTL2NT {
 	public static final Hashtable<String, String> prefixHashtable = new Hashtable<String, String>();
 

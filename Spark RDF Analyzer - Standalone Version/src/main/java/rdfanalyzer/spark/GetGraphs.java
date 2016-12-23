@@ -21,9 +21,13 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+/**
+ * This class takes already preprocessed graphs and sends them to frontend.
+ */
 public class GetGraphs {
 	public static String main(String[] args) throws Exception {
 		String result = "";
@@ -31,6 +35,16 @@ public class GetGraphs {
 		// Get folder names.
 		File directory = new File(Configuration.properties.getProperty("Storage"));
 		File[] subdirs = directory.listFiles();
+
+		// TODO: Following is from the cluster.
+		// FileSystem fs = FileSystem.get(new
+		// URI(Configuration.properties.getProperty("StorageURL")),new
+		// org.apache.hadoop.conf.Configuration());
+
+		// Path src=new
+		// Path(Configuration.properties.getProperty("StoragePath"));
+
+		// FileStatus[] subdirs = fs.listStatus(src);
 
 		// Generate new graph thumbnail.
 		result += "<div class=\"col-sm-2 col-md-3\">" + "<div class=\"thumbnail\">"
@@ -51,11 +65,17 @@ public class GetGraphs {
 			result += "<p>WARNING: The path, defined in the app.properties is incorrect!</p>";
 		}
 
+		// TODO: Following is from cluster.
+		// for (FileStatus f : subdirs) {
+		// result += generateThumbnail(f.getPath().getName());
+		// }
+
 		return result;
 	}
 
 	public static String generateThumbnail(String graphName) {
 		graphName = graphName.substring(0, graphName.indexOf('.'));
+
 		return "<div class=\"col-sm-2 col-md-3\">" + "<div class=\"thumbnail\">"
 				+ "<p><a href=\"#\"  style=\"text-align:right; margin:0px;\" class=\"btn btn-danger\" role=\"button\" onClick=\"deleteGraph('"
 				+ graphName + "')\"><span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span></a></p>"
@@ -66,8 +86,24 @@ public class GetGraphs {
 				+ "</div>" + "</div>" + "</div>";
 	}
 
-	public static void deleteGraph(String graphName) throws IOException, URISyntaxException {
+	public static String deleteGraph(String graphName) throws IOException, URISyntaxException {
+		// FIXME: Hard coded path. Use path from properties.
 		FileSystem fs = FileSystem.get(new URI("hdfs://localhost:8020"), new org.apache.hadoop.conf.Configuration());
 		fs.delete(new Path("/user/cloudera/toDelete"), true);
+
+		return "Success";
+
+		// TODO: Following is from the cluster version
+		// FileSystem fs = FileSystem.get(new
+		// URI(Configuration.properties.getProperty("StorageURL")),new
+		// org.apache.hadoop.conf.Configuration());
+
+		// fs.delete(new
+		// Path(Configuration.properties.getProperty("StoragePath")+graphName+".parquet"),
+		// true);
+
+		// fs.delete(new
+		// Path(Configuration.properties.getProperty("StoragePath")+graphName+"Ranking.parquet"),
+		// true);
 	}
 }

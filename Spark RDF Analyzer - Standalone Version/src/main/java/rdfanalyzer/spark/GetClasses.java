@@ -19,37 +19,41 @@ package rdfanalyzer.spark;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
+/**
+ * This class calculates the list of distinct classes for a given graph.
+ */
 public class GetClasses {
 	public static String main(String[] args) throws Exception {
 		String result = "";
 
-		/*
-		 * Read graph from parquet
-		 */
-		DataFrame schemaRDF = WebService.sqlContext
+		// Read graph from parquet
+		DataFrame graphFrame = WebService.sqlContext
 				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + ".parquet");
-		schemaRDF.cache().registerTempTable("Graph");
+		graphFrame.cache().registerTempTable("Graph");
 
-		// SQL can be run over RDDs that have been registered as tables.
-		DataFrame predicatesFrame = WebService.sqlContext.sql(
+		// Run SQL over loaded Graph.
+		DataFrame resultsFrame = WebService.sqlContext.sql(
 				"SELECT DISTINCT object FROM Graph WHERE predicate='<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>'");
 
-		// The results of SQL queries are DataFrames and support all the normal
-		// RDD operations.
-		Row[] resultRows = predicatesFrame.collect();
+		// Format output results. Based if output is table or chart it is
+		// returned into different formats.
+		Row[] resultRows = resultsFrame.collect();
 
 		if (args[1].equals("Normal")) {
 			result = "<table class=\"table table-striped\">";
 			result += "<thead><tr><th style=\"text-align: center;\">Class</th></tr></thead>";
+
 			for (Row r : resultRows) {
 				result += "<tr><td data-toggle=\"tooltip\" title=\"" + r.getString(0) + "\">"
 						+ Configuration.shortenURI(r.getString(0)) + "</td></tr>";
 			}
+
 			result += "</table>";
 		} else if (args[1].equals("Chart")) {
 			for (Row r : resultRows) {
 				result += Configuration.shortenURI(r.getString(0)) + ",";
 			}
+
 			result = result.substring(0, result.length() - 1);
 		}
 

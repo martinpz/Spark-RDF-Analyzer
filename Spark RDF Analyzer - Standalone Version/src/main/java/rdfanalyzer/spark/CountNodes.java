@@ -19,34 +19,32 @@ package rdfanalyzer.spark;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
+/**
+ * This class calculates the number of nodes for a given graph.
+ */
 public class CountNodes {
 	public static String main(String[] args) throws Exception {
-
 		String result = "";
-		/*
-		 * Check if arguments have been passed.
-		 */
+
+		// Check if arguments have been passed.
+		// TODO: Not done in Cluster version.
 		if (args.length != 1) {
 			System.out.println("Missing Arguments <INPUT>");
 			System.exit(0);
 		}
 
-		/*
-		 * Read graph from parquet
-		 */
-		DataFrame schemaRDF = WebService.sqlContext
+		// Read graph from parquet
+		DataFrame graphFrame = WebService.sqlContext
 				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + ".parquet");
-		schemaRDF.cache().registerTempTable("Graph");
+		graphFrame.cache().registerTempTable("Graph");
 
-		// SQL can be run over RDDs that have been registered as tables.
-		DataFrame predicatesFrame = WebService.sqlContext
+		// Run SQL over loaded Graph.
+		DataFrame resultsFrame = WebService.sqlContext
 				.sql("SELECT COUNT(DISTINCT MyTable1.subject) FROM (SELECT subject FROM Graph"
 						+ " UNION ALL SELECT object FROM Graph" + " ) MyTable1");
 
-		// The results of SQL queries are DataFrames and support all the normal
-		// RDD operations.
-		// Save result to file
-		Row[] rows = predicatesFrame.collect();
+		// Get the results and format them in desired format.
+		Row[] rows = resultsFrame.collect();
 		result = Long.toString(rows[0].getLong(0));
 
 		return "<h1>" + result + "</h1>";

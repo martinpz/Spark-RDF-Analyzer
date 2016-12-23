@@ -19,6 +19,10 @@ package rdfanalyzer.spark;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
+/**
+ * This is the main class of Connectivity Viewer module It communicates with
+ * other modules and calculates connections based on user parameters.
+ */
 public class ConnViewer {
 	public static ConnAdapter objAdapter = new ConnAdapter();
 	public static boolean Update = false;
@@ -38,6 +42,8 @@ public class ConnViewer {
 
 		Counter = 0;
 
+		// For each pattern check if it is wanted by user.
+		// In addition check if the maximum number of results is not exceeded.
 		if (Pattern[0].equals("1"))
 			createTable(ConnViewerHelper.strQuery01, "tbl01");
 		if (Counter <= 30 && Pattern[1].equals("1"))
@@ -90,59 +96,68 @@ public class ConnViewer {
 			createTable(ConnViewerHelper.strQuery27, "tbl27");
 
 		objAdapter.End = true;
-
 	}
 
+	/**
+	 * This method calculates a single pattern. If it is an output pattern then
+	 * it forwards the result to adapter.
+	 * 
+	 * @param Query
+	 * @param tableName
+	 */
 	public static void createTable(String Query, String tableName) {
 		DataFrame predicatesFrame = WebService.sqlContext.sql(Query);
 		predicatesFrame.registerTempTable(tableName);
 
 		if (ConnViewerHelper.outputTables.contains(tableName)) {
 			Row[] rows = predicatesFrame.collect();
+
 			if ((Counter + rows.length) <= 30) {
 				objAdapter.UpdateResults(rows, tableName);
 			} else {
-
 				Row[] rows2 = new Row[30 - Counter];
 				int j = 0;
+
 				for (int i = Counter; i < 30; i++) {
 					rows2[j] = rows[j];
 					j++;
-
 				}
+
 				objAdapter.UpdateResults(rows2, tableName);
 				Counter = 300;
 			}
 		}
-
 	}
 
 	public static String preprocess(String graphName, String Predicates) {
 		String[] list = Predicates.split("--");
 		String Sign = "=";
+
 		if (list[0].equals("Exclude")) {
 			Sign = "!=";
 		}
+
 		if (list.length > 1) {
 			String trimmedString = list[1].substring(0, list[1].length() - 1);
 			String[] predicatesList = trimmedString.split(",");
 			String Condition = "";
-			for (int i = 0; i < (predicatesList.length); i++) {
 
+			for (int i = 0; i < (predicatesList.length); i++) {
 				predicatesList[i] = predicatesList[i].replace('$', '/');
 				predicatesList[i] = predicatesList[i].replace('&', '#');
 
 				Condition += " predicate " + Sign + " '" + predicatesList[i] + "' ";
+
 				if (Sign.equals("=")) {
 					Condition += "OR";
 				} else {
 					Condition += "AND";
 				}
 			}
+
 			Condition = Condition.substring(0, Condition.length() - 3);
-			/*
-			 * Read graph from parquet
-			 */
+
+			// Read graph from parquet
 			DataFrame schemaRDF = WebService.sqlContext
 					.parquetFile(Configuration.properties.getProperty("Storage") + graphName + ".parquet");
 			schemaRDF.cache().registerTempTable("Graph");
@@ -152,14 +167,12 @@ public class ConnViewer {
 			predicatesFrame.registerTempTable("Graph2");
 
 			return "Graph2";
-
 		} else {
-			/*
-			 * Read graph from parquet
-			 */
+			// Read graph from parquet
 			DataFrame schemaRDF = WebService.sqlContext
 					.parquetFile(Configuration.properties.getProperty("Storage") + graphName + ".parquet");
 			schemaRDF.cache().registerTempTable("Graph");
+
 			return "Graph";
 		}
 	}

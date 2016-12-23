@@ -19,44 +19,39 @@ package rdfanalyzer.spark;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
+/**
+ * This class uses a detailed and advanced method to calculate number of nodes.
+ */
 public class CountNodesV2 {
 	public static String main(String[] args) throws Exception {
-		/*
-		 * Check if arguments have been passed.
-		 */
+		// Check if arguments have been passed.
+		// TODO: Not done in cluster version.
 		if (args.length != 1) {
 			System.out.println("Missing Arguments <INPUT>");
 			System.exit(0);
 		}
 
-		/*
-		 * Read graph from parquet
-		 */
-		DataFrame schemaRDF = WebService.sqlContext
+		// Read graph from parquet
+		DataFrame graphFrame = WebService.sqlContext
 				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + ".parquet");
-		schemaRDF.cache().registerTempTable("Graph");
+		graphFrame.cache().registerTempTable("Graph");
 
-		// SQL can be run over RDDs that have been registered as tables.
-		DataFrame predicatesFrame = WebService.sqlContext
+		// Run SQL over loaded Graph.
+		DataFrame resultsFrame = WebService.sqlContext
 				.sql("SELECT COUNT(DISTINCT MyTable1.subject) FROM (SELECT subject FROM Graph"
 						+ " UNION ALL SELECT object FROM Graph WHERE object NOT LIKE '\"%' " + " ) MyTable1");
 
-		// The results of SQL queries are DataFrames and support all the normal
-		// RDD operations.
-		// Save result to file
-		Row[] rows = predicatesFrame.collect();
+		// Get the literals.
+		Row[] rows = resultsFrame.collect();
 		String Literals = Long.toString(rows[0].getLong(0));
 
-		// SQL can be run over RDDs that have been registered as tables.
-		predicatesFrame = WebService.sqlContext.sql("SELECT COUNT(object) FROM Graph WHERE object LIKE '\"%'");
+		// Run SQL over loaded Graph.
+		resultsFrame = WebService.sqlContext.sql("SELECT COUNT(object) FROM Graph WHERE object LIKE '\"%'");
 
-		// The results of SQL queries are DataFrames and support all the normal
-		// RDD operations.
-		// Save result to file
-		rows = predicatesFrame.collect();
+		// Get the Objects, calculate SUM and format results desired format.
+		rows = resultsFrame.collect();
 
 		String Objects = Long.toString(rows[0].getLong(0));
-
 		String Sum = Integer.toString(Integer.parseInt(Literals) + Integer.parseInt(Objects));
 
 		return "<h3><span class=\"glyphicon glyphicon-file\" aria-hidden=\"true\"></span>&nbsp;Objects: " + Objects

@@ -19,32 +19,33 @@ package rdfanalyzer.spark;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
+/**
+ * This class calculates AVG, MIN, and MAX out-degree for a given graph.
+ */
 public class OutDegree {
 	public static String main(String[] args) throws Exception {
 		String result = "";
-		/*
-		 * Check if arguments have been passed.
-		 */
+
+		// Check if arguments have been passed.
+		// TODO: Not done in cluster version.
 		if (args.length != 2) {
 			System.out.println("Missing Arguments <INPUT>");
 			System.exit(0);
 		}
-		/*
-		 * Read graph from parquet
-		 */
-		DataFrame schemaRDF = WebService.sqlContext
-				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + ".parquet");
-		schemaRDF.cache().registerTempTable("Graph");
 
-		// SQL can be run over RDDs that have been registered as tables.
-		DataFrame predicatesFrame = WebService.sqlContext
+		// Read graph from parquet
+		DataFrame graphFrame = WebService.sqlContext
+				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + ".parquet");
+		graphFrame.cache().registerTempTable("Graph");
+
+		// Run SQL over loaded Graph.
+		DataFrame resultsFrame = WebService.sqlContext
 				.sql("SELECT " + args[1] + "(degree) FROM (SELECT subject, COUNT(predicate) AS degree FROM Graph"
 						+ " GROUP BY subject) MyTable1");
 
-		// The results of SQL queries are DataFrames and support all the normal
-		// RDD operations.
+		// Format output results. Based if input is AVG, MIN or MAX.
+		Row[] rows = resultsFrame.collect();
 
-		Row[] rows = predicatesFrame.collect();
 		if (args[1].equals("MIN") || args[1].equals("MAX")) {
 			result = Long.toString(rows[0].getLong(0));
 		} else {

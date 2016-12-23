@@ -18,6 +18,10 @@ package rdfanalyzer.spark;
 
 import org.apache.spark.sql.Row;
 
+/**
+ * This class is used as an intermediate adapter between frontend and backend.
+ * It enables dynamic display of results.
+ */
 public class ConnAdapter {
 	private String startNode = "";
 	private String endNode = "";
@@ -32,7 +36,7 @@ public class ConnAdapter {
 		this.Edges = "{color:none}\n; choices\n";
 		this.Nodes = "; endings\n";
 		this.End = false;
-		ConfirmedEnd = false;
+		this.ConfirmedEnd = false;
 
 	}
 
@@ -41,7 +45,7 @@ public class ConnAdapter {
 
 		if (this.End == true && this.ConfirmedEnd == true) {
 			return "END";
-		} else if (this.End == true) {
+		} else if (this.End == true && this.ConfirmedEnd == false) {
 			this.ConfirmedEnd = true;
 			result = Edges + Nodes + startNode + endNode;
 			return result;
@@ -58,51 +62,58 @@ public class ConnAdapter {
 		this.endNode = Node + " {color:#c6531e}\n";
 	}
 
-	public void testResult() {
-		this.Edges += "User1 -- User1_Likes_Item1\n";
-		this.Edges += "User1_Likes_Item1 -> Item1\n";
-		this.Edges += "User2 -- User2_Likes_Item1\n";
-		this.Edges += "User2_Likes_Item1 -> Item1\n";
+	// TODO: Remove this method.
+	// public void testResult() {
+	// this.Edges += "User1 -- User1_Likes_Item1\n";
+	// this.Edges += "User1_Likes_Item1 -> Item1\n";
+	// this.Edges += "User2 -- User2_Likes_Item1\n";
+	// this.Edges += "User2_Likes_Item1 -> Item1\n";
+	//
+	// this.Edges += "User1 -- User1_Likes_Item2\n";
+	// this.Edges += "User1_Likes_Item2 -> Item2\n";
+	// this.Edges += "User2 -- User2_Likes_Item2\n";
+	// this.Edges += "User2_Likes_Item2 -> Item2\n";
+	//
+	// this.Edges += "User1 -- User1_Likes_Item3\n";
+	// this.Edges += "User1_Likes_Item3 -> Item3\n";
+	// this.Edges += "User2 -- User2_Likes_Item3\n";
+	// this.Edges += "User2_Likes_Item3 -> Item3\n";
+	//
+	// this.Edges += "User1 -- User1_Likes_Item4\n";
+	// this.Edges += "User1_Likes_Item4 -> Item4\n";
+	// this.Edges += "User2 -- User2_Likes_Item4\n";
+	// this.Edges += "User2_Likes_Item4 -> Item4\n";
+	//
+	// this.Edges += "User1 -- User1_Likes_Item5\n";
+	// this.Edges += "User1_Likes_Item5 -> Item5\n";
+	// this.Edges += "User2 -- User2_Likes_Item5\n";
+	// this.Edges += "User2_Likes_Item5 -> Item5\n";
+	//
+	// this.Nodes += "Item1 {color:#95cde5}\n";
+	// this.Nodes += "Item2 {color:#95cde5}\n";
+	// this.Nodes += "Item3 {color:#95cde5}\n";
+	// this.Nodes += "Item4 {color:#95cde5}\n";
+	// this.Nodes += "Item5 {color:#95cde5}\n";
+	// this.Nodes += "User1_Likes_Item1 {label:Likes}\n";
+	// this.Nodes += "User1_Likes_Item2 {label:Likes}\n";
+	// this.Nodes += "User1_Likes_Item3 {label:Likes}\n";
+	// this.Nodes += "User1_Likes_Item4 {label:Likes}\n";
+	// this.Nodes += "User1_Likes_Item5 {label:Likes}\n";
+	// this.Nodes += "User2_Likes_Item1 {label:Likes}\n";
+	// this.Nodes += "User2_Likes_Item2 {label:Likes}\n";
+	// this.Nodes += "User2_Likes_Item3 {label:Likes}\n";
+	// this.Nodes += "User2_Likes_Item4 {label:Likes}\n";
+	// this.Nodes += "User2_Likes_Item5 {label:Likes}\n";
+	//
+	// ConnViewer.Update = true;
+	// }
 
-		this.Edges += "User1 -- User1_Likes_Item2\n";
-		this.Edges += "User1_Likes_Item2 -> Item2\n";
-		this.Edges += "User2 -- User2_Likes_Item2\n";
-		this.Edges += "User2_Likes_Item2 -> Item2\n";
-
-		this.Edges += "User1 -- User1_Likes_Item3\n";
-		this.Edges += "User1_Likes_Item3 -> Item3\n";
-		this.Edges += "User2 -- User2_Likes_Item3\n";
-		this.Edges += "User2_Likes_Item3 -> Item3\n";
-
-		this.Edges += "User1 -- User1_Likes_Item4\n";
-		this.Edges += "User1_Likes_Item4 -> Item4\n";
-		this.Edges += "User2 -- User2_Likes_Item4\n";
-		this.Edges += "User2_Likes_Item4 -> Item4\n";
-
-		this.Edges += "User1 -- User1_Likes_Item5\n";
-		this.Edges += "User1_Likes_Item5 -> Item5\n";
-		this.Edges += "User2 -- User2_Likes_Item5\n";
-		this.Edges += "User2_Likes_Item5 -> Item5\n";
-
-		this.Nodes += "Item1 {color:#95cde5}\n";
-		this.Nodes += "Item2 {color:#95cde5}\n";
-		this.Nodes += "Item3 {color:#95cde5}\n";
-		this.Nodes += "Item4 {color:#95cde5}\n";
-		this.Nodes += "Item5 {color:#95cde5}\n";
-		this.Nodes += "User1_Likes_Item1 {label:Likes}\n";
-		this.Nodes += "User1_Likes_Item2 {label:Likes}\n";
-		this.Nodes += "User1_Likes_Item3 {label:Likes}\n";
-		this.Nodes += "User1_Likes_Item4 {label:Likes}\n";
-		this.Nodes += "User1_Likes_Item5 {label:Likes}\n";
-		this.Nodes += "User2_Likes_Item1 {label:Likes}\n";
-		this.Nodes += "User2_Likes_Item2 {label:Likes}\n";
-		this.Nodes += "User2_Likes_Item3 {label:Likes}\n";
-		this.Nodes += "User2_Likes_Item4 {label:Likes}\n";
-		this.Nodes += "User2_Likes_Item5 {label:Likes}\n";
-
-		ConnViewer.Update = true;
-	}
-
+	/**
+	 * Converts output to HalfViz format.
+	 * 
+	 * @param rows
+	 * @param type
+	 */
 	public void UpdateResults(Row[] rows, String type) {
 		if (type.equals("tbl01") || type.equals("tbl02")) {
 			for (Row r : rows) {
@@ -121,6 +132,7 @@ public class ConnAdapter {
 		} else if (type.equals("tbl11")) {
 			for (Row r : rows) {
 				ConnViewer.Counter++;
+
 				String Subject1 = Configuration.shortenURI(r.getString(0));
 				String Predicate1 = Configuration.shortenURI(r.getString(1));
 				String Object = Configuration.shortenURI(r.getString(2));
@@ -137,11 +149,11 @@ public class ConnAdapter {
 				this.Nodes += Object + " {color:#95cde5}\n";
 				this.Nodes += Subject1 + "_" + Predicate1 + "_" + Object + " {label:" + Predicate1 + "}\n";
 				this.Nodes += Subject2 + "_" + Predicate2 + "_" + Object + " {label:" + Predicate2 + "}\n";
-
 			}
 		} else if (type.equals("tbl12") || type.equals("tbl13")) {
 			for (Row r : rows) {
 				ConnViewer.Counter++;
+
 				String Subject1 = Configuration.shortenURI(r.getString(0));
 				String Predicate1 = Configuration.shortenURI(r.getString(1));
 				String Object = Configuration.shortenURI(r.getString(2));
@@ -158,11 +170,11 @@ public class ConnAdapter {
 				this.Nodes += Object + " {color:#95cde5}\n";
 				this.Nodes += Subject1 + "_" + Predicate1 + "_" + Object + " {label:" + Predicate1 + "}\n";
 				this.Nodes += Object + "_" + Predicate2 + "_" + Subject2 + " {label:" + Predicate2 + "}\n";
-
 			}
 		} else if (type.equals("tbl14")) {
 			for (Row r : rows) {
 				ConnViewer.Counter++;
+
 				String Subject1 = Configuration.shortenURI(r.getString(0));
 				String Predicate1 = Configuration.shortenURI(r.getString(1));
 				String Object = Configuration.shortenURI(r.getString(2));
@@ -179,11 +191,11 @@ public class ConnAdapter {
 				this.Nodes += Object + " {color:#95cde5}\n";
 				this.Nodes += Object + "_" + Predicate1 + "_" + Subject1 + " {label:" + Predicate1 + "}\n";
 				this.Nodes += Object + "_" + Predicate2 + "_" + Subject2 + " {label:" + Predicate2 + "}\n";
-
 			}
 		} else if (type.equals("tbl21") || type.equals("tbl23")) {
 			for (Row r : rows) {
 				ConnViewer.Counter++;
+
 				String Subject1 = Configuration.shortenURI(r.getString(0));
 				String Predicate1 = Configuration.shortenURI(r.getString(1));
 				String Object1 = Configuration.shortenURI(r.getString(2));
@@ -208,11 +220,11 @@ public class ConnAdapter {
 				this.Nodes += Subject1 + "_" + Predicate1 + "_" + Object1 + " {label:" + Predicate1 + "}\n";
 				this.Nodes += Object1 + "_" + Predicate2 + "_" + Object2 + " {label:" + Predicate2 + "}\n";
 				this.Nodes += Object2 + "_" + Predicate3 + "_" + Subject2 + " {label:" + Predicate3 + "}\n";
-
 			}
 		} else if (type.equals("tbl22") || type.equals("tbl24")) {
 			for (Row r : rows) {
 				ConnViewer.Counter++;
+
 				String Subject1 = Configuration.shortenURI(r.getString(0));
 				String Predicate1 = Configuration.shortenURI(r.getString(1));
 				String Object1 = Configuration.shortenURI(r.getString(2));
@@ -237,11 +249,11 @@ public class ConnAdapter {
 				this.Nodes += Subject1 + "_" + Predicate1 + "_" + Object1 + " {label:" + Predicate1 + "}\n";
 				this.Nodes += Object1 + "_" + Predicate2 + "_" + Object2 + " {label:" + Predicate2 + "}\n";
 				this.Nodes += Subject2 + "_" + Predicate3 + "_" + Object2 + " {label:" + Predicate3 + "}\n";
-
 			}
 		} else if (type.equals("tbl25")) {
 			for (Row r : rows) {
 				ConnViewer.Counter++;
+
 				String Subject1 = Configuration.shortenURI(r.getString(0));
 				String Predicate1 = Configuration.shortenURI(r.getString(1));
 				String Object1 = Configuration.shortenURI(r.getString(2));
@@ -266,11 +278,11 @@ public class ConnAdapter {
 				this.Nodes += Subject1 + "_" + Predicate1 + "_" + Object1 + " {label:" + Predicate1 + "}\n";
 				this.Nodes += Object2 + "_" + Predicate2 + "_" + Object1 + " {label:" + Predicate2 + "}\n";
 				this.Nodes += Object2 + "_" + Predicate3 + "_" + Subject2 + " {label:" + Predicate3 + "}\n";
-
 			}
 		} else if (type.equals("tbl26")) {
 			for (Row r : rows) {
 				ConnViewer.Counter++;
+
 				String Subject1 = Configuration.shortenURI(r.getString(0));
 				String Predicate1 = Configuration.shortenURI(r.getString(1));
 				String Object1 = Configuration.shortenURI(r.getString(2));
@@ -295,11 +307,11 @@ public class ConnAdapter {
 				this.Nodes += Object1 + "_" + Predicate1 + "_" + Subject1 + " {label:" + Predicate1 + "}\n";
 				this.Nodes += Object2 + "_" + Predicate2 + "_" + Object1 + " {label:" + Predicate2 + "}\n";
 				this.Nodes += Object2 + "_" + Predicate3 + "_" + Subject2 + " {label:" + Predicate3 + "}\n";
-
 			}
 		} else if (type.equals("tbl27")) {
 			for (Row r : rows) {
 				ConnViewer.Counter++;
+
 				String Subject1 = Configuration.shortenURI(r.getString(0));
 				String Predicate1 = Configuration.shortenURI(r.getString(1));
 				String Object1 = Configuration.shortenURI(r.getString(2));
@@ -324,11 +336,11 @@ public class ConnAdapter {
 				this.Nodes += Object1 + "_" + Predicate1 + "_" + Subject1 + " {label:" + Predicate1 + "}\n";
 				this.Nodes += Object1 + "_" + Predicate2 + "_" + Object2 + " {label:" + Predicate2 + "}\n";
 				this.Nodes += Object2 + "_" + Predicate3 + "_" + Subject2 + " {label:" + Predicate3 + "}\n";
-
 			}
 		} else if (type.equals("tbl28")) {
 			for (Row r : rows) {
 				ConnViewer.Counter++;
+
 				String Subject1 = Configuration.shortenURI(r.getString(0));
 				String Predicate1 = Configuration.shortenURI(r.getString(1));
 				String Object1 = Configuration.shortenURI(r.getString(2));
@@ -353,7 +365,6 @@ public class ConnAdapter {
 				this.Nodes += Object1 + "_" + Predicate1 + "_" + Subject1 + " {label:" + Predicate1 + "}\n";
 				this.Nodes += Object1 + "_" + Predicate2 + "_" + Object2 + " {label:" + Predicate2 + "}\n";
 				this.Nodes += Subject2 + "_" + Predicate3 + "_" + Object2 + " {label:" + Predicate3 + "}\n";
-
 			}
 		}
 	}

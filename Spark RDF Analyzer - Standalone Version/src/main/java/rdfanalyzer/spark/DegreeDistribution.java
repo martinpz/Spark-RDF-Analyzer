@@ -19,53 +19,65 @@ package rdfanalyzer.spark;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
+/**
+ * This class calculates degree distribution for a given graph.
+ */
 public class DegreeDistribution {
 	public static String main(String[] args) throws Exception {
 		String result = "";
 
-		/*
-		 * Read graph from parquet
-		 */
-		DataFrame schemaRDF = WebService.sqlContext
+		// Read graph from parquet
+		DataFrame graphFrame = WebService.sqlContext
 				.parquetFile(Configuration.properties.getProperty("Storage") + args[0] + ".parquet");
-		schemaRDF.cache().registerTempTable("Graph");
+		graphFrame.cache().registerTempTable("Graph");
 
-		// SQL can be run over RDDs that have been registered as tables.
-		DataFrame predicatesFrame = WebService.sqlContext
+		// Run SQL over loaded Graph.
+		DataFrame resultsFrame = WebService.sqlContext
 				.sql("SELECT degree, COUNT(degree) AS instances FROM (SELECT subject, COUNT(predicate)"
 						+ " AS degree FROM Graph GROUP BY subject) MyTable1 GROUP BY degree ORDER BY instances DESC");
 
-		// The results of SQL queries are DataFrames and support all the normal
-		// RDD operations.
+		// Format output results. Based if output is table or chart, it is
+		// returned into different formats.
+		Row[] resultRows = resultsFrame.collect();
 
-		Row[] resultRows = predicatesFrame.collect();
 		if (args[1].equals("Table")) {
 			result = "<table class=\"table table-striped\">";
 			result += "<thead><tr><th style=\"text-align: center;\">Degree</th><th style=\"text-align: center;\">Nr. of occurencies</th></tr></thead>";
+
 			int i = 0;
+
 			for (Row r : resultRows) {
 				i++;
+
 				if (i == 30) {
 					break;
 				}
+
 				result += "<tr><td>" + Long.toString(r.getLong(0)) + "</td><td>" + Long.toString(r.getLong(1))
 						+ "</td></tr>";
 			}
+
 			result += "</table>";
 		} else if (args[1].equals("Chart")) {
 			String X = "";
 			String Y = "";
+
 			int i = 1;
+
 			for (Row r : resultRows) {
 				if (i > 10) {
 					break;
 				}
+
 				i++;
+
 				X += Long.toString(r.getLong(0)) + "|";
 				Y += Long.toString(r.getLong(1)) + "|";
 			}
+
 			result = X + "$" + Y;
 		}
+
 		return result;
 	}
 }

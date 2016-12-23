@@ -24,6 +24,10 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SQLContext;
 
+/**
+ * This class is the REST web service which handles front end requests by
+ * calling the desired module with specified parameters.
+ */
 @Path("/ALL")
 public class WebService {
 	public static SparkConf sparkConf;
@@ -31,322 +35,331 @@ public class WebService {
 	public static SQLContext sqlContext;
 	public static Configuration configuration;
 
+	// TODO: Following comes from Cluster:
+	// public static Configuration configuration = new Configuration();
+	// public static SparkConf sparkConf =
+	// SparkConfigurationHelper.getConfiguration();
+	// public static JavaSparkContext ctx = new JavaSparkContext(sparkConf);
+	// public static SQLContext sqlContext = new SQLContext(ctx);
+	// public static ClassLoader classLoader =
+	// WebService.class.getClassLoader();
+
 	@GET
 	@Path("/loadGraph/{inputPath}/{inputName}/{inputFormat}")
 	public String getMsgg(@PathParam("inputPath") String inputPath, @PathParam("inputName") String inputName,
 			@PathParam("inputFormat") boolean inputFormat) {
-		String dalja = "";
+		String objResponse = "";
 
 		try {
-			dalja = GraphLoader.main(inputPath, inputName, inputFormat);
+			objResponse = GraphLoader.main(inputPath, inputName, inputFormat);
 		} catch (Exception e) {
-			dalja = "Graph Loading Failed!\nError Message:" + e.getMessage();
+			objResponse = "Graph Loading Failed!<br>Error Message: " + e.getMessage();
 		}
 
-		return dalja;
+		return objResponse;
 	}
 
 	@GET
 	@Path("/countEdges/{DataSet}")
 	public String getMsg(@PathParam("DataSet") String dataSet) {
-
 		String[] args = { dataSet };
-		String dalja = "";
+		String objResponse = "";
 
 		try {
-			dalja = CountEdges.main(args);
+			objResponse = CountEdges.main(args);
 		} catch (Exception e) {
-			dalja = "Calculationd Failed!!  " + e.getMessage();
+			objResponse = "Calculation Failed.<br>" + e.getMessage();
 		}
 
-		return dalja;
+		return objResponse;
 	}
 
 	@GET
 	@Path("/predicateDistribution/{DataSet}/{Type}")
 	public String getMsg2(@PathParam("DataSet") String dataSet, @PathParam("Type") String viewType) {
-
 		String[] args = { dataSet, viewType };
-		String dalja = "";
+		String objResponse = "";
 
 		try {
-			dalja = PredicateDistribution.main(args);
+			objResponse = PredicateDistribution.main(args);
 		} catch (Exception e) {
-			dalja = "Calculationd Failed!! :" + e.getMessage();
+			objResponse = "Calculation Failed.<br>" + e.getMessage();
 		}
 
-		return dalja;
+		return objResponse;
 	}
 
 	@GET
 	@Path("/countNodes/{DataSet}")
 	public String getMsg3(@PathParam("DataSet") String dataSet) {
-
 		String[] args = { dataSet };
-		String dalja = "";
+		String objResponse = "";
 
 		try {
-			dalja = CountNodes.main(args);
+			objResponse = CountNodes.main(args);
 		} catch (Exception e) {
-			dalja = "Calculationd Failed!! ";
+			objResponse = "Calculation Failed.<br>" + e.getMessage();
 		}
 
-		return dalja;
-
+		return objResponse;
 	}
 
 	@GET
 	@Path("/getClasses/{DataSet}")
 	public String getMsg5(@PathParam("DataSet") String dataSet) {
-
 		String[] args = { dataSet, "Normal" };
-		String dalja = "";
+		String objResponse = "";
 
 		try {
-			dalja = GetClasses.main(args);
+			objResponse = GetClasses.main(args);
 		} catch (Exception e) {
-			dalja = "Calculationd Failed!!";
+			objResponse = "Calculation Failed.<br>" + e.getMessage();
 		}
 
-		return dalja;
-
+		return objResponse;
 	}
 
 	@GET
 	@Path("/collapsedGraph/{DataSet}/{Type}")
 	public String getMsg6(@PathParam("DataSet") String dataSet, @PathParam("Type") String Type) throws Exception {
-
 		String[] args = { dataSet, Type };
-		String dalja = "";
-		dalja = CollapsedGraph.main(args);
-		try {
+		String objResponse = "";
 
+		try {
+			objResponse = CollapsedGraph.main(args);
 		} catch (Exception e) {
-			// dalja = "Calculation Failed!:"e.getMessage();
+			objResponse = "Calculation Failed.<br>" + e.getMessage();
 		}
 
-		return dalja;
-
+		return objResponse;
 	}
 
 	@GET
 	@Path("/edgeFinder/{DataSet}/{Type}")
 	public String getMsg7(@PathParam("DataSet") String dataSet, @PathParam("Type") String Type) {
-
 		String[] args = { dataSet, Type };
-		String dalja = "";
+		String objResponse = "";
 
 		try {
-			dalja = EdgeFinder.main(args);
+			objResponse = EdgeFinder.main(args);
 		} catch (Exception e) {
-			dalja = "Calculationd Failed!! :" + e.getMessage();
+			objResponse = "Calculation Failed.<br>" + e.getMessage();
 		}
 
-		return dalja;
+		return objResponse;
 	}
 
 	@GET
 	@Path("/inDegree/{DataSet}/{Type}")
 	public String getMsg8(@PathParam("DataSet") String dataSet, @PathParam("Type") String Type) {
-
 		String[] args = { dataSet, Type };
-		String dalja = "";
+		String objResponse = "";
 
 		try {
-			dalja = InDegree.main(args);
+			objResponse = InDegree.main(args);
 		} catch (Exception e) {
-			dalja = "Calculationd Failed!!";
+			objResponse = "Calculation Failed.<br>" + e.getMessage();
 		}
 
-		return dalja;
+		return objResponse;
 	}
 
 	@GET
 	@Path("/outDegree/{DataSet}/{Type}")
 	public String getMsg9(@PathParam("DataSet") String dataSet, @PathParam("Type") String Type) {
-
 		String[] args = { dataSet, Type };
-		String dalja = "";
+		String objResponse = "";
 
 		try {
-			dalja = OutDegree.main(args);
+			objResponse = OutDegree.main(args);
 		} catch (Exception e) {
-			dalja = "Calculationd Failed!!";
+			objResponse = "Calculation Failed.<br>" + e.getMessage();
 		}
 
-		return dalja;
+		return objResponse;
 	}
 
 	@GET
 	@Path("/classDistribution/{DataSet}/{Type}")
 	public String getMsg10(@PathParam("DataSet") String dataSet, @PathParam("Type") String viewType) {
-
 		String[] args = { dataSet, viewType };
-		String dalja = "";
+		String objResponse = "";
 
 		try {
-			dalja = ClassDistribution.main(args);
+			objResponse = ClassDistribution.main(args);
 		} catch (Exception e) {
-			dalja = "Calculationd Failed!!";
+			objResponse = "Calculation Failed.<br>" + e.getMessage();
 		}
 
-		return dalja;
+		return objResponse;
 	}
 
 	@GET
 	@Path("/degreeDistribution/{DataSet}/{Type}")
 	public String getMsg11(@PathParam("DataSet") String dataSet, @PathParam("Type") String viewType) {
-
 		String[] args = { dataSet, viewType };
-		String dalja = "";
+		String objResponse = "";
 
 		try {
-			dalja = DegreeDistribution.main(args);
+			objResponse = DegreeDistribution.main(args);
 		} catch (Exception e) {
-			dalja = "Calculationd Failed!! " + e.getMessage();
+			objResponse = "Calculation Failed.<br>" + e.getMessage();
 		}
 
-		return dalja;
+		return objResponse;
 	}
 
 	@GET
 	@Path("/countNodesV2/{DataSet}")
 	public String getMsg12(@PathParam("DataSet") String dataSet) {
-
 		String[] args = { dataSet };
-		String dalja = "";
+		String objResponse = "";
 
 		try {
-			dalja = CountNodesV2.main(args);
+			objResponse = CountNodesV2.main(args);
 		} catch (Exception e) {
-			dalja = "Calculationd Failed!! ";
+			objResponse = "Calculation Failed.<br>" + e.getMessage();
 		}
 
-		return dalja;
+		return objResponse;
 	}
 
 	@GET
 	@Path("/getGraphs")
 	public String getMsg12() {
+		// TODO: Following is from Cluster version.
+		// Maybe we can distribute the JAR file even earlier?
+		// ctx.addJar(classLoader.getResource("Project.jar").getFile());
+		// SparkConfigurationHelper.setOthers();
 
 		String[] args = {};
-		String dalja = "";
+		String objResponse = "";
 
 		try {
-
-			dalja = GetGraphs.main(args);
+			objResponse = GetGraphs.main(args);
 		} catch (Exception e) {
-			dalja = "Calculationd Failed!! " + e.getMessage();
+			objResponse = "Calculation Failed.<br>" + e.getMessage();
 		}
 
-		return dalja;
+		return objResponse;
 	}
 
 	@GET
 	@Path("/partialRead/{inputSubject}/{inputType}")
 	public String getMsg13(@PathParam("inputSubject") String inputSubject, @PathParam("inputType") String inputType) {
-
-		String dalja = "";
+		String objResponse = "";
 
 		try {
 			if (inputType.equals("edgeFinder")) {
-				dalja = EdgeFinder.partialRead(inputSubject);
+				objResponse = EdgeFinder.partialRead(inputSubject);
 			} else {
-				dalja = CollapsedGraph.partialRead(inputSubject);
+				objResponse = CollapsedGraph.partialRead(inputSubject);
 			}
 		} catch (Exception e) {
-			dalja = "Calculationd Failed!! :" + e.getMessage();
+			objResponse = "Calculation Failed.<br>" + e.getMessage();
 		}
 
-		return dalja;
+		return objResponse;
 	}
 
 	@GET
 	@Path("/autoComplete/{DataSet}/{UserInput}/{Type}")
 	public String getMsg14(@PathParam("DataSet") String dataSet, @PathParam("UserInput") String userInput,
 			@PathParam("Type") String Type) {
-
-		String dalja = "";
-
-		try {
-			dalja = AutoComplete.main(dataSet, userInput, Type);
-		} catch (Exception e) {
-			dalja = "Calculationd Failed!! :" + e.getMessage();
-		}
-
-		return dalja;
-	}
-
-	@GET
-	@Path("/connViewerTest")
-	public String getMsg15() {
-
-		String dalja = "";
+		String objResponse = "";
 
 		try {
-			ConnAdapter objAdapter = new ConnAdapter();
-			objAdapter.setStartNode("User1");
-			objAdapter.setEndNode("User2");
-			objAdapter.testResult();
-			dalja = objAdapter.getResults();
+			objResponse = AutoComplete.main(dataSet, userInput, Type);
 		} catch (Exception e) {
-			dalja = "Calculationd Failed!! :" + e.getMessage();
+			objResponse = "Calculation Failed.<br>" + e.getMessage();
 		}
 
-		return dalja;
+		return objResponse;
 	}
+
+	// TODO: This is excluded in Cluster version.
+	// @GET
+	// @Path("/connViewerTest")
+	// public String getMsg15() {
+	//
+	// String objResponse = "";
+	//
+	// try {
+	// ConnAdapter objAdapter = new ConnAdapter();
+	// objAdapter.setStartNode("User1");
+	// objAdapter.setEndNode("User2");
+	// objAdapter.testResult();
+	// objResponse = objAdapter.getResults();
+	// } catch (Exception e) {
+	// objResponse = "Calculation Failed. :" + e.getMessage();
+	// }
+	//
+	// return objResponse;
+	// }
 
 	@GET
 	@Path("/connViewer/{Node1}/{Node2}/{DataSet}/{Predicates}/{Pattern}")
 	public String getMsg16(@PathParam("DataSet") String dataSet, @PathParam("Node1") String startN,
 			@PathParam("Node2") String endN, @PathParam("Predicates") String Predicates,
 			@PathParam("Pattern") String Pattern) {
-
-		String dalja = "";
+		String objResponse = "";
 
 		try {
 			startN = startN.replace('$', '/');
 			startN = startN.replace('&', '#');
 			endN = endN.replace('$', '/');
 			endN = endN.replace('&', '#');
+
 			ConnViewer.main(startN, endN, dataSet, Predicates, Pattern);
-			dalja = "Started";
+
+			objResponse = "Started";
 		} catch (Exception e) {
-			dalja = "Calculationd Failed!! :" + e.getMessage();
+			objResponse = "Calculation Failed.<br>" + e.getMessage();
 		}
 
-		return dalja;
+		return objResponse;
 	}
 
 	@GET
 	@Path("/connViewerResult")
 	public String getMsg17() {
-
-		String dalja = "";
+		String objResponse = "";
 
 		try {
-
-			dalja = ConnViewer.objAdapter.getResults();
+			objResponse = ConnViewer.objAdapter.getResults();
 		} catch (Exception e) {
-			dalja = "Calculationd Failed!! :" + e.getMessage();
+			objResponse = "Calculation Failed.<br>" + e.getMessage();
 		}
 
-		return dalja;
+		return objResponse;
 	}
 
 	@GET
 	@Path("/deleteGraph/{DataSet}")
 	public String getMsg18(@PathParam("DataSet") String dataSet) {
-
-		String dalja = "";
+		String objResponse = "";
 
 		try {
-			GetGraphs.deleteGraph(dataSet);
-			dalja = "Success";
+			objResponse = GetGraphs.deleteGraph(dataSet);
 		} catch (Exception e) {
-			dalja = "Calculation Failed!! ";
+			objResponse = "Calculation Failed.<br>" + e.getMessage();
 		}
 
-		return dalja;
+		return objResponse;
+	}
+
+	@GET
+	@Path("/closeSession")
+	public String getMsg19() {
+		String objResponse = "";
+
+		try {
+			ctx.close();
+			objResponse = "Context Closed.";
+		} catch (Exception e) {
+			objResponse = "Calculation Failed.<br>" + e.getMessage();
+		}
+
+		return objResponse;
 	}
 }

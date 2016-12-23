@@ -19,9 +19,11 @@ package rdfanalyzer.spark;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.util.Properties;
 
+/**
+ * This class is used to read the configuration file.
+ */
 public class Configuration {
 	public static Properties properties = new Properties();
 
@@ -31,16 +33,23 @@ public class Configuration {
 			InputStream is = classloader.getResourceAsStream("app.properties");
 			properties.load(is);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// TODO: This was removed on Cluster!
 			e.printStackTrace();
 		}
-
 	}
 
+	/**
+	 * Converts a URI to a shorter representation which is shown to users.
+	 * 
+	 * @param inputURI
+	 * @return
+	 */
 	public static String shortenURI(String inputURI) {
+		// TODO: Separation of concerns!
 		String result = "";
 		int index1 = inputURI.lastIndexOf('#');
 		int index2 = inputURI.lastIndexOf('/');
+
 		if (index1 > index2) {
 			result = inputURI.substring(index1 + 1, inputURI.length() - 1);
 		} else if (index2 > index1) {
@@ -50,9 +59,9 @@ public class Configuration {
 		try {
 			result = java.net.URLDecoder.decode(result, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
 		return result;
 	}
 }
