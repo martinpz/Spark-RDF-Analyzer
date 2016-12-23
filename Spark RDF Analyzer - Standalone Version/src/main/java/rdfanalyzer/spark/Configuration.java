@@ -69,40 +69,16 @@ public class Configuration {
 		static final SparkConf getSparkConf() {
 			SparkConf sparkConf = new SparkConf();
 
-			// sparkConf.setAppName(PROPERTIES.getProperty("spark.appname"));
-			// sparkConf.setMaster(PROPERTIES.getProperty("spark.master"));
-
 			for (Entry<Object, Object> prop : PROPERTIES.entrySet()) {
 				String key = (String) prop.getKey();
 				String val = (String) prop.getValue();
 
-				System.out.println("Key='" + key + "' => Val='" + val + "'");
-
+				// Set all spark properties to the configuration.
 				if (key.startsWith("spark")) {
-					System.out.println(">>> SETTING IT TO THE CONFIG");
-					// sparkConf.set(key, val);
+					System.out.println(">>> Key='" + key + "' => Val='" + val + "'");
+					sparkConf.set(key, val);
 				}
 			}
-
-			// sparkConf.set("spark.executor.memory", "2g");
-			// sparkConf.set("spark.sql.parquet.binaryAsString", "true");
-			// sparkConf.set("spark.core.connection.ack.wait.timeout", "200");
-			// sparkConf.set("spark.core.connection.auth.wait.timeout", "200");
-			// sparkConf.set("spark.akka.timeout", "200");
-			// sparkConf.set("spark.storage.blockManagerSlaveTimeoutMs",
-			// "200000");
-			// sparkConf.set("spark.shuffle.io.connectionTimeout", "200");
-			// sparkConf.set("spark.sql.parquet.filterPushdown", "true");
-			// sparkConf.set("spark.rdd.compress", "true");
-			// sparkConf.set("spark.default.parallelism", "32");
-			// sparkConf.set("spark.sql.inMemoryColumnarStorage.compressed",
-			// "true");
-			// sparkConf.set("spark.sql.shuffle.partitions", "32");
-
-			// sparkConf.set("spark.eventLog.enabled","true");
-			// sparkConf.set("spark.eventLog.dir",
-			// "hdfs://isydney.informatik.uni-freiburg.de:8020/user/teamprojekt2015/logs/");
-			// sparkConf.set("spark.sql.codegen", "true");
 
 			return sparkConf;
 		}
