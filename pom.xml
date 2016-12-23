@@ -19,7 +19,6 @@
 	<name>${project.artifactId}</name>
 	<url>http://www.uni-freiburg.de</url>
 
-	<!-- Choose the configuration file, depending on the run profile. -->
 	<profiles>
 		<profile>
 			<id>tomcat-localhost</id>
@@ -38,6 +37,13 @@
 				<resources>
 					<resource>
 						<directory>src/main/resources/cluster</directory>
+						<targetPath>.</targetPath>
+					</resource>
+					<resource>
+						<directory>src/main/resources</directory>
+						<includes>
+							<include>${project.name}.jar</include>
+						</includes>
 						<targetPath>.</targetPath>
 					</resource>
 				</resources>
@@ -100,6 +106,14 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.0.2</version>
+				<configuration>
+					<outputDirectory>${project.basedir}/src/main/resources</outputDirectory>
 				</configuration>
 			</plugin>
 			<plugin>
