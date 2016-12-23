@@ -28,7 +28,11 @@ import javax.servlet.ServletContextListener;
 public class DeploymentListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent ctxEvent) {
-		// Services are initialized when they are needed the first time.
+		String storageDir = Configuration.storage();
+		System.out.println("Using Storage Directory: " + storageDir);
+
+		String appName = Service.sparkCtx().appName();
+		System.out.println("Runnig Spark App '" + appName + "'");
 	}
 
 	@Override
