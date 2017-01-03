@@ -45,12 +45,13 @@ public class WebService {
 	@Path("/countEdges/{DataSet}")
 	public String getMsg(@PathParam("DataSet") String dataSet) {
 		String[] args = { dataSet };
+		System.out.println("[INFO] Count edges WebService called...");
 		String objResponse = "";
 
 		try {
 			objResponse = CountEdges.main(args);
 		} catch (Exception e) {
-			objResponse = "Calculation Failed.<br>" + e.getMessage();
+			objResponse = "[ERROR] Calculation Failed.<br>" + e.getMessage();
 		}
 
 		return objResponse;

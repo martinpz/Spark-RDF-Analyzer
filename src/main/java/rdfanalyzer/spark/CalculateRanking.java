@@ -34,11 +34,11 @@ public class CalculateRanking {
 		result = Long.toString(resultsFrame.count());
 
 		// Write results to parquet.
-		resultsFrame.write().parquet("parquet/" + args[0] + "Ranking.parquet");
+//		resultsFrame.write().parquet("parquet/" + args[0] + "Ranking.parquet");
 
 		// TODO: From Standalone
-		// resultsFrame.write().parquet(Configuration.properties.getProperty("Storage")
-		// + args[0] + "Ranking.parquet");
+		 resultsFrame.write().parquet(Configuration.storage()
+		 + args[0] + "Ranking.parquet");
 
 		return result;
 	}

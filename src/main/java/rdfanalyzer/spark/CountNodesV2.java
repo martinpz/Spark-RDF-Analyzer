@@ -31,6 +31,7 @@ public class CountNodesV2 {
 			System.exit(0);
 		}
 
+		System.out.println("[INFO] ======== CountNodes  ======== "+Configuration.storage() + args[0] + ".parquet");
 		// Read graph from parquet
 		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + args[0] + ".parquet");
 		graphFrame.cache().registerTempTable("Graph");

@@ -25,10 +25,11 @@ import org.apache.spark.sql.DataFrame;
  * format it saves to a parquet file. Otherwise the file is first converted from
  * turtle to nTriple and then saved to parquet.
  */
+
 public class GraphLoader {
 	public static String main(String Input, String Name, Boolean nTriple) throws Exception {
 		String result = "";
-
+		System.out.println("[INFO] GraphLoader Main function called");
 		// Normalize input
 		Input = Input.replace('$', '/');
 
@@ -40,6 +41,7 @@ public class GraphLoader {
 			return result;
 		}
 
+		System.out.println("=== COMMENT ===  loading tet file and convert each line");
 		// Load a text file and convert each line to a Java Bean.
 		JavaRDD<RDFgraph> RDF = Service.sparkCtx().textFile(Input + "/*", 18).map(new Function<String, RDFgraph>() {
 			public RDFgraph call(String line) {
@@ -58,9 +60,12 @@ public class GraphLoader {
 
 		// Apply a schema to an RDD of Java Beans and register it as a table.
 		DataFrame schemaRDF = Service.sqlCtx().createDataFrame(RDF, RDFgraph.class);
+		
+		System.out.println("=== COMMENT ===  schemaRDF dataframe");
 
 		String storageDir = Configuration.storage();
-		schemaRDF.saveAsParquetFile(storageDir + Name + ".parquet");
+		System.out.println("[INFO] PathToParquet = "+storageDir + Name + ".parquet");
+		schemaRDF.write().parquet(storageDir + Name + ".parquet");
 		// TODO: Following is from Cluster.
 		// schemaRDF.saveAsParquetFile("parquet/"+Name+".parquet");
 
