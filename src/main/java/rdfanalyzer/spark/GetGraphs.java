@@ -35,7 +35,6 @@ public class GetGraphs {
 		File directory = new File(Configuration.storage());
 		File[] subdirs = directory.listFiles();
 
-//		GraphLoader.main("/home/data/sib400", "sib400", true);
 		// TODO: Following is from the cluster.
 		// FileSystem fs = FileSystem.get(new
 		// URI(Configuration.properties.getProperty("StorageURL")),new
@@ -64,7 +63,6 @@ public class GetGraphs {
 		} else {
 			result += "<p>WARNING: The path, defined in the app.properties is incorrect!</p>";
 		}
-		
 
 		// TODO: Following is from cluster.
 		// for (FileStatus f : subdirs) {
@@ -73,7 +71,6 @@ public class GetGraphs {
 
 		return result;
 	}
-	
 
 	public static String generateThumbnail(String graphName) {
 		graphName = graphName.substring(0, graphName.indexOf('.'));
