@@ -18,6 +18,7 @@ package rdfanalyzer.spark;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import org.apache.log4j.Logger;
 
 /**
  * This class gets called on deploy and undeploy events of Tomcat. It creates
@@ -26,13 +27,15 @@ import javax.servlet.ServletContextListener;
  * @author marcoprobst
  */
 public class DeploymentListener implements ServletContextListener {
+	private final static Logger logger = Logger.getLogger(DeploymentListener.class);
+
 	@Override
 	public void contextInitialized(ServletContextEvent ctxEvent) {
 		String storageDir = Configuration.storage();
-		System.out.println("Using Storage Directory: " + storageDir);
-
 		String appName = Service.sparkCtx().appName();
-		System.out.println("Runnig Spark App '" + appName + "'");
+
+		logger.info("Using Storage Directory: " + storageDir);
+		logger.info("Runnig Spark App '" + appName + "'");
 	}
 
 	@Override
