@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 
 /**
@@ -28,6 +29,8 @@ import org.apache.spark.SparkConf;
  * Configuration.
  */
 public class Configuration {
+	private final static Logger logger = Logger.getLogger(DeploymentListener.class);
+
 	/**
 	 * Private inner class which not gets initialized before it is called by the
 	 * outer class.
@@ -69,13 +72,14 @@ public class Configuration {
 		static final SparkConf getSparkConf() {
 			SparkConf sparkConf = new SparkConf();
 
+			logger.info("Reading properties ...");
 			for (Entry<Object, Object> prop : PROPERTIES.entrySet()) {
 				String key = (String) prop.getKey();
 				String val = (String) prop.getValue();
 
 				// Set all spark properties to the configuration.
 				if (key.startsWith("spark")) {
-					System.out.println(">>> Key='" + key + "' => Val='" + val + "'");
+					logger.info("[" + key + "] => '" + val + "'");
 					sparkConf.set(key, val);
 				}
 			}
