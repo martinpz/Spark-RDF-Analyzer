@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
@@ -30,52 +31,50 @@ import org.apache.hadoop.fs.Path;
  */
 public class GetGraphs {
 	public static String main(String[] args) throws Exception {
-		String result = "";
-
-		// Get folder names.
-		File directory = new File(Configuration.storage());
-		File[] subdirs = directory.listFiles();
-
-		// TODO: Following is from the cluster.
-		// FileSystem fs = FileSystem.get(new
-		// URI(Configuration.properties.getProperty("StorageURL")),new
-		// org.apache.hadoop.conf.Configuration());
-
-		// Path src=new
-		// Path(Configuration.properties.getProperty("StoragePath"));
-
-		// FileStatus[] subdirs = fs.listStatus(src);
-
-		// Generate new graph thumbnail.
-		result += "<div class=\"col-sm-2 col-md-3\">" + "<div class=\"thumbnail\">"
+		// Generate "New graph" thumbnail.
+		String result = "<div class=\"col-sm-2 col-md-3\">" + "<div class=\"thumbnail\">"
 				+ "<p><a href=\"#\"  style=\"text-align:right; visibility:hidden; margin:0px;\" class=\"btn btn-danger\" role=\"button\" onClick=\"deleteGraph('')\"><span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span></a></p>"
 				+ "<img src=\"./img/ng.png\" alt=\"\">" + "<div class=\"caption\" style=\"text-align:center\">"
 				+ "<h3> &nbsp; </h3>"
 				+ "<p><a href=\"newGraph.html\" class=\"btn btn-success\" role=\"button\"><span class=\"glyphicon glyphicon-plus\" aria-hidden=\"true\"></span>&nbsp;Add new Graph</a></p>"
 				+ "</div>" + "</div>" + "</div>";
 
-		if (subdirs != null) {
-			// Generate graph thumbnails.
-			for (File f : subdirs) {
-				if (!f.getName().startsWith(".") && !f.getName().endsWith("Ranking.parquet")) {
-					result += generateThumbnail(f.getName());
+		String storageURL = Configuration.props("storage.url");
+		String storageDir = Configuration.storage();
+
+		if (storageURL == null || storageURL.isEmpty()) {
+			// We are in local mode.
+			File[] subdirs = new File(storageDir).listFiles();
+
+			if (subdirs != null) {
+				for (File f : subdirs) {
+					if (!f.getName().startsWith(".") && !f.getName().endsWith("Ranking.parquet")) {
+						result += generateThumbnail(f.getName());
+					}
 				}
+			} else {
+				result = "<p>WARNING: The path, defined in the app.properties is incorrect!</p>";
 			}
 		} else {
-			result += "<p>WARNING: The path, defined in the app.properties is incorrect!</p>";
-		}
+			// We are in cluster mode.
+			FileSystem fs = FileSystem.get(new URI(storageURL), new org.apache.hadoop.conf.Configuration());
+			Path src = new Path(storageDir);
+			FileStatus[] subdirs = fs.listStatus(src);
 
-		// TODO: Following is from cluster.
-		// for (FileStatus f : subdirs) {
-		// result += generateThumbnail(f.getPath().getName());
-		// }
+			if (subdirs != null) {
+				for (FileStatus f : subdirs) {
+					result += generateThumbnail(f.getPath().getName());
+				}
+			} else {
+				result = "<p>WARNING: The path, defined in the app.properties is incorrect!</p>";
+			}
+		}
 
 		return result;
 	}
 
 	public static String generateThumbnail(String graphName) {
 		graphName = graphName.substring(0, graphName.indexOf('.'));
-
 		return "<div class=\"col-sm-2 col-md-3\">" + "<div class=\"thumbnail\">"
 				+ "<p><a href=\"#\"  style=\"text-align:right; margin:0px;\" class=\"btn btn-danger\" role=\"button\" onClick=\"deleteGraph('"
 				+ graphName + "')\"><span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span></a></p>"
@@ -102,7 +101,7 @@ public class GetGraphs {
 
 			retVal = !(parquetData.exists() || rankingData.exists());
 		} else {
-			// We are in cluster mode => Connect to HDFS first.
+			// We are in cluster mode.
 			FileSystem fs = FileSystem.get(new URI(storageURL), new org.apache.hadoop.conf.Configuration());
 			retVal = fs.delete(new Path(parquetData.toString()), true);
 			retVal = fs.delete(new Path(rankingData.toString()), true);
