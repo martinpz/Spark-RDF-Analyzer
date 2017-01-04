@@ -28,7 +28,6 @@ import org.apache.spark.sql.DataFrame;
 public class GraphLoader {
 	public static String main(String Input, String Name, Boolean nTriple) throws Exception {
 		String result = "";
-
 		// Normalize input
 		Input = Input.replace('$', '/');
 
@@ -60,7 +59,7 @@ public class GraphLoader {
 		DataFrame schemaRDF = Service.sqlCtx().createDataFrame(RDF, RDFgraph.class);
 
 		String storageDir = Configuration.storage();
-		schemaRDF.saveAsParquetFile(storageDir + Name + ".parquet");
+		schemaRDF.write().parquet(storageDir + Name + ".parquet");
 		// TODO: Following is from Cluster.
 		// schemaRDF.saveAsParquetFile("parquet/"+Name+".parquet");
 

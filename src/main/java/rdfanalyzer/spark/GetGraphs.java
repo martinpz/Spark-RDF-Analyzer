@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
@@ -86,23 +87,27 @@ public class GetGraphs {
 	}
 
 	public static String deleteGraph(String graphName) throws IOException, URISyntaxException {
-		// FIXME: Hard coded path. Use path from properties.
-		FileSystem fs = FileSystem.get(new URI("hdfs://localhost:8020"), new org.apache.hadoop.conf.Configuration());
-		fs.delete(new Path("/user/cloudera/toDelete"), true);
+		boolean retVal = true;
 
-		return "Success";
+		String storageURL = Configuration.props("storage.url");
+		String storageDir = Configuration.storage();
 
-		// TODO: Following is from the cluster version
-		// FileSystem fs = FileSystem.get(new
-		// URI(Configuration.properties.getProperty("StorageURL")),new
-		// org.apache.hadoop.conf.Configuration());
+		File parquetData = new File(storageDir + graphName + ".parquet");
+		File rankingData = new File(storageDir + graphName + "Ranking.parquet");
 
-		// fs.delete(new
-		// Path(Configuration.properties.getProperty("StoragePath")+graphName+".parquet"),
-		// true);
+		if (storageURL == null || storageURL.isEmpty()) {
+			// We are in local mode.
+			FileUtils.deleteDirectory(parquetData);
+			FileUtils.deleteDirectory(rankingData);
 
-		// fs.delete(new
-		// Path(Configuration.properties.getProperty("StoragePath")+graphName+"Ranking.parquet"),
-		// true);
+			retVal = !(parquetData.exists() || rankingData.exists());
+		} else {
+			// We are in cluster mode => Connect to HDFS first.
+			FileSystem fs = FileSystem.get(new URI(storageURL), new org.apache.hadoop.conf.Configuration());
+			retVal = fs.delete(new Path(parquetData.toString()), true);
+			retVal = fs.delete(new Path(rankingData.toString()), true);
+		}
+
+		return retVal ? "Success" : "Failed";
 	}
 }
