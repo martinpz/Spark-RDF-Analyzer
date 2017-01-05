@@ -32,28 +32,27 @@ public class TTL2NTV2 {
 	public static Hashtable<String, String> prefixHashtable = new Hashtable<String, String>();
 	static Broadcast<Hashtable<String, String>> broadcastPrefixes;
 
-	public static String main(String Input, String Name) throws Exception {
-		String result = "";
-
+	public static JavaRDD<RDFgraph> main(String Input, String Name) throws Exception {
 		// Read Prefixes.
-		JavaRDD<RDFgraph> RDF1 = Service.sparkCtx().textFile(Input + "/*", 18).map(new Function<String, RDFgraph>() {
-			public RDFgraph call(String line) {
-				String[] parts = line.split(" (?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-				RDFgraph entry = new RDFgraph();
+		JavaRDD<RDFgraph> RDF1 = Service.sparkCtx().textFile(Input + "/*", Configuration.numPartitions())
+				.map(new Function<String, RDFgraph>() {
+					public RDFgraph call(String line) {
+						String[] parts = line.split(" (?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+						RDFgraph entry = new RDFgraph();
 
-				if (parts[0].equals("@prefix")) {
-					entry.setSubject(parts[0]);
-					entry.setPredicate(parts[1]);
-					entry.setObject(parts[2]);
-				} else {
-					entry.setSubject("E");
-					entry.setPredicate("E");
-					entry.setObject("E");
-				}
+						if (parts[0].equals("@prefix")) {
+							entry.setSubject(parts[0]);
+							entry.setPredicate(parts[1]);
+							entry.setObject(parts[2]);
+						} else {
+							entry.setSubject("E");
+							entry.setPredicate("E");
+							entry.setObject("E");
+						}
 
-				return entry;
-			}
-		});
+						return entry;
+					}
+				});
 
 		DataFrame schemaRDF1 = Service.sqlCtx().createDataFrame(RDF1, RDFgraph.class);
 		schemaRDF1.registerTempTable("Prefixes");
@@ -71,44 +70,32 @@ public class TTL2NTV2 {
 		broadcastPrefixes = Service.sparkCtx().broadcast(prefixHashtable);
 
 		// Read Graph and replace prefixes
-		JavaRDD<RDFgraph> RDF = Service.sparkCtx().textFile(Input + "/*", 18).map(new Function<String, RDFgraph>() {
-			public RDFgraph call(String line) {
-				String[] parts = line.split(" (?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-				RDFgraph entry = new RDFgraph();
+		JavaRDD<RDFgraph> RDF = Service.sparkCtx().textFile(Input + "/*", Configuration.numPartitions())
+				.map(new Function<String, RDFgraph>() {
+					public RDFgraph call(String line) {
+						String[] parts = line.split(" (?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+						RDFgraph entry = new RDFgraph();
 
-				if (!parts[0].equals("@prefix")) {
-					entry.setSubject(replacePrefix(parts[0]));
-					entry.setPredicate(replacePrefix(parts[1]));
-					entry.setObject(replacePrefix(parts[2]));
-				}
+						if (!parts[0].equals("@prefix")) {
+							entry.setSubject(replacePrefix(parts[0]));
+							entry.setPredicate(replacePrefix(parts[1]));
+							entry.setObject(replacePrefix(parts[2]));
+						}
 
-				return entry;
-			}
-		});
+						return entry;
+					}
+				});
 
-		// Apply a schema to an RDD of Java Beans and register it as a table.
-		DataFrame schemaRDF = Service.sqlCtx().createDataFrame(RDF, RDFgraph.class);
-
-		String storageDir = Configuration.storage();
-		schemaRDF.saveAsParquetFile(storageDir + Name + ".parquet");
-
-		result = "Success";
-
-		String[] rankingArguments = { Name };
-		CalculateRanking.main(rankingArguments);
-
-		return result;
+		return RDF;
 	}
 
 	/**
 	 * Replaces prefix for each node.
 	 * 
 	 * @param resource
-	 * @return
+	 * @return full URI
 	 */
 	public static String replacePrefix(String resource) {
-		String prefix = "";
-
 		if (resource.startsWith("\"")) {
 			return resource;
 		} else if (resource.equalsIgnoreCase("a")) {
@@ -117,7 +104,7 @@ public class TTL2NTV2 {
 			String[] resource_prefix = resource.split(":");
 
 			if (resource_prefix.length == 2) {
-				prefix = broadcastPrefixes.value().get(resource_prefix[0] + ":");
+				String prefix = broadcastPrefixes.value().get(resource_prefix[0] + ":");
 				prefix = prefix.substring(0, prefix.length() - 1);
 
 				// Return the full URI.

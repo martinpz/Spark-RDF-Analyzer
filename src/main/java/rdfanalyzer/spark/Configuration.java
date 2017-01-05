@@ -117,6 +117,13 @@ public class Configuration {
 	}
 
 	/**
+	 * @return number of partitions for hadoop
+	 */
+	public static int numPartitions() {
+		return Integer.valueOf(props("hadoop.numpartitions"));
+	}
+
+	/**
 	 * @return Spark Configuration
 	 */
 	public static SparkConf sparkConf() {

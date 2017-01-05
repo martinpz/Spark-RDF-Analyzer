@@ -27,47 +27,41 @@ import org.apache.spark.sql.DataFrame;
  */
 public class GraphLoader {
 	public static String main(String Input, String Name, Boolean nTriple) throws Exception {
-		String result = "";
+		JavaRDD<RDFgraph> RDF;
+
 		// Normalize input
 		Input = Input.replace('$', '/');
 
 		// Check if input is in turtle format.
-		if (!nTriple) {
-			// TODO: Not done in Cluster.
+		if (nTriple) {
+			// Load a text file and convert each line to a Java Bean.
+			RDF = Service.sparkCtx().textFile(Input + "/*", Configuration.numPartitions())
+					.map(new Function<String, RDFgraph>() {
+						public RDFgraph call(String line) {
+							String[] parts = line.split(" (?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+							RDFgraph entry = new RDFgraph();
+
+							if (parts[1].length() > 1) {
+								entry.setSubject(parts[0]);
+								entry.setPredicate(parts[1]);
+								entry.setObject(parts[2]);
+							}
+
+							return entry;
+						}
+					});
+		} else {
 			// TTL2NTV2.prefixHashtable.clear();
-			result = TTL2NTV2.main(Input, Name);
-			return result;
+			RDF = TTL2NTV2.main(Input, Name);
 		}
-
-		// Load a text file and convert each line to a Java Bean.
-		JavaRDD<RDFgraph> RDF = Service.sparkCtx().textFile(Input + "/*", 18).map(new Function<String, RDFgraph>() {
-			public RDFgraph call(String line) {
-				String[] parts = line.split(" (?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-				RDFgraph entry = new RDFgraph();
-
-				if (parts[1].length() > 1) {
-					entry.setSubject(parts[0]);
-					entry.setPredicate(parts[1]);
-					entry.setObject(parts[2]);
-				}
-
-				return entry;
-			}
-		});
 
 		// Apply a schema to an RDD of Java Beans and register it as a table.
 		DataFrame schemaRDF = Service.sqlCtx().createDataFrame(RDF, RDFgraph.class);
-
-		String storageDir = Configuration.storage();
-		schemaRDF.write().parquet(storageDir + Name + ".parquet");
-		// TODO: Following is from Cluster.
-		// schemaRDF.saveAsParquetFile("parquet/"+Name+".parquet");
-
-		result = "Success";
+		schemaRDF.write().parquet(Configuration.storage() + Name + ".parquet");
 
 		String[] rankingArguments = { Name };
 		CalculateRanking.main(rankingArguments);
 
-		return result;
+		return "Success";
 	}
 }
