@@ -35,23 +35,6 @@ public class CollapsedGraph {
 
 	public static String main(String[] args) throws Exception {
 		String result = "";
-		/*
-		 * Check if arguments have been passed. TODO: This is not done in
-		 * Cluster version.
-		 */
-		if (args.length != 2) {
-			System.out.println("Missing Arguments <INPUT>");
-			System.exit(0);
-		}
-
-		/*
-		 * Read graph from parquet TODO: This is not done in Cluster Version.
-		 */
-
-		// DataFrame schemaRDF = WebService.sqlContext
-		// .parquetFile(Configuration.properties.getProperty("Storage") +
-		// args[0] + ".parquet");
-		// schemaRDF.cache().registerTempTable("Graph");
 
 		// SQL can be run over RDDs that have been registered as tables.
 		DataFrame predicatesFrame = Service.sqlCtx()
@@ -62,12 +45,6 @@ public class CollapsedGraph {
 						+ " WHERE t1s=t3s AND t1p=t3p AND t1o=t3o GROUP BY t2o, t1p, t4o ORDER BY t1p");
 
 		Row[] resultRows = predicatesFrame.collect();
-
-		// TODO: This is just commented out and deleted in Cluster Version.
-		// DataFrame collapsedFrame = sqlContext.sql("Select * FROM EdgesTable
-		// ORDER BY p");
-		// The results of SQL queries are DataFrames and support all the normal
-		// RDD operations.
 
 		// Merge Edgefinder data and format output results. Based on if output
 		// is table or chart it is returned into different formats.

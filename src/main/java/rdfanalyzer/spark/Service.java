@@ -20,8 +20,8 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SQLContext;
 
 /**
- * This class holds all requirede services for performing computations within
- * the RDF Analyzer. For consistency it follows the singleton pattern to have
+ * This class holds all required services for performing computations within the
+ * RDF Analyzer. For consistency it follows the singleton pattern to have
  * exactly one instance of each service.
  * 
  * @author marcoprobst
@@ -38,9 +38,6 @@ public class Service {
 		 */
 		static final JavaSparkContext SPARK_CTX = new JavaSparkContext(Configuration.sparkConf());
 		static final SQLContext SQL_CTX = new SQLContext(SPARK_CTX);
-
-		// TODO: Check if needed, comes from Cluster for loading JAR to clients.
-		// static ClassLoader classLoader = WebService.class.getClassLoader();
 	}
 
 	private Service() {

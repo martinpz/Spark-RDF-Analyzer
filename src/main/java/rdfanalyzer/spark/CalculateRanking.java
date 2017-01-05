@@ -33,11 +33,7 @@ public class CalculateRanking {
 		DataFrame resultsFrame = Service.sqlCtx().sql("SELECT subject, COUNT(*) as nr FROM Graph GROUP BY subject");
 		result = Long.toString(resultsFrame.count());
 
-		// TODO: Write results to parquet.
-		// resultsFrame.write().parquet("parquet/" + args[0] +
-		// "Ranking.parquet");
-
-		// From Standalone version.
+		// Write results to parquet.
 		resultsFrame.write().parquet(Configuration.storage() + args[0] + "Ranking.parquet");
 
 		return result;

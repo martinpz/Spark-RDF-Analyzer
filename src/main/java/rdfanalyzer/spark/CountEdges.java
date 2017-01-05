@@ -25,13 +25,6 @@ public class CountEdges {
 	public static String main(String[] args) throws Exception {
 		String result = "";
 
-		// Check if arguments have been passed.
-		// TODO: This is not done in Cluster version.
-		if (args.length != 1) {
-			System.out.println("Missing Arguments <INPUT>");
-			System.exit(0);
-		}
-
 		// Read graph from parquet
 		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + args[0] + ".parquet");
 		graphFrame.cache().registerTempTable("Graph");

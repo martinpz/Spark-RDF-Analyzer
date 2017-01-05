@@ -209,11 +209,6 @@ public class WebService {
 	@GET
 	@Path("/getGraphs")
 	public String getMsg12() {
-		// TODO: Following is from Cluster version.
-		// Maybe we can distribute the JAR file even earlier?
-		// ctx.addJar(classLoader.getResource("Project.jar").getFile());
-		// SparkConfigurationHelper.setOthers();
-
 		String[] args = {};
 		String objResponse = "";
 
@@ -258,26 +253,6 @@ public class WebService {
 
 		return objResponse;
 	}
-
-	// TODO: This is excluded in Cluster version.
-	// @GET
-	// @Path("/connViewerTest")
-	// public String getMsg15() {
-	//
-	// String objResponse = "";
-	//
-	// try {
-	// ConnAdapter objAdapter = new ConnAdapter();
-	// objAdapter.setStartNode("User1");
-	// objAdapter.setEndNode("User2");
-	// objAdapter.testResult();
-	// objResponse = objAdapter.getResults();
-	// } catch (Exception e) {
-	// objResponse = "Calculation Failed. :" + e.getMessage();
-	// }
-	//
-	// return objResponse;
-	// }
 
 	@GET
 	@Path("/connViewer/{Node1}/{Node2}/{DataSet}/{Predicates}/{Pattern}")
