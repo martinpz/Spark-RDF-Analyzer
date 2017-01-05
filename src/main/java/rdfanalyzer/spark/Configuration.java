@@ -18,6 +18,7 @@ package rdfanalyzer.spark;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Map.Entry;
 import java.util.Properties;
 
@@ -29,7 +30,7 @@ import org.apache.spark.SparkConf;
  * Configuration.
  */
 public class Configuration {
-	private final static Logger logger = Logger.getLogger(DeploymentListener.class);
+	private final static Logger logger = Logger.getLogger(Configuration.class);
 
 	/**
 	 * Private inner class which not gets initialized before it is called by the
@@ -123,10 +124,26 @@ public class Configuration {
 	}
 
 	/**
-	 * Sets system properties.
+	 * Sets hadoop system properties and distributes JAR file.
 	 */
-	public static void setHadoopProps() {
-		Service.sparkCtx().hadoopConfiguration().set("fs.defaultFS", props("hadoop.homefolder"));
-		System.setProperty("HADOOP_USER_NAME", props("hadoop.user"));
+	public static void setupHadoop() {
+		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+		String hdpHome = props("hadoop.homefolder");
+		String hdpUser = props("hadoop.user");
+		URL projectJAR = classloader.getResource("spark-rdfanalyzer2.jar");
+
+		// Setup hadoop configuration if it exists.
+		// This will only be the case on the cluster.
+		if (hdpHome != null) {
+			Service.sparkCtx().hadoopConfiguration().set("fs.defaultFS", hdpHome);
+		}
+
+		if (hdpUser != null) {
+			System.setProperty("HADOOP_USER_NAME", hdpUser);
+		}
+
+		if (projectJAR != null) {
+			Service.sparkCtx().addJar(projectJAR.getFile());
+		}
 	}
 }

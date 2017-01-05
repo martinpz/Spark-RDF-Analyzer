@@ -36,6 +36,8 @@ public class DeploymentListener implements ServletContextListener {
 
 		logger.info("Using Storage Directory: " + storageDir);
 		logger.info("Runnig Spark App '" + appName + "'");
+
+		Configuration.setupHadoop();
 	}
 
 	@Override

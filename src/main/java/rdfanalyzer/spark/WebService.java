@@ -209,11 +209,6 @@ public class WebService {
 	@GET
 	@Path("/getGraphs")
 	public String getMsg12() {
-		// TODO: Following is from Cluster version.
-		// Maybe we can distribute the JAR file even earlier?
-		// ctx.addJar(classLoader.getResource("Project.jar").getFile());
-		// SparkConfigurationHelper.setOthers();
-
 		String[] args = {};
 		String objResponse = "";
 
