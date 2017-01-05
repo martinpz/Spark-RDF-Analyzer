@@ -58,7 +58,6 @@ public class Configuration {
 
 				properties.load(is);
 			} catch (IOException e) {
-				// TODO: This was removed on Cluster!
 				e.printStackTrace();
 			}
 

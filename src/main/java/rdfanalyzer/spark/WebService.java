@@ -254,26 +254,6 @@ public class WebService {
 		return objResponse;
 	}
 
-	// TODO: This is excluded in Cluster version.
-	// @GET
-	// @Path("/connViewerTest")
-	// public String getMsg15() {
-	//
-	// String objResponse = "";
-	//
-	// try {
-	// ConnAdapter objAdapter = new ConnAdapter();
-	// objAdapter.setStartNode("User1");
-	// objAdapter.setEndNode("User2");
-	// objAdapter.testResult();
-	// objResponse = objAdapter.getResults();
-	// } catch (Exception e) {
-	// objResponse = "Calculation Failed. :" + e.getMessage();
-	// }
-	//
-	// return objResponse;
-	// }
-
 	@GET
 	@Path("/connViewer/{Node1}/{Node2}/{DataSet}/{Predicates}/{Pattern}")
 	public String getMsg16(@PathParam("DataSet") String dataSet, @PathParam("Node1") String startN,

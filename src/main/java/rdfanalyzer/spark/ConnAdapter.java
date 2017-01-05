@@ -62,52 +62,6 @@ public class ConnAdapter {
 		this.endNode = Node + " {color:#c6531e}\n";
 	}
 
-	// TODO: Remove this method.
-	// public void testResult() {
-	// this.Edges += "User1 -- User1_Likes_Item1\n";
-	// this.Edges += "User1_Likes_Item1 -> Item1\n";
-	// this.Edges += "User2 -- User2_Likes_Item1\n";
-	// this.Edges += "User2_Likes_Item1 -> Item1\n";
-	//
-	// this.Edges += "User1 -- User1_Likes_Item2\n";
-	// this.Edges += "User1_Likes_Item2 -> Item2\n";
-	// this.Edges += "User2 -- User2_Likes_Item2\n";
-	// this.Edges += "User2_Likes_Item2 -> Item2\n";
-	//
-	// this.Edges += "User1 -- User1_Likes_Item3\n";
-	// this.Edges += "User1_Likes_Item3 -> Item3\n";
-	// this.Edges += "User2 -- User2_Likes_Item3\n";
-	// this.Edges += "User2_Likes_Item3 -> Item3\n";
-	//
-	// this.Edges += "User1 -- User1_Likes_Item4\n";
-	// this.Edges += "User1_Likes_Item4 -> Item4\n";
-	// this.Edges += "User2 -- User2_Likes_Item4\n";
-	// this.Edges += "User2_Likes_Item4 -> Item4\n";
-	//
-	// this.Edges += "User1 -- User1_Likes_Item5\n";
-	// this.Edges += "User1_Likes_Item5 -> Item5\n";
-	// this.Edges += "User2 -- User2_Likes_Item5\n";
-	// this.Edges += "User2_Likes_Item5 -> Item5\n";
-	//
-	// this.Nodes += "Item1 {color:#95cde5}\n";
-	// this.Nodes += "Item2 {color:#95cde5}\n";
-	// this.Nodes += "Item3 {color:#95cde5}\n";
-	// this.Nodes += "Item4 {color:#95cde5}\n";
-	// this.Nodes += "Item5 {color:#95cde5}\n";
-	// this.Nodes += "User1_Likes_Item1 {label:Likes}\n";
-	// this.Nodes += "User1_Likes_Item2 {label:Likes}\n";
-	// this.Nodes += "User1_Likes_Item3 {label:Likes}\n";
-	// this.Nodes += "User1_Likes_Item4 {label:Likes}\n";
-	// this.Nodes += "User1_Likes_Item5 {label:Likes}\n";
-	// this.Nodes += "User2_Likes_Item1 {label:Likes}\n";
-	// this.Nodes += "User2_Likes_Item2 {label:Likes}\n";
-	// this.Nodes += "User2_Likes_Item3 {label:Likes}\n";
-	// this.Nodes += "User2_Likes_Item4 {label:Likes}\n";
-	// this.Nodes += "User2_Likes_Item5 {label:Likes}\n";
-	//
-	// ConnViewer.Update = true;
-	// }
-
 	/**
 	 * Converts output to HalfViz format.
 	 * 
