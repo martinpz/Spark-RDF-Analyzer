@@ -3,4 +3,4 @@
 .settings
 target
 *.jar
-src/main/webapp/js/
+/src/main/webapp/js/

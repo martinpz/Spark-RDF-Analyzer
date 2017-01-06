@@ -1,7 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
-   "http://www.w3.org/TR/html4/strict.dtd">
-
-<html lang="en">
+<html>
 <head>
 <title>Spark RDF Analyzer - Connectivity Viewer</title>
 
@@ -26,96 +23,8 @@
 <script src="src/parseur.js"></script>
 <script src="src/renderer.js"></script>
 <script src="src/halfviz.js"></script>
-
-<script>
-	function doSmth() {
-		document.getElementById('code').value = 'User1_Likes -> Item1';
-		document.getElementById('code').focus();
-		var e = jQuery.Event("keydown");
-		e.which = 32; // # Some key code value
-		$("#code").trigger(e);
-		document.getElementById('editor').style.display = 'none';
-		document.getElementById('viewport').width = (parseInt($('#IDbardh')
-				.get(0).offsetWidth) - 100);
-		document.getElementById('viewport').height = 400;
-	}
-
-	String.prototype.replaceAll = function(target, replacement) {
-		return this.split(target).join(replacement);
-	};
-</script>
-
-<style>
-.loading:after {
-	overflow: hidden;
-	display: inline-block;
-	vertical-align: bottom;
-	-webkit-animation: ellipsis steps(4, end) 900ms infinite;
-	animation: ellipsis steps(4, end) 900ms infinite;
-	content: "\2026"; /* ascii code for the ellipsis character */
-	width: 0px;
-}
-
-@
-keyframes ellipsis {to { width:20px;
-	
-}
-
-}
-@
--webkit-keyframes ellipsis {to { width:20px;
-	
-}
-
-}
-#left {
-	width: 35%;
-	display: inline-block;
-}
-
-#right {
-	width: 65%;
-	display: inline-block;
-}
-
-#left, #right {
-	float: left;
-}
-</style>
 </head>
-
-<body onload="getGraphName()" background="./img/bg.jpg"
-	style="-webkit-background-size: cover; -moz-background-size: cover; -o-background-size: cover; background-size: cover;">
-	<div class="navbar navbar-inverse" style="background-color: rgba(70, 130, 180, 0.95);">
-		<div class="navbar-header">
-			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-inverse-collapse">
-				<span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span>
-			</button>
-			<a class="navbar-brand" href="../index.html">SPARK RDF ANALYSIS</a> <a id="slash" class="navbar-brand" href="#">/</a> <a id="GraphName"
-				class="navbar-brand" href="#"><b>reading...</b></a>
-		</div>
-		<div class="navbar-collapse collapse navbar-inverse-collapse">
-
-			<ul class="nav navbar-nav navbar-right">
-			</ul>
-		</div>
-	</div>
-
-	<form id="IDbardh" class="form-horizontal col-md-10 col-md-offset-1"
-		style="padding-bottom: 20px; background-color: rgba(70, 130, 180, 0.95); border-radius: 15px" action="" method="post">
-		<br>
-
-		<nav class="navbar navbar-default">
-		<div class="container">
-			<ul class="nav navbar-nav">
-				<li><a href="../statistics.html"><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>&nbsp;Statistics</a></li>
-				<li><a href="../structure.html"><span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>&nbsp;Structure</a></li>
-				<li class="active"><a href="#"><span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span>&nbsp;Connectivity Viewer</a></li>
-				<li><a href="../visualizer.html"><span class="glyphicon glyphicon-dashboard" aria-hidden="true"></span>&nbsp;Schema Visualizer</a></li>
-				<li><a href="../centrality.html"><span class="glyphicon glyphicon-dashboard" aria-hidden="true"></span>&nbsp;Centrality</a></li>
-			</ul>
-		</div>
-		</nav>
+<body>
 		<div class="parent">
 			<div class="font" id="left">
 				<div id="divNode1" class="form-group" style="margin: 20px 5px 20px 20px;">
@@ -216,57 +125,6 @@ keyframes ellipsis {to { width:20px;
 			</div>
 		</div>
 		</div>
-
-		<div id="halfviz" style="height: 550px;">
-			<canvas id="viewport"></canvas>
-			<div id="editor">
-				<textarea id="code"></textarea>
-			</div>
-			<div id="grabber" style="display: none;"></div>
-		</div>
-
-		<div id="dashboard">
-			<ul class="controls">
-				<li class="stiffness">spring tension <span class="frob">10,000</span></li>
-				<li class="repulsion">node repulsion <span class="frob">10,000</span></li>
-				<li class="friction">friction <span class="frob">20%</span></li>
-				<li class="gravity">gravity <span class="toggle">.</span></li>
-			</ul>
-		</div>
-	</form>
-
-	<div class="modal fade" id="basicModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true" onclick="closeDialog()">&times;</button>
-					<h3 class="modal-title" id="myModalLabel" style="text-align: center" nodeName="">
-						<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Choose a URI
-					</h3>
-				</div>
-				<div class="alert alert-info" id="listNodes">
-					<p>
-						<span class="glyphicon glyphicon-search" aria-hidden="true"></span> Searching on graph for URIs that match your query.
-					</p>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal" onclick="closeDialog()">Close</button>
-					<button type="button" id="listButton" class="btn btn-primary" data-dismiss="modal" onclick="selectNode()">
-						<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Select URI
-					</button>
-				</div>
-			</div>
-		</div>
-	</div>
 </body>
-
-<script>
-	setInterval(getResult, 5000);
-</script>
-<script>
-	document.getElementById('editor').style.display = 'none';
-	document.getElementById('viewport').width = (parseInt($('#IDbardh').get(0).offsetWidth) - 100);
-	document.getElementById('viewport').height = 400;
-</script>
-
 </html>
+		

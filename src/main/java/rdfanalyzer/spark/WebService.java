@@ -42,6 +42,27 @@ public class WebService {
 	}
 
 	@GET
+	@Path("/applySimrank/{DataSet}")
+	public String findNodeSimilarity(@PathParam("DataSet") String dataSet) {
+		
+		System.out.println("Simrank Called");
+
+		// Called Simrank
+
+		String[] args = { dataSet };
+		String objResponse = "";
+		
+		
+
+		try {
+			objResponse = Simrank.preCalculateSimrank(dataSet);
+		} catch (Exception e) {
+			objResponse = "Simrank Failed.<br>" + e.getMessage();
+		}
+
+		return objResponse;
+	}
+	@GET
 	@Path("/countEdges/{DataSet}")
 	public String getMsg(@PathParam("DataSet") String dataSet) {
 		String[] args = { dataSet };
@@ -74,7 +95,12 @@ public class WebService {
 	@GET
 	@Path("/countNodes/{DataSet}")
 	public String getMsg3(@PathParam("DataSet") String dataSet) {
-		String[] args = { dataSet };
+
+		/*
+		 *  1 = need the result in string for showing the output on frontend
+		 *  2 = need the output in int to use to perform other operations
+		 */
+		String[] args = { dataSet, "1" };
 		String objResponse = "";
 
 		try {
@@ -259,6 +285,7 @@ public class WebService {
 	public String getMsg16(@PathParam("DataSet") String dataSet, @PathParam("Node1") String startN,
 			@PathParam("Node2") String endN, @PathParam("Predicates") String Predicates,
 			@PathParam("Pattern") String Pattern) {
+
 		String objResponse = "";
 
 		try {

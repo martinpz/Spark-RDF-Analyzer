@@ -1,7 +1,7 @@
 var CONFIG = {
 	prot : 'http',
 	site : '127.0.0.1',
-	port : '8080',
+	port : '8081',
 	rest : 'spark-rdfanalyzer2/rest/ALL'
 };
 
