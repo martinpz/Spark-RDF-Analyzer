@@ -41,23 +41,18 @@ public class WebService {
 		return objResponse;
 	}
 
+	
 	@GET
-	@Path("/applySimrank/{DataSet}")
-	public String findNodeSimilarity(@PathParam("DataSet") String dataSet) {
-		
-		System.out.println("Simrank Called");
+	@Path("/calculateCentrality/{DataSet}/{Node}/{Type}")
+	public String calculateCentrality(@PathParam("DataSet") String dataSet, @PathParam("Node") String node,
+			@PathParam("Type") String MetricType) {
 
-		// Called Simrank
-
-		String[] args = { dataSet };
 		String objResponse = "";
-		
-		
 
 		try {
-			objResponse = Simrank.preCalculateSimrank(dataSet);
+			objResponse = Centrality.main(MetricType, dataSet, node);
 		} catch (Exception e) {
-			objResponse = "Simrank Failed.<br>" + e.getMessage();
+			objResponse = "Graph Loading Failed!<br>Error Message: " + e.getMessage();
 		}
 
 		return objResponse;

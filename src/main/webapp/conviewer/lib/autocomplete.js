@@ -31,26 +31,27 @@ function checkNode(Node)
 }
 function checkEnable()
 {
-	if(document.getElementById('divSearch').style.visibility == 'visible')
+		if(document.getElementById('divSearch').style.visibility == 'visible')
 		{
-		document.getElementById("btnSubmit").className="btn btn-success disabled";
-		 
+			document.getElementById("btnSubmit").className="btn btn-success disabled";
 		}
-	else
+		else
 		{
-		 if(document.getElementById("btnNode1").className=="btn btn-warning disabled" && document.getElementById("btnNode2").className=="btn btn-warning disabled")
-		 {
-		  document.getElementById("btnSubmit").className="btn btn-success";
-		 }
-	 else
-		 {
-		 document.getElementById("btnSubmit").className="btn btn-success disabled";
-		 }
+			 if(document.getElementById("btnNode1").className=="btn btn-warning disabled" && document.getElementById("btnNode2").className=="btn btn-warning disabled")
+			 {
+				 document.getElementById("btnSubmit").className="btn btn-success";
+			 }
+			 else
+			 {
+				 document.getElementById("btnSubmit").className="btn btn-success disabled";
+			 }
 		
 		}
 
 
 }
+
+
 function deleteChoice(selectedNode)
 {
 	 document.getElementById("input"+selectedNode).value = '';
@@ -97,13 +98,19 @@ function selectNode()
 	 document.cookie="selected"+selectedNode+"="+selectedURI;
 	 document.getElementById("btn"+selectedNode).className="btn btn-warning disabled"
 	 closeDialog();
-	 checkEnable(); 
+	 
+	 
+	 if($('#pagetype').val() == "centrality"){
+		 // this function is defined in centrality.html
+		 enableCalculateButton();
+	 }
+	 else{
+		 // it's conviewer
+		 checkEnable(); 
+	 }
  }
- 
- 
-
-
 }
+
 function closeDialog()
 {
 	document.getElementById("listButton").className="btn btn-primary"

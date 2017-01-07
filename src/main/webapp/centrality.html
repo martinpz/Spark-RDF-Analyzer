@@ -17,13 +17,58 @@
 <script src="conviewer/lib/jquery.address-1.4.min.js"></script>
 <script src="conviewer/lib/arbor.js"></script>
 <script>
-function getDegree(){
+function calculateCentralityMetric(){
+
+	
+	// show searching label and disable button from further submit clicks.	
+	document.getElementById('divSearch').style.visibility = 'visible';		
+	enableCalculateButton();
+
+	
 	/*
 	*
-	*	get degree type i.e in-degree, out-degree.
-	*	
+	*		Step 1: Get the graphName
+	*		Step 2: Get the selected Node
+	*		Step 3: Get selected Metric
+	*		Step 4: Make an http request
 	*/
 
+	// step 1
+	var selectedGraphValue = getCookie('graphName');
+
+	// step 2
+	var Node1 = getCookie('selectedNode1');
+	Node1 = Node1.replaceAll("/","$");
+	Node1 = Node1.replaceAll("#","&");
+	
+	// step 3
+	var metric = $('input[name=optradio]:checked').val();
+
+	// step 4
+	var xhttp = new XMLHttpRequest();
+	
+	xhttp.onreadystatechange = function() {
+		if (xhttp.readyState == 4 && xhttp.status == 200) {
+			console.log(xhttp.responseText);
+		}
+	}
+	
+	xhttp.open("GET", REST_API + "calculateCentrality/" + graphName +"/"+ Node1 +"/"+ metric, true);
+	xhttp.send();
+	
+	
+}
+//this is for the centrality page.
+function enableCalculateButton(){
+
+	if(document.getElementById('divSearch').style.visibility == 'visible')
+	{
+		document.getElementById("btnSubmit").className="btn btn-success disabled";
+	}
+	else
+	{
+		document.getElementById("btnSubmit").className="btn btn-success";
+	}
 }
 </script>
 <!-- 
@@ -80,6 +125,9 @@ keyframes ellipsis {to { width:20px;
 
 <body onload="getGraphName()" background="./img/bg.jpg"
 	style="-webkit-background-size: cover; -moz-background-size: cover; -o-background-size: cover; background-size: cover;">
+
+	<input type="hidden" value="centrality" id="pagetype" />
+
 	<div class="navbar navbar-inverse" style="background-color: rgba(70, 130, 180, 0.95);">
 		<div class="navbar-header">
 			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-inverse-collapse">
@@ -138,23 +186,23 @@ keyframes ellipsis {to { width:20px;
 					<section class="centrality_metrics" style="margin:20px">
 					<label><span class="glyphicon glyphicon-pushpin" aria-hidden="true"></span> Metric:</label>
 						<div class="radio">
-						  <label><input type="radio" name="optradio">In degree</label>
+						  <label><input type="radio" value="1" checked="checked" name="optradio">In degree</label>
 						</div>
 						<div class="radio">
-						  <label><input type="radio" name="optradio">Out degree</label>
+						  <label><input type="radio" value="2" name="optradio">Out degree</label>
 						</div>
 						<div class="radio">
-						  <label><input type="radio" name="optradio">Closeness Centrality</label>
+						  <label><input type="radio" value="3" name="optradio">Betweenness Centrality</label>
 						</div>
 						<div class="radio">
-						  <label><input type="radio" name="optradio">Betweenness Centrality</label>
+						  <label><input type="radio" value="4" name="optradio">Closeness Centrality</label>
 						</div>
 					</section>
 				</div>
 			</div>
 			<div class="form-group" style="margin: 20px">
 				<label> <a class="btn btn-success disabled" id="btnSubmit" role="button" data-loading-text="Searching for connectons..."
-					onClick="startJob()"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Calculate</a>
+					onClick="calculateCentralityMetric()"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Calculate</a>
 				</label>
 			</div>
 			<div id="divSearch" style="visibility: hidden;" class="loading">

@@ -9,19 +9,6 @@
 <script type="text/javascript" src="js/app-config.js"></script>
 <script type="text/javascript">
 
-	function calculateSimrank(graphName) {
-		var xhttp = new XMLHttpRequest();
-	
-		xhttp.onreadystatechange = function() {
-			if (xhttp.readyState == 4 && xhttp.status == 200) {
-				console.log(xhttp.responseText);
-			}
-		}
-	
-		xhttp.open("GET", REST_API + "applySimrank/" + graphName, true);
-		xhttp.send();
-	}
-	calculateSimrank(getCookie('graphName'));
 
 	function getGraphName() {
 		var name = getCookie('graphName');
