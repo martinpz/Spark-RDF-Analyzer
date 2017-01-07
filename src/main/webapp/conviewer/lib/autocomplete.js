@@ -124,7 +124,7 @@ function getCookie(name) {
 function startJob()
 {
 
-	document.getElementById('divSearch').style.visibility = 'visible';		
+  document.getElementById('divSearch').style.visibility = 'visible';		
   var xhttp = new XMLHttpRequest();
    
   var selectedGraphValue = getCookie('graphName');
@@ -139,6 +139,7 @@ function startJob()
   var Predicate = $('input[name="radioPredicate"]:checked').val()+"--";
   var ul = document.getElementById("predicatesUL");
   var items = ul.getElementsByTagName("li");
+  
   for (var i = 0; i < items.length; ++i) {
     var fullN = items[i].getAttribute('fullName');
 	fullN = fullN.replaceAll("/","$");
