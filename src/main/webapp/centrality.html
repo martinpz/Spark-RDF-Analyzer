@@ -186,21 +186,30 @@ keyframes ellipsis {to { width:20px;
 			</div>
 			<div class="font" id="right">
 				<div class="parent">
-					<section class="centrality_metrics" style="margin:20px">
-					<label><span class="glyphicon glyphicon-pushpin" aria-hidden="true"></span> Metric:</label>
-						<div class="radio">
-						  <label><input type="radio" value="1" checked="checked" name="metricRadio">In degree</label>
+					<div class="font" id="left" style="width:55%;">
+						<section class="centrality_metrics" style="margin:20px">
+						<label><span class="glyphicon glyphicon-pushpin" aria-hidden="true"></span> Metric:</label>
+							<div class="radio">
+							  <label><input type="radio" value="1" checked="checked" name="metricRadio">In degree</label>
+							</div>
+							<div class="radio">
+							  <label><input type="radio" value="2" name="metricRadio">Out degree</label>
+							</div>
+							<div class="radio">
+							  <label><input type="radio" value="3" name="metricRadio">Betweenness Centrality</label>
+							</div>
+							<div class="radio">
+							  <label><input type="radio" value="4" name="metricRadio">Closeness Centrality</label>
+							</div>
+						</section>
+					</div>
+					<div class="font" id="right" style="width:45%;margin-top:7%;">
+						<label><span class="glyphicon glyphicon-pushpin" aria-hidden="true"></span> Result:</label>
+						<div id="" class="alert alert-info" style="text-align:center;">
+							<h1>12378123</h1>
 						</div>
-						<div class="radio">
-						  <label><input type="radio" value="2" name="metricRadio">Out degree</label>
-						</div>
-						<div class="radio">
-						  <label><input type="radio" value="3" name="metricRadio">Betweenness Centrality</label>
-						</div>
-						<div class="radio">
-						  <label><input type="radio" value="4" name="metricRadio">Closeness Centrality</label>
-						</div>
-					</section>
+					</div>
+				
 				</div>
 			</div>
 			<div class="form-group" style="margin: 20px">
