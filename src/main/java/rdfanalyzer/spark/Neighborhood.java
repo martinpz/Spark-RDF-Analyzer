@@ -47,7 +47,7 @@ public class Neighborhood {
 
 		JSONObject jsonObj = new JSONObject();
 
-		jsonObj.put("neighborMaybe", "This/is/a/simple/test");
+		jsonObj.put("neighborTest", "This/is/a/simple/test");
 		jsonObj.put("neighborMaybe", "Here/is/another/URI/maybe");
 
 		return jsonObj;
