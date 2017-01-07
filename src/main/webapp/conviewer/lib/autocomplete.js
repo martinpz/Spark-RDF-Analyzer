@@ -70,7 +70,7 @@ function deletePredicate(Predicate)
 }
 function selectNode()
 {
- var selectedText = $('input[name="optradio"]:checked').val().split(":");	
+ var selectedText = $('input[name="optradio"]:checked').val().split(":");
  var selectedValue = selectedText[0];
  var selectedURI = selectedText[1]+":"+selectedText[2];
  var selectedNode = document.getElementById("myModalLabel").getAttribute('nodeName');
@@ -206,9 +206,9 @@ function getResult()
 				document.getElementById('viewport').height=500;
 	        }
 	        else
-	        	{
-	        	
-	        	}
+        	{
+        	
+        	}
 		    
 			
 			

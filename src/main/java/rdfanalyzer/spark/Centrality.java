@@ -4,36 +4,36 @@ public class Centrality {
 	
 	public static String main(String metricType,String dataset, String nodeName){
 		
-		if(metricType == "1"){
+		if(metricType.equals("1")){
 			return CalculateInDegree(nodeName);
 		}
-		else if(metricType == "2"){
+		else if(metricType.equals("2")){
 			return CalculateOutDegree(nodeName);
 		}
-		else if(metricType == "3"){
+		else if(metricType.equals("3")){
 			return CalculateBetweenness(nodeName);
 		}
-		else if(metricType == "4"){
+		else if(metricType.equals("4")){
 			return CalculateCloseness(nodeName);
 		}
 		
-		return "";
+		return "none";
 	}
 	
 	public static String CalculateInDegree(String node){
-		return "";
+		return "in degree";
 	}
 	public static String CalculateOutDegree(String node){
-		return "";
+		return "out degree";
 	}
 	
 	public static String CalculateBetweenness(String node){
 		
-		return "";
+		return "betweenness";
 	}
 	public static String CalculateCloseness(String node){
 		
-		return "";
+		return "closeness";
 	}
 
 }

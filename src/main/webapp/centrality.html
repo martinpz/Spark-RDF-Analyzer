@@ -17,6 +17,9 @@
 <script src="conviewer/lib/jquery.address-1.4.min.js"></script>
 <script src="conviewer/lib/arbor.js"></script>
 <script>
+String.prototype.replaceAll = function(target, replacement) {
+	return this.split(target).join(replacement);
+};
 function calculateCentralityMetric(){
 
 	
@@ -34,7 +37,7 @@ function calculateCentralityMetric(){
 	*/
 
 	// step 1
-	var selectedGraphValue = getCookie('graphName');
+	var graphName = getCookie('graphName');
 
 	// step 2
 	var Node1 = getCookie('selectedNode1');
@@ -42,7 +45,7 @@ function calculateCentralityMetric(){
 	Node1 = Node1.replaceAll("#","&");
 	
 	// step 3
-	var metric = $('input[name=optradio]:checked').val();
+	var metric = $('input[name=metricRadio]:checked').val();
 
 	// step 4
 	var xhttp = new XMLHttpRequest();
@@ -186,16 +189,16 @@ keyframes ellipsis {to { width:20px;
 					<section class="centrality_metrics" style="margin:20px">
 					<label><span class="glyphicon glyphicon-pushpin" aria-hidden="true"></span> Metric:</label>
 						<div class="radio">
-						  <label><input type="radio" value="1" checked="checked" name="optradio">In degree</label>
+						  <label><input type="radio" value="1" checked="checked" name="metricRadio">In degree</label>
 						</div>
 						<div class="radio">
-						  <label><input type="radio" value="2" name="optradio">Out degree</label>
+						  <label><input type="radio" value="2" name="metricRadio">Out degree</label>
 						</div>
 						<div class="radio">
-						  <label><input type="radio" value="3" name="optradio">Betweenness Centrality</label>
+						  <label><input type="radio" value="3" name="metricRadio">Betweenness Centrality</label>
 						</div>
 						<div class="radio">
-						  <label><input type="radio" value="4" name="optradio">Closeness Centrality</label>
+						  <label><input type="radio" value="4" name="metricRadio">Closeness Centrality</label>
 						</div>
 					</section>
 				</div>

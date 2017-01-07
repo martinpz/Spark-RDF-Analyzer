@@ -48,11 +48,13 @@ public class WebService {
 			@PathParam("Type") String MetricType) {
 
 		String objResponse = "";
-
+		System.out.println("called calculateCentrality");
+		System.out.println(MetricType);
+		
 		try {
 			objResponse = Centrality.main(MetricType, dataSet, node);
 		} catch (Exception e) {
-			objResponse = "Graph Loading Failed!<br>Error Message: " + e.getMessage();
+			objResponse = "Error !<br>Error Message: " + e.getMessage();
 		}
 
 		return objResponse;
