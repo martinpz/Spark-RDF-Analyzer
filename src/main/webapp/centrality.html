@@ -53,6 +53,11 @@ function calculateCentralityMetric(){
 	xhttp.onreadystatechange = function() {
 		if (xhttp.readyState == 4 && xhttp.status == 200) {
 			console.log(xhttp.responseText);
+			$('#centrality_result').html(xhttp.responseText);
+
+			document.getElementById('divSearch').style.visibility = 'hidden';		
+			enableCalculateButton();
+
 		}
 	}
 	
@@ -205,8 +210,7 @@ keyframes ellipsis {to { width:20px;
 					</div>
 					<div class="font" id="right" style="width:45%;margin-top:7%;">
 						<label><span class="glyphicon glyphicon-pushpin" aria-hidden="true"></span> Result:</label>
-						<div id="" class="alert alert-info" style="text-align:center;">
-							<h1>12378123</h1>
+						<div id="centrality_result" class="alert alert-info" style="text-align:center;">
 						</div>
 					</div>
 				
