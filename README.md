@@ -81,12 +81,6 @@ This way we can ensure that real credentials are hidden from public and excluded
         </profiles>
 </settings>
 ```
-## Things to Note
-
-While deploying the war file to the container by running the eclipse java program you might get into the problem that the `sib200Ranking.parquet` file will not be generated. 
-
-If this happens, one possible cause of the problem is `line 37` of the `CaluculateRanking.java` which is responsible for generating the ranking file on a path on the cluster. Just comment it out and uncomment the `line 40` which is responsible for generating the ranking file on localhost path. 
-
 ## Run the Spark RDF Analyzer
 - Check out the project and import it into eclipse as a maven project.
 - Set up a new run configuration for it. 
