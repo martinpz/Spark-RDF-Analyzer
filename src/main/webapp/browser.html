@@ -74,8 +74,8 @@
 				<p>Enter a node's name and click button 'Search'.</p>
 				<input type="text" class="form-control" id="entryNode" style="width: 300px; display: inline;"> <a href="#"
 					class="btn btn-warning" id="btnSearch" onClick="showAutocompletionModal()" role="button" data-toggle="modal" data-target="#modal"
-					style="width: 120px; margin-left: 10px; margin-top: -2px;"><span class="glyphicon glyphicon-search" aria-hidden="true"></span>
-					Search</a>
+					data-backdrop="static" data-keyboard="false" style="width: 120px; margin-left: 10px; margin-top: -2px;"><span
+					class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</a>
 			</div>
 
 			<div id="suggestions">
@@ -99,7 +99,7 @@
 				<div class="modal-footer">
 					<button type="button" id="btnCancelModal" class="btn btn-default" data-dismiss="modal">Cancel</button>
 					<button type="button" id="btnStartBrowsing" class="btn btn-primary" onClick="startBrowsing(event)" data-toggle="modal"
-						data-target="#browserModal">Start Browsing</button>
+						data-target="#browserModal" data-backdrop="static" data-keyboard="false">Start Browsing</button>
 				</div>
 			</div>
 		</div>
