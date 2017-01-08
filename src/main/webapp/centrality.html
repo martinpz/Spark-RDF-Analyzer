@@ -37,15 +37,15 @@ function calculateCentralityMetric(){
 	*/
 
 	// step 1
-	var graphName = getCookie('graphName');
+	//var graphName = getCookie('graphName');
 
 	// step 2
-	var Node1 = getCookie('selectedNode1');
-	Node1 = Node1.replaceAll("/","$");
-	Node1 = Node1.replaceAll("#","&");
+	//var Node1 = getCookie('selectedNode1');
+	//Node1 = Node1.replaceAll("/","$");
+	//Node1 = Node1.replaceAll("#","&");
 	
 	// step 3
-	var metric = $('input[name=metricRadio]:checked').val();
+	//var metric = $('input[name=metricRadio]:checked').val();
 
 	// step 4
 	var xhttp = new XMLHttpRequest();
@@ -61,6 +61,9 @@ function calculateCentralityMetric(){
 		}
 	}
 	
+	var graphName = "sib200";
+	var Node1 = "<http:$$www.ins.cwi.nl$sib$user$u62>";
+	var metric = "4";
 	xhttp.open("GET", REST_API + "calculateCentrality/" + graphName +"/"+ Node1 +"/"+ metric, true);
 	xhttp.send();
 	
@@ -217,7 +220,7 @@ keyframes ellipsis {to { width:20px;
 				</div>
 			</div>
 			<div class="form-group" style="margin: 20px">
-				<label> <a class="btn btn-success disabled" id="btnSubmit" role="button" data-loading-text="Searching for connectons..."
+				<label> <a class="btn btn-success" id="btnSubmit" role="button" data-loading-text="Searching for connectons..."
 					onClick="calculateCentralityMetric()"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Calculate</a>
 				</label>
 			</div>
