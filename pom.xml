@@ -70,7 +70,6 @@
 			<artifactId>hadoop-client</artifactId>
 			<version>${hadoop.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-core_2.10</artifactId>
@@ -105,6 +104,12 @@
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.17</version>
+		</dependency>
+
+		<dependency>
+		   <groupId>com.revelytix</groupId>
+		   <artifactId>spark-http-client</artifactId>
+		   <version>0.1.7</version>
 		</dependency>
 	</dependencies>
 

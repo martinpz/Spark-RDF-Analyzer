@@ -12,17 +12,24 @@ public class Centrality {
 		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + dataset + ".parquet");
 		graphFrame.cache().registerTempTable("Graph");
 
+		nodeName = nodeName.replace("$", "/");
 		
+		System.out.println("[LOGS] Node name= "+nodeName);
+
 		if(metricType.equals("1")){
+			System.out.println("[LOGS] Present in metric type 1");
 			return CalculateInDegree(nodeName);
 		}
 		else if(metricType.equals("2")){
+			System.out.println("[LOGS] Present in metric type 2");
 			return CalculateOutDegree(nodeName);
 		}
 		else if(metricType.equals("3")){
+			System.out.println("[LOGS] Present in metric type 3");
 			return CalculateBetweenness(nodeName);
 		}
 		else if(metricType.equals("4")){
+			System.out.println("[LOGS] Present in metric type 4");
 			return CalculateCloseness(nodeName);
 		}
 		
@@ -32,8 +39,9 @@ public class Centrality {
 	public static String CalculateInDegree(String node){
 
 		String result = "";
-		System.out.println(node);
 		// Run SQL over loaded Graph.
+		
+
 		DataFrame resultsFrame = Service.sqlCtx().sql("SELECT COUNT(object) FROM Graph WHERE object = '"+node+"'");
 		Row[] rows = resultsFrame.collect();
 
