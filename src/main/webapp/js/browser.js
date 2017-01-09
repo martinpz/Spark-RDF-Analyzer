@@ -65,7 +65,9 @@ function prepareBrowser(selectedValue, centralNode) {
 		}
 	}
 
-	xhttp.open('GET', getAPIEndpoint(centralNode), true);
+	xhttp.open('GET', REST_API + 'directNeighbors/' + getCookie('graphName')
+			+ '?centralNode=' + encodeURIComponent(centralNode)
+			+ '&numNeighbors=5', true);
 	xhttp.send();
 }
 
@@ -101,11 +103,6 @@ function displayNodes(centralNode, neighbors) {
 }
 
 // ########################## Utility Functions ##########################
-function getAPIEndpoint(node, numNeighbors) {
-	return REST_API + 'directNeighbors/' + getCookie('graphName')
-			+ '?centralNode=' + encodeURIComponent(node) + '&numNeighbors=5';
-}
-
 function getGraphName() {
 	$('#GraphName').html(getCookie('graphName'));
 }
