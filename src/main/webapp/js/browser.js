@@ -71,14 +71,16 @@ function displayNodes(centralNode, neighbors) {
 	console.log('Received message ...');
 	console.log('CentralNode=' + centralNode);
 	console.log(neighbors);
+	console.log('-------------------------');
 
+	// Remove < and > from URI.
 	var toShow = '<p><strong>Central Node: ' + centralNode.slice(1, -1)
 			+ '</strong></p>';
 
-	$.each(neighbors, function(key, neighbor) {
-		var link = neighbor.slice(1, -1);
-
-		toShow += '<a href="' + link + '">' + link + '</a>';
+	$.each(neighbors, function(URI, name) {
+		toShow += '<a href="#" onclick="';
+		toShow += 'prepareBrowser(\'' + name + '\', \'' + URI + '\')';
+		toShow += '">' + name + '</a>';
 		toShow += '<br>';
 	});
 

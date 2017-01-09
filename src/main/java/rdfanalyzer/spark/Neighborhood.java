@@ -47,7 +47,8 @@ public class Neighborhood {
 		JSONObject jsonObj = new JSONObject();
 
 		for (String neighbor : queryNeighbors(graph, centralNode, num)) {
-			jsonObj.put(neighbor, neighbor);
+			// Add element to neighbors (URI => name)
+			jsonObj.put(neighbor, RDFgraph.shortenURI(neighbor));
 		}
 
 		return jsonObj;
