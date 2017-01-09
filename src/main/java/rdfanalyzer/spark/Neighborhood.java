@@ -52,7 +52,7 @@ public class Neighborhood {
 			JSONObject jsonNeighbor = new JSONObject(neighbor);
 
 			// Add element to neighbors. Format "URI" => {properties}
-			neighbors.put(jsonNeighbor.getString("uri"), jsonNeighbor);
+			neighbors.put(jsonNeighbor.getString("URI"), jsonNeighbor);
 		}
 
 		return neighbors;
@@ -106,16 +106,15 @@ public class Neighborhood {
 		sb.append("SELECT object AS neighbor, predicate AS connection, 'out' AS direction ");
 		sb.append("FROM Graph ");
 		sb.append("WHERE subject='" + centralNode + "' ");
+		sb.append("LIMIT " + num);
 
 		// ... combine these with ...
-		sb.append("UNION ");
+		sb.append(" UNION ");
 
 		// ... all nodes which have the central node as target.
 		sb.append("SELECT subject AS neighbor, predicate AS connection, 'in' AS direction ");
 		sb.append("FROM Graph ");
 		sb.append("WHERE object='" + centralNode + "' ");
-
-		// Limit the number of results to passed value.
 		sb.append("LIMIT " + num);
 
 		return sb.toString();
@@ -137,9 +136,9 @@ public class Neighborhood {
 		String predicate = row.getString(1);
 		String direction = row.getString(2);
 
-		neighbor.put("uri", URI);
+		neighbor.put("URI", URI);
 		neighbor.put("name", RDFgraph.shortenURI(URI));
-		neighbor.put("predicate-uri", predicate);
+		neighbor.put("predicateURI", predicate);
 		neighbor.put("predicate", RDFgraph.shortenURI(predicate));
 		neighbor.put("direction", direction);
 

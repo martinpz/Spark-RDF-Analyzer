@@ -50,28 +50,29 @@ function startBrowsing(event) {
 }
 
 // ########################## RDF Browser ##########################
-function prepareBrowser(selectedValue, centralNode) {
+function prepareBrowser(centralNode, centralNodeURI) {
 	var xhttp = new XMLHttpRequest();
 
-	updateBrowsingHistory(selectedValue, centralNode);
+	updateBrowsingHistory(centralNode, centralNodeURI);
 
 	$('#browserModalBody').html(
-			'<p>Computing the neighbors for ' + selectedValue + ' ...</p>'
+			'<p>Computing the neighbors for ' + centralNode + ' ...</p>'
 					+ loader);
 
 	xhttp.onreadystatechange = function() {
 		if (xhttp.readyState == 4 && xhttp.status == 200) {
-			displayNodes(centralNode, JSON.parse(xhttp.responseText));
+			displayNodes(centralNode, centralNodeURI, JSON
+					.parse(xhttp.responseText));
 		}
 	}
 
 	xhttp.open('GET', REST_API + 'directNeighbors/' + getCookie('graphName')
-			+ '?centralNode=' + encodeURIComponent(centralNode)
-			+ '&numNeighbors=5', true);
+			+ '?centralNode=' + encodeURIComponent(centralNodeURI)
+			+ '&numNeighbors=12', true);
 	xhttp.send();
 }
 
-function updateBrowsingHistory(currentName, currentNode) {
+function updateBrowsingHistory(currentName, currentURI) {
 	// Add link to pre-last element. Remove active marker.
 	var lastNode = $('#browsingHistory #list li').last();
 	var lastURI = lastNode.attr('data-uri');
@@ -83,20 +84,41 @@ function updateBrowsingHistory(currentName, currentNode) {
 
 	// Append new last (= current) element. Make it active.
 	$('#browsingHistory #list').append(
-			'<li class="active" data-uri="' + currentNode + '">' + currentName
+			'<li class="active" data-uri="' + currentURI + '">' + currentName
 					+ '</li>');
 }
 
-function displayNodes(centralNode, neighbors) {
+function displayNodes(centralNode, centralNodeURI, neighbors) {
 	// Remove < and > from URI.
-	var toShow = '<p><strong>Central Node: ' + centralNode.slice(1, -1)
-			+ '</strong></p>';
+	var toShow = '<p><strong>Central Node:</strong> <a href="'
+			+ centralNodeURI.slice(1, -1) + '">' + centralNodeURI.slice(1, -1)
+			+ '</a></p>';
 
 	$.each(neighbors, function(URI, props) {
-		toShow += '<a href="#" onclick="';
-		toShow += 'prepareBrowser(\'' + props.name + '\', \'' + URI + '\')';
-		toShow += '">' + props.name + '</a>';
-		toShow += '<br>';
+		// An arrow. Indicating if central node is source or target.
+		// Right arrow = central node is source.
+		var direction = props.direction == 'out' ? 'right' : 'left';
+		var arrow = '<span class="glyphicon glyphicon-circle-arrow-'
+				+ direction + '" style="margin-right: 10px;"></span>';
+
+		var showCentralNode = '<span style="margin-right: 5px;">' + centralNode
+				+ '</span>';
+
+		// The type of the connection, e.g. the predicate.
+		var type = '<a href="' + props.predicateURI.slice(1, -1)
+				+ '" target="_blank" style="margin-right: 5px;">'
+				+ props.predicate + '</a>';
+
+		// The link to browse to the neighbor node.
+		var neighbor = '<a href="#" onclick="' + 'prepareBrowser(\''
+				+ props.name + '\', \'' + URI + '\')'
+				+ '" style="margin-right: 5px;">' + props.name + '</a>';
+
+		// Central node is source => write it left, otherwise right
+		toShow += '<div>' + arrow;
+		toShow += direction == 'right' ? showCentralNode + type + neighbor
+				: neighbor + type + showCentralNode;
+		toShow += '</div>';
 	});
 
 	$('#browserModalBody').html(toShow);
