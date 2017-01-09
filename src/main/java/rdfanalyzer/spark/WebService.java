@@ -335,8 +335,7 @@ public class WebService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getDirectNeighbors(@PathParam("graph") String graph,
 			@DefaultValue("") @QueryParam("centralNode") String centralNode,
-			@DefaultValue("5") @QueryParam("numNeighbors") int numNeighbors,
-			@DefaultValue("1") @QueryParam("distance") int distance) throws UnsupportedEncodingException {
+			@DefaultValue("5") @QueryParam("numNeighbors") int numNeighbors) throws UnsupportedEncodingException {
 		// Only compute neighbors when central node is selected.
 		if (centralNode.isEmpty()) {
 			throw new IllegalArgumentException("You MUST specifiy a central node.");
@@ -346,7 +345,7 @@ public class WebService {
 		centralNode = URLDecoder.decode(centralNode, "UTF-8");
 
 		// Actually compute the neighbors.
-		JSONObject neighbors = Neighborhood.getNeighbors(graph, centralNode, numNeighbors, distance);
+		JSONObject neighbors = Neighborhood.getNeighbors(graph, centralNode, numNeighbors);
 
 		// Return the response to the client.
 		return Response.ok().entity("" + neighbors).build();

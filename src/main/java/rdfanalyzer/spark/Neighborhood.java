@@ -16,6 +16,11 @@
 
 package rdfanalyzer.spark;
 
+import java.util.List;
+
+import org.apache.spark.api.java.function.Function;
+import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Row;
 import org.json.JSONObject;
 
 /**
@@ -31,25 +36,43 @@ public class Neighborhood {
 	 *            The URI of the central node.
 	 * @param num
 	 *            How many neighbors to return.
-	 * @param distance
-	 *            How far away a neighbor may be.
 	 * 
 	 * @return A JSONObject of the URIs of the neighbors.
 	 */
-	public static JSONObject getNeighbors(String graph, String centralNode, int num, int distance) {
+	public static JSONObject getNeighbors(String graph, String centralNode, int num) {
 		if (num <= 0) {
 			throw new IllegalArgumentException("Requested number of neighbors must be greater than zero.");
 		}
 
-		if (distance <= 0) {
-			throw new IllegalArgumentException("Distance must be greater than zero.");
-		}
-
 		JSONObject jsonObj = new JSONObject();
 
-		jsonObj.put("neighborTest", "This/is/a/simple/test");
-		jsonObj.put("neighborMaybe", "Here/is/another/URI/maybe");
+		for (String neighbor : queryNeighbors(graph, centralNode, num)) {
+			jsonObj.put(neighbor, neighbor);
+		}
 
 		return jsonObj;
+	}
+
+	private static List<String> queryNeighbors(String graph, String centralNode, int num) {
+		// Read graph from parquet
+		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + graph + ".parquet");
+		graphFrame.cache().registerTempTable("Graph");
+
+		// Run neighbor query over loaded graph.
+		DataFrame resultsFrame = Service.sqlCtx()
+				.sql("SELECT subject AS neighbor " + "FROM Graph " + "WHERE object='" + centralNode + "'" + " UNION "
+						+ "SELECT object AS neighbor " + "FROM Graph " + "WHERE subject='" + centralNode + "'"
+						+ " LIMIT " + num);
+
+		// Collect neighbors from result.
+		@SuppressWarnings("serial")
+		List<String> neighbors = resultsFrame.javaRDD().map(new Function<Row, String>() {
+			@Override
+			public String call(Row row) {
+				return row.getString(0);
+			}
+		}).collect();
+
+		return neighbors;
 	}
 }
