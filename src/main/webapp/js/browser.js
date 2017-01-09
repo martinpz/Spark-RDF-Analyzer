@@ -86,11 +86,6 @@ function updateBrowsingHistory(currentName, currentNode) {
 }
 
 function displayNodes(centralNode, neighbors) {
-	console.log('Received message ...');
-	console.log('CentralNode=' + centralNode);
-	console.log(neighbors);
-	console.log('-------------------------');
-
 	// Remove < and > from URI.
 	var toShow = '<p><strong>Central Node: ' + centralNode.slice(1, -1)
 			+ '</strong></p>';
