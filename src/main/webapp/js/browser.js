@@ -51,7 +51,6 @@ function startBrowsing(event) {
 
 // ########################## RDF Browser ##########################
 function prepareBrowser(selectedValue, centralNode) {
-	var numNeighbors = 5;
 	var xhttp = new XMLHttpRequest();
 
 	$('#browserModalBody').html(
@@ -64,9 +63,7 @@ function prepareBrowser(selectedValue, centralNode) {
 		}
 	}
 
-	xhttp.open('GET', REST_API + 'directNeighbors/' + getCookie('graphName')
-			+ '?centralNode=' + encodeURIComponent(centralNode)
-			+ '&numNeighbors=' + numNeighbors, true);
+	xhttp.open('GET', getAPIEndpoint(centralNode), true);
 	xhttp.send();
 }
 
@@ -89,6 +86,11 @@ function displayNodes(centralNode, neighbors) {
 }
 
 // ########################## Utility Functions ##########################
+function getAPIEndpoint(node, numNeighbors) {
+	return REST_API + 'directNeighbors/' + getCookie('graphName')
+			+ '?centralNode=' + encodeURIComponent(node) + '&numNeighbors=5';
+}
+
 function getGraphName() {
 	$('#GraphName').html(getCookie('graphName'));
 }
