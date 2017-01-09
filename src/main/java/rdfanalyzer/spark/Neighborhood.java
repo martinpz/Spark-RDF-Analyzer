@@ -31,7 +31,7 @@ public class Neighborhood {
 	 * Computes the neighbors w.r.t. their distance and amount.
 	 * 
 	 * @param graph
-	 *            The name of the graph to use.
+	 *            The name of the graph to query from.
 	 * @param centralNode
 	 *            The URI of the central node.
 	 * @param num
@@ -58,6 +58,18 @@ public class Neighborhood {
 		return neighbors;
 	}
 
+	/**
+	 * Queries the neighbors from the graph.
+	 * 
+	 * @param graph
+	 *            The name of the graph to query from.
+	 * @param centralNode
+	 *            The URI of the central node.
+	 * @param num
+	 *            How many neighbors to return.
+	 * 
+	 * @return A List of JSON represented neighbors.
+	 */
 	private static List<String> queryNeighbors(String graph, String centralNode, int num) {
 		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + graph + ".parquet");
 		graphFrame.cache().registerTempTable("Graph");
@@ -75,6 +87,18 @@ public class Neighborhood {
 		return neighbors;
 	}
 
+	/**
+	 * Builds the SQL query to find all neighbors.
+	 * 
+	 * @param graph
+	 *            The name of the graph to query from.
+	 * @param centralNode
+	 *            The URI of the central node.
+	 * @param num
+	 *            How many neighbors to return.
+	 * 
+	 * @return The query String.
+	 */
 	private static String getSQLQuery(String graph, String centralNode, int num) {
 		StringBuilder sb = new StringBuilder();
 
