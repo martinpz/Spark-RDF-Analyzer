@@ -60,24 +60,32 @@ function prepareBrowser(selectedValue, centralNode) {
 
 	xhttp.onreadystatechange = function() {
 		if (xhttp.readyState == 4 && xhttp.status == 200) {
-			displayNodes(centralNode, xhttp.responseText);
+			displayNodes(centralNode, JSON.parse(xhttp.responseText));
 		}
 	}
 
 	xhttp.open('GET', REST_API + 'directNeighbors/' + getCookie('graphName')
 			+ '?centralNode=' + encodeURIComponent(centralNode)
-			+ '&numNeighbors=' + numNeighbors + '&distance=1', true);
+			+ '&numNeighbors=' + numNeighbors, true);
 	xhttp.send();
 }
 
 function displayNodes(centralNode, neighbors) {
 	console.log('Received message ...');
 	console.log('CentralNode=' + centralNode);
-	console.log('--- neighbors ---');
 	console.log(neighbors);
 
-	$('#browserModalBody').text('Central Node: ' + centralNode);
-	$('#browserModalBody').after('<div>' + neighbors + '</div>');
+	var toShow = '<p><strong>Central Node: ' + centralNode.slice(1, -1)
+			+ '</strong></p>';
+
+	$.each(neighbors, function(key, neighbor) {
+		var link = neighbor.slice(1, -1);
+
+		toShow += '<a href="' + link + '">' + link + '</a>';
+		toShow += '<br>';
+	});
+
+	$('#browserModalBody').html(toShow);
 }
 
 // ########################## Utility Functions ##########################
