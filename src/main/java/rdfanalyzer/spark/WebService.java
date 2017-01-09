@@ -16,9 +16,19 @@
 
 package rdfanalyzer.spark;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.MediaType;
+
+import org.json.JSONObject;
 
 /**
  * This class is the REST web service which handles front end requests by
@@ -318,5 +328,26 @@ public class WebService {
 		}
 
 		return objResponse;
+	}
+
+	@GET
+	@Path("/directNeighbors/{graph}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getDirectNeighbors(@PathParam("graph") String graph,
+			@DefaultValue("") @QueryParam("centralNode") String centralNode,
+			@DefaultValue("5") @QueryParam("numNeighbors") int numNeighbors) throws UnsupportedEncodingException {
+		// Only compute neighbors when central node is selected.
+		if (centralNode.isEmpty()) {
+			throw new IllegalArgumentException("You MUST specifiy a central node.");
+		}
+
+		// Decode node URI.
+		centralNode = URLDecoder.decode(centralNode, "UTF-8");
+
+		// Actually compute the neighbors.
+		JSONObject neighbors = Neighborhood.getNeighbors(graph, centralNode, numNeighbors);
+
+		// Return the response to the client.
+		return Response.ok().entity("" + neighbors).build();
 	}
 }
