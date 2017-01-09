@@ -24,7 +24,7 @@ import org.apache.spark.sql.Row;
 import org.json.JSONObject;
 
 /**
- * This class uses a detailed and advanced method to calculate number of nodes.
+ * This class is for computation of neighborhoods.
  */
 public class Neighborhood {
 	/**
