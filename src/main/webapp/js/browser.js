@@ -53,6 +53,8 @@ function startBrowsing(event) {
 function prepareBrowser(selectedValue, centralNode) {
 	var xhttp = new XMLHttpRequest();
 
+	updateBrowsingHistory(selectedValue, centralNode);
+
 	$('#browserModalBody').html(
 			'<p>Computing the neighbors for ' + selectedValue + ' ...</p>'
 					+ loader);
@@ -65,6 +67,22 @@ function prepareBrowser(selectedValue, centralNode) {
 
 	xhttp.open('GET', getAPIEndpoint(centralNode), true);
 	xhttp.send();
+}
+
+function updateBrowsingHistory(currentName, currentNode) {
+	// Add link to pre-last element. Remove active marker.
+	var lastNode = $('#browsingHistory #list li').last();
+	var lastURI = lastNode.attr('data-uri');
+	var lastName = lastNode.text();
+
+	lastNode.removeClass('active');
+	lastNode.html('<a href="#" onclick="' + 'prepareBrowser(\'' + lastName
+			+ '\', \'' + lastURI + '\')' + '">' + lastName + '</a>');
+
+	// Append new last (= current) element. Make it active.
+	$('#browsingHistory #list').append(
+			'<li class="active" data-uri="' + currentNode + '">' + currentName
+					+ '</li>');
 }
 
 function displayNodes(centralNode, neighbors) {
