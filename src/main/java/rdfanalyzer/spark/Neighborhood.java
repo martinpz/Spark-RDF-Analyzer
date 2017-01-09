@@ -37,43 +37,88 @@ public class Neighborhood {
 	 * @param num
 	 *            How many neighbors to return.
 	 * 
-	 * @return A JSONObject of the URIs of the neighbors.
+	 * @return A JSONObject mapping the URIs of the neighbors to a JSONObject of
+	 *         their properties for each neighbor.
 	 */
 	public static JSONObject getNeighbors(String graph, String centralNode, int num) {
 		if (num <= 0) {
 			throw new IllegalArgumentException("Requested number of neighbors must be greater than zero.");
 		}
 
-		JSONObject jsonObj = new JSONObject();
+		JSONObject neighbors = new JSONObject();
 
 		for (String neighbor : queryNeighbors(graph, centralNode, num)) {
-			// Add element to neighbors (URI => name)
-			jsonObj.put(neighbor, RDFgraph.shortenURI(neighbor));
+			// Convert the neighbor String back to a JSONObject.
+			JSONObject jsonNeighbor = new JSONObject(neighbor);
+
+			// Add element to neighbors. Format "URI" => {properties}
+			neighbors.put(jsonNeighbor.getString("uri"), jsonNeighbor);
 		}
 
-		return jsonObj;
+		return neighbors;
 	}
 
 	private static List<String> queryNeighbors(String graph, String centralNode, int num) {
-		// Read graph from parquet
 		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + graph + ".parquet");
 		graphFrame.cache().registerTempTable("Graph");
 
-		// Run neighbor query over loaded graph.
-		DataFrame resultsFrame = Service.sqlCtx()
-				.sql("SELECT subject AS neighbor " + "FROM Graph " + "WHERE object='" + centralNode + "'" + " UNION "
-						+ "SELECT object AS neighbor " + "FROM Graph " + "WHERE subject='" + centralNode + "'"
-						+ " LIMIT " + num);
+		DataFrame resultsFrame = Service.sqlCtx().sql(getSQLQuery(graph, centralNode, num));
 
-		// Collect neighbors from result.
 		@SuppressWarnings("serial")
 		List<String> neighbors = resultsFrame.javaRDD().map(new Function<Row, String>() {
 			@Override
 			public String call(Row row) {
-				return row.getString(0);
+				return convertSQLRowToJSON(row);
 			}
 		}).collect();
 
 		return neighbors;
+	}
+
+	private static String getSQLQuery(String graph, String centralNode, int num) {
+		StringBuilder sb = new StringBuilder();
+
+		// All nodes which have the central node as source ...
+		sb.append("SELECT object AS neighbor, predicate AS connection, 'out' AS direction ");
+		sb.append("FROM Graph ");
+		sb.append("WHERE subject='" + centralNode + "' ");
+
+		// ... combine these with ...
+		sb.append("UNION ");
+
+		// ... all nodes which have the central node as target.
+		sb.append("SELECT subject AS neighbor, predicate AS connection, 'in' AS direction ");
+		sb.append("FROM Graph ");
+		sb.append("WHERE object='" + centralNode + "' ");
+
+		// Limit the number of results to passed value.
+		sb.append("LIMIT " + num);
+
+		return sb.toString();
+	}
+
+	/**
+	 * Converts a SQL row with a neighbor node into a JSONObject, represented as
+	 * a String for serializability.
+	 * 
+	 * @param row
+	 *            The SQL row to convert.
+	 * @return The String representation of a JSONObject with the neighbors
+	 *         properties.
+	 */
+	private static String convertSQLRowToJSON(Row row) {
+		JSONObject neighbor = new JSONObject();
+
+		String URI = row.getString(0);
+		String predicate = row.getString(1);
+		String direction = row.getString(2);
+
+		neighbor.put("uri", URI);
+		neighbor.put("name", RDFgraph.shortenURI(URI));
+		neighbor.put("predicate-uri", predicate);
+		neighbor.put("predicate", RDFgraph.shortenURI(predicate));
+		neighbor.put("direction", direction);
+
+		return neighbor.toString();
 	}
 }

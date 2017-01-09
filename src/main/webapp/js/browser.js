@@ -92,10 +92,10 @@ function displayNodes(centralNode, neighbors) {
 	var toShow = '<p><strong>Central Node: ' + centralNode.slice(1, -1)
 			+ '</strong></p>';
 
-	$.each(neighbors, function(URI, name) {
+	$.each(neighbors, function(URI, props) {
 		toShow += '<a href="#" onclick="';
-		toShow += 'prepareBrowser(\'' + name + '\', \'' + URI + '\')';
-		toShow += '">' + name + '</a>';
+		toShow += 'prepareBrowser(\'' + props.name + '\', \'' + URI + '\')';
+		toShow += '">' + props.name + '</a>';
 		toShow += '<br>';
 	});
 
