@@ -106,7 +106,7 @@ public class Neighborhood {
 		sb.append("SELECT object AS neighbor, predicate AS connection, 'out' AS direction ");
 		sb.append("FROM Graph ");
 		sb.append("WHERE subject='" + centralNode + "' ");
-		sb.append("LIMIT " + num);
+		// sb.append("LIMIT " + num);
 
 		// ... combine these with ...
 		sb.append(" UNION ");
@@ -115,7 +115,7 @@ public class Neighborhood {
 		sb.append("SELECT subject AS neighbor, predicate AS connection, 'in' AS direction ");
 		sb.append("FROM Graph ");
 		sb.append("WHERE object='" + centralNode + "' ");
-		sb.append("LIMIT " + num);
+		// sb.append("LIMIT " + num);
 
 		return sb.toString();
 	}
