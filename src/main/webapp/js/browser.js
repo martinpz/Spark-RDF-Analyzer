@@ -63,6 +63,11 @@ function prepareBrowser(centralNode, centralNodeURI) {
 		if (xhttp.readyState == 4 && xhttp.status == 200) {
 			displayNodes(centralNode, centralNodeURI, JSON
 					.parse(xhttp.responseText));
+
+			// Update the height of the body div w.r.t. to the header.
+			var headerHeight = $('#browserModalHeader').outerHeight();
+			$('#browserModalBody').css('height',
+					'calc(100vh - ' + headerHeight + 'px)');
 		}
 	}
 

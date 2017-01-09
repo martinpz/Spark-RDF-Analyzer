@@ -112,12 +112,12 @@
 	<div class="modal modal-fullscreen fade" id="browserModal" tabindex="-1" role="dialog" aria-labelledby="browserModalTitle">
 		<div class="modal-dialog" role="document" style="width: 100%; height: 100%; margin: 0; padding: 0;">
 			<div class="modal-content" style="height: 100%; width: 100%; border: none; border-radius: 0;">
-				<div class="modal-header">
+				<div id="browserModalHeader" class="modal-header">
 					<button type="button" id="btnCloseBrowserModal" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
 
-					<h4 class="modal-title" id="modalTitle">RDF Browser</h4>
+					<h4 id="modalTitle" class="modal-title">RDF Browser</h4>
 
 					<div id="browsingHistory">
 						<span>History:&nbsp;&nbsp;&nbsp;</span>
@@ -125,7 +125,7 @@
 					</div>
 				</div>
 
-				<div id="browserModalBody" class="modal-body">...</div>
+				<div id="browserModalBody" class="modal-body" style="overflow: auto;">...</div>
 
 				<!--<div class="modal-footer" style="position: fixed; bottom: 0; width: 100%;">
 					<button type="button" id="btnCancelBrowserModal" class="btn btn-default" data-dismiss="modal">Exit Browser</button>
