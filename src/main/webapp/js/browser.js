@@ -101,8 +101,8 @@ function displayNodes(centralNode, centralNodeURI, neighbors) {
 		var arrow = '<span class="glyphicon glyphicon-circle-arrow-'
 				+ direction + '" style="margin-right: 10px;"></span>';
 
-		var showCentralNode = '<span style="margin-right: 5px;">' + centralNode
-				+ '</span>';
+		var showCentralNode = '<span style="margin-right: 5px;"><strong>'
+				+ centralNode + '</strong></span>';
 
 		// The type of the connection, e.g. the predicate.
 		var type = '<a href="' + props.predicateURI.slice(1, -1)
@@ -110,9 +110,20 @@ function displayNodes(centralNode, centralNodeURI, neighbors) {
 				+ props.predicate + '</a>';
 
 		// The link to browse to the neighbor node.
-		var neighbor = '<a href="#" onclick="' + 'prepareBrowser(\''
-				+ props.name + '\', \'' + URI + '\')'
-				+ '" style="margin-right: 5px;">' + props.name + '</a>';
+		// OR the literal to be shown.
+		var neighbor = '';
+
+		if (props.name !== '') {
+			// When a name is set, use it for the neighbor.
+			neighbor = '<a href="#" onclick="prepareBrowser';
+			neighbor += '(\'' + props.name + '\', \'' + URI + '\')';
+			neighbor += '" style="margin-right: 5px;">';
+			neighbor += props.name + '</a>';
+		} else {
+			// When there is no name, we have a literal.
+			neighbor = '<span style="margin-right: 5px; font-style: italic;">';
+			neighbor += props.URI + '</span>';
+		}
 
 		// Central node is source => write it left, otherwise right
 		toShow += '<div>' + arrow;
