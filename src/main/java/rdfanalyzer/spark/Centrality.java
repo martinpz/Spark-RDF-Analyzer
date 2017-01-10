@@ -1,19 +1,26 @@
 package rdfanalyzer.spark;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.nio.charset.Charset;
 
-import org.apache.spark.api.java.function.Function;
+import javax.sound.sampled.AudioFormat.Encoding;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
-
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
+import org.apache.spark.sql.Dataset;
 
 public class Centrality {
 
 	public static ConnAdapter objAdapter = new ConnAdapter();
-	public static ArrayList<Threader> threadsList = new ArrayList<Threader>();
-
 	public static DataFrame graphFrame;
 	
 	public static String main(String metricType,String dataset, String nodeName){
@@ -96,49 +103,33 @@ public class Centrality {
 		 *  Hence the distance from Node1 to Node4 is 0 while Node1 to Node3 is 2.
 		 * 
 		 */
-		
-		Row[] outDegreeObjects = Threader.GetNodeObjects(node);
-		System.out.println("[LOG] GetNodeObjects Finished1"+ outDegreeObjects[0].getString(0));
-		String startnode = calculateStartNode();
-		return startnode;
-
-		// Run SQL over loaded Graph.
-//		DataFrame resultsFrame = Service.sqlCtx()
-//				.sql("SELECT MyTable2.subject FROM "
-//						+ "("
-//						+ "		SELECT DISTINCT MyTable1.subject FROM "
-//								+ "("
-//								+ "	SELECT subject FROM Graph"
-//								+ " UNION ALL SELECT object FROM Graph" + " "
-//								+ ") MyTable1"
-//						+ ") "
-//					+ "MyTable2 "
-//					+ "WHERE MyTable2.object");
-
-		
-//		for(int i=0;i<outDegreeObjects.length;i++){
-//
-//			Threader thread = new Threader(outDegreeObjects[i].toString());
-//			thread.start();
-//			threadsList.add(thread);
+	
+//	    DataFrame peopleDF = Service.sqlCtx().read().json("/home/data/example.json");
+//	    peopleDF.cache().registerTempTable("people");
+//	    DataFrame firstRadiusObjects = Service.sqlCtx().sql(""
+//	    		+ "SELECT "
+//	    		+ "name, address.state1,address.state2 FROM people EXTERNAL VIEW explode(address) parttable as part ");
+//	    
+//		Row[] rowMaxInDegree = firstRadiusObjects.collect();
+//	    
+//		for(int i=0;i<rowMaxInDegree.length;i++){
 //			
+//			System.out.println("The name  : "+rowMaxInDegree[i].getString(0));
+//			System.out.println("The state1 : "+rowMaxInDegree[i].getString(1));
+//			System.out.println("The state2 : "+rowMaxInDegree[i].getString(2));
 //		}
 
-//		Threader thread = new Threader(outDegreeObjects);
-//		thread.start();
-//		
-//		DataFrame teenagers = Service.sqlCtx().sql("SELECT * FROM Graph ");
-//		List<String> teenagerNames = teenagers.javaRDD().map(new Function<Row, String>() {
-//		  public String call(Row row) {
-//		    
-//			  System.out.println("[LOG]Name: " + row.getString(0));
-//
-//			  return "";
-//		  }
-//		}).collect();
-//		
-//		return "closeness";
+		String startnode = calculateStartNode();
+
+
+		Threader thread = new Threader(startnode);
+		thread.start();
+
+		return startnode;
 	}
+	public static String readResource(final String fileName, Charset charset) throws IOException {
+        return Resources.toString(Resources.getResource(fileName), charset);
+	}	
 	
 	public static String calculateStartNode(){
 		
@@ -160,7 +151,6 @@ public class Centrality {
 		// in-degree of node with highest out-degree
 		String maxInDegreeOfOutDegree = CalculateInDegree(rowMaxOutDegree[0].getString(0));
 
-
 		
 		// node with highest in-degree
 		DataFrame maxInDegreeFrame = Service.sqlCtx()
@@ -176,7 +166,7 @@ public class Centrality {
 			long maxOutdegreeTotal = rowMaxOutDegree[0].getLong(1) + Integer.parseInt(maxInDegreeOfOutDegree);
 			long maxIndegreeTotal = rowMaxInDegree[0].getLong(1) + Integer.parseInt(maxOutDegreeOfInDegree);
 			
-			if(maxOutdegreeTotal > maxIndegreeTotal){
+			if(maxOutdegreeTotal < maxIndegreeTotal){
 				return rowMaxOutDegree[0].getString(0);
 			}
 			return rowMaxInDegree[0].getString(0);
