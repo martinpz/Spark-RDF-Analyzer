@@ -63,11 +63,28 @@
 		</fieldset>
 
 		<div id="entrypoint">
-			<h1>Select your entry point!</h1>
-			<p>
-				Here you can select from two opportunities to start browsing through the RDF graph.<br> Either manually select a node you want to
-				start with or use one of our suggestions.
-			</p>
+			<div class="panel panel-default" style="float: right;">
+				<div class="panel-heading">
+					<span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span> Browser Configuration
+				</div>
+				<div class="panel-body" style="color: white; background-color: rgba(70, 130, 180, 0.95); height: 250px;">
+					<p>Configure your browsing experience.</p>
+
+					<div class="checkbox">
+						<label style="font-weight: bold;"><input type="checkbox" value="">Textual Browsing</label>
+						<p style="font-style: italic;">Check this box, if you prefer text-based browsing.<br>
+						Leave it unchecked if you want to visually browse.</p>
+					</div>
+				</div>
+			</div>
+
+			<div id="welcome">
+				<h1>Select your entry point!</h1>
+				<p>
+					Here you can select from two opportunities to start browsing through the RDF graph.<br> Either manually select a node you want to
+					start with or use one of our suggestions.
+				</p>
+			</div>
 
 			<div id="manual">
 				<h2>Manual selection</h2>
