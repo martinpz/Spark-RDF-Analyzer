@@ -48,8 +48,10 @@ public class GetGraphs {
 
 			if (subdirs != null) {
 				for (File f : subdirs) {
-					if (!f.getName().startsWith(".") && !f.getName().endsWith("Ranking.parquet")) {
-						result += generateThumbnail(f.getName());
+					String graphName = f.getName();
+
+					if (!graphName.startsWith(".") && !graphName.endsWith("Ranking.parquet")) {
+						result += generateThumbnail(graphName);
 					}
 				}
 			} else {
@@ -63,7 +65,11 @@ public class GetGraphs {
 
 			if (subdirs != null) {
 				for (FileStatus f : subdirs) {
-					result += generateThumbnail(f.getPath().getName());
+					String graphName = f.getPath().getName();
+
+					if (!graphName.startsWith(".") && !graphName.endsWith("Ranking.parquet")) {
+						result += generateThumbnail(graphName);
+					}
 				}
 			} else {
 				result = "<p>WARNING: The path, defined in the app.properties is incorrect!</p>";
