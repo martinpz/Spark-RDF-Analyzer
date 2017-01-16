@@ -55,7 +55,8 @@ function showBrowser(centralNode, centralNodeURI) {
 	var conf = getBrowserConfiguration();
 	var browserType = conf.textual ? 'textual' : 'visual';
 
-	$('#browser').addClass(browserType).show('fast');
+	$('#browserBody').addClass(browserType);
+	$('#browser').show('fast');
 	$('#entrypoint').hide('fast');
 
 	// Fill browser div with content.
@@ -74,19 +75,15 @@ function prepareBrowser(centralNode, centralNodeURI) {
 
 	updateBrowsingHistory(centralNode, centralNodeURI);
 
-	$('#browserModalBody').html(
-			'<p>Computing the neighbors for ' + centralNode + ' ...</p>'
-					+ loader);
+	$('#browserBody').html('<p>Computing the neighbors for ' + centralNode + ' ...</p>' + loader);
 
 	xhttp.onreadystatechange = function() {
 		if (xhttp.readyState == 4 && xhttp.status == 200) {
-			displayNodes(centralNode, centralNodeURI, JSON
-					.parse(xhttp.responseText));
+			displayNodes(centralNode, centralNodeURI, JSON.parse(xhttp.responseText));
 
 			// Update the height of the body div w.r.t. to the header.
-			var headerHeight = $('#browserModalHeader').outerHeight();
-			$('#browserModalBody').css('height',
-					'calc(100vh - ' + headerHeight + 'px)');
+			var headerHeight = $('#browserHeader').outerHeight();
+			$('#browserBody').css('height', 'calc(100vh - ' + headerHeight + 'px)');
 		}
 	}
 
@@ -103,35 +100,26 @@ function updateBrowsingHistory(currentName, currentURI) {
 	var lastName = lastNode.text();
 
 	lastNode.removeClass('active');
-	lastNode.html('<a href="#" onclick="' + 'prepareBrowser(\'' + lastName
-			+ '\', \'' + lastURI + '\')' + '">' + lastName + '</a>');
+	lastNode.html('<a href="#" onclick="' + 'prepareBrowser(\'' + lastName + '\', \'' + lastURI + '\')' + '">' + lastName + '</a>');
 
 	// Append new last (= current) element. Make it active.
-	$('#browsingHistory #list').append(
-			'<li class="active" data-uri="' + currentURI + '">' + currentName
-					+ '</li>');
+	$('#browsingHistory #list').append('<li class="active" data-uri="' + currentURI + '">' + currentName + '</li>');
 }
 
 function displayNodes(centralNode, centralNodeURI, neighbors) {
 	// Remove < and > from URI.
-	var toShow = '<p><strong>Central Node:</strong> <a href="'
-			+ centralNodeURI.slice(1, -1) + '">' + centralNodeURI.slice(1, -1)
-			+ '</a></p>';
+	var toShow = '<p><strong>Central Node:</strong> <a href="' + centralNodeURI.slice(1, -1) + '">' + centralNodeURI.slice(1, -1) + '</a></p>';
 
 	$.each(neighbors, function(URI, props) {
 		// An arrow. Indicating if central node is source or target.
 		// Right arrow = central node is source.
 		var direction = props.direction == 'out' ? 'right' : 'left';
-		var arrow = '<span class="glyphicon glyphicon-circle-arrow-'
-				+ direction + '" style="margin-right: 10px;"></span>';
+		var arrow = '<span class="glyphicon glyphicon-circle-arrow-' + direction + '" style="margin-right: 10px;"></span>';
 
-		var showCentralNode = '<span style="margin-right: 5px;"><strong>'
-				+ centralNode + '</strong></span>';
+		var showCentralNode = '<span style="margin-right: 5px;"><strong>' + centralNode + '</strong></span>';
 
 		// The type of the connection, e.g. the predicate.
-		var type = '<a href="' + props.predicateURI.slice(1, -1)
-				+ '" target="_blank" style="margin-right: 5px;">'
-				+ props.predicate + '</a>';
+		var type = '<a href="' + props.predicateURI.slice(1, -1) + '" target="_blank" style="margin-right: 5px;">' + props.predicate + '</a>';
 
 		// The link to browse to the neighbor node.
 		// OR the literal to be shown.
@@ -156,7 +144,7 @@ function displayNodes(centralNode, centralNodeURI, neighbors) {
 		toShow += '</div>';
 	});
 
-	$('#browserModalBody').html(toShow);
+	$('#browserBody').html(toShow);
 }
 
 // ########################## Utility Functions ##########################
