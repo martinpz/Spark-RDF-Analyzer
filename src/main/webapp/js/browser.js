@@ -46,10 +46,29 @@ function startBrowsing(event) {
 	// Close modal.
 	$('#btnCloseModal').click();
 
-	prepareBrowser(selectedValue, selectedURI);
+	showBrowser(selectedValue, selectedURI);
 }
 
 // ########################## RDF Browser ##########################
+function showBrowser(centralNode, centralNodeURI) {
+	// Set up the browser div with the user's configuration.
+	var conf = getBrowserConfiguration();
+	var browserType = conf.textual ? 'textual' : 'visual';
+
+	$('#browser').addClass(browserType).show('fast');
+	$('#entrypoint').hide('fast');
+
+	// Fill browser div with content.
+	prepareBrowser(centralNode, centralNodeURI);
+}
+
+function getBrowserConfiguration() {
+	var textualBrowsing = $('#textualBrowsing').prop('checked');
+	var conf = {textual: textualBrowsing};
+
+	return conf;
+}
+
 function prepareBrowser(centralNode, centralNodeURI) {
 	var xhttp = new XMLHttpRequest();
 
