@@ -212,53 +212,88 @@ function displayNodesVisual(centralNode, centralNodeURI, neighbors) {
 	$('#browserBody').html('<div id="container"></div>');
 
 	console.log('Let us do the parsing.');
-	// sigma.parsers.json('test.json', {
-	// 	container: 'browserBody',
-	// 	settings: {
-	// 		defaultNodeColor: 'orange'
-	// 	}
-	// });
 
- 	// Initialize sigma graph instance.
-    var s = new sigma('container');
+	var edgeCount = 0;
+	var g = {
+      nodes: [],
+      edges: []
+    };
 
-	s.settings({
-		edgeColor: 'default',
-		defaultEdgeColor: 'green'
-	});
-
-    // Add nodes and edges to be displayed.
-    s.graph.addNode({
-		// Main attributes:
-		id: 'n0',
-		label: 'Hello',
-		// Display attributes:
+    // Add central nodes to the graph instance.
+    g.nodes.push({
+		id: centralNodeURI,
+		label: centralNode,
 		x: 0,
 		y: 0,
-		size: 1,
-		color: '#f00'
-	}).addNode({
-		// Main attributes:
-		id: 'n1',
-		label: 'World !',
-		// Display attributes:
-		x: 1,
-		y: 1,
-		size: 1,
-		color: '#00f'
-	}).addEdge({
-		id: 'e0',
-		// Reference extremities:
-		source: 'n0',
-		target: 'n1'
+		size: 3,
+		color: 'darkred'
 	});
 
+	// Add all neighbor nodes to the graph instance.
 	$.each(neighbors, function(URI, props) {
 		// toShow += '';
+
+		// [Log] URI=<http://dbpedia.org/resource/Harry_and_the_Potters>
+		// [Log] {predicate: "artist", predicateURI: "<http://dbpedia.org/property/artist>", name: "Harry_and_the_Potters", URI: "<http://dbpedia.org/resource/Harry_and_the_Potters>", direction: "out"}
+
+		var name = props.name == '' ? URIS : props.name;
+		var src = props.direction == 'out' ? centralNodeURI : URI;
+		var tgt = props.direction == 'out' ? URI : centralNodeURI;
+
+		g.nodes.push({
+			id: URI,
+			label: name,
+			x: Math.random(),
+			y: Math.random(),
+			size: 1,
+			color: 'lightblue',
+			hover_color: 'darkblue'
+		});
+
+		g.edges.push({
+			id: 'e' + edgeCount,
+			label: props.predicate,
+			source: centralNodeURI,
+			target: URI,
+			size: Math.random(),
+			color: 'green',
+			hover_color: 'orange',
+			type: 'arrow'
+		});
+
+		++edgeCount;
 	});
 
     // Finally, let's ask our sigma instance to refresh:
-    s.refresh();
+	var s = new sigma({
+		graph: g,
+		renderer: {
+			container: document.getElementById('container'),
+			type: 'canvas'
+		},
+		settings: {
+			doubleClickEnabled: false,
+			minEdgeSize: 0.5,
+			maxEdgeSize: 4,
+			enableEdgeHovering: true,
+			edgeHoverColor: 'edge',
+			defaultEdgeHoverColor: 'pink',
+			edgeLabelSize: 'proportional',
+			edgeHoverSizeRatio: 1,
+			edgeHoverExtremities: true,
+		}
+	});
+
+	// Bind event handlers to nodes and edges.
+	s.bind('overNode outNode clickNode', function(e) {
+		console.log(e.type, e.data.node.label, e.data.captor);
+	});
+
+	s.bind('overEdge outEdge clickEdge', function(e) {
+		console.log(e.type, e.data.edge, e.data.captor);
+	});
+
+    // s.refresh();
 
 	console.log('kay,done.');
 }
