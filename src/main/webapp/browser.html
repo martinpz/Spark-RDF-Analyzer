@@ -43,7 +43,7 @@
 		</div>
 	</div>
 
-	<form id="IDbardh" class="form-horizontal col-md-8 col-md-offset-2"
+	<form id="IDbardh" onsubmit="simulateClickOnSearch(); return false;" class="form-horizontal col-md-8 col-md-offset-2"
 		style="padding-bottom: 20px; background-color: rgba(70, 130, 180, 0.95); border-radius: 15px" action="" method="post">
 		<br>
 		<fieldset>
@@ -61,6 +61,7 @@
 			</nav>
 		</fieldset>
 
+		<!---------------------- Entry Point ---------------------->
 		<div id="entrypoint">
 			<div class="panel panel-default" style="float: right;">
 				<div class="panel-heading">
@@ -80,18 +81,29 @@
 			<div id="welcome">
 				<h1>Select your entry point!</h1>
 				<p>
-					Here you can select from two opportunities to start browsing through the RDF graph.<br> Either manually select a node you want to
-					start with or use one of our suggestions.
+					Here you can select from two opportunities to start browsing through the RDF graph.<br>
+					Either manually select a node you want to start with or use one of our suggestions.
 				</p>
 			</div>
 
 			<div id="manual">
 				<h2>Manual selection</h2>
 				<p>Enter a node's name and click button 'Search'.</p>
-				<input type="text" class="form-control" id="entryNode" style="width: 300px; display: inline;"> <a href="#"
-					class="btn btn-warning" id="btnSearch" onClick="showAutocompletionModal()" role="button" data-toggle="modal" data-target="#modal"
-					data-backdrop="static" data-keyboard="false" style="width: 120px; margin-left: 10px; margin-top: -2px;"><span
-					class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</a>
+				<div class="col-lg-4" style="padding-left: 0;">
+					<div class="input-group">
+						<input id="entryNode" type="text" class="form-control" placeholder="Entry node">
+						<span class="input-group-btn">
+							<button id="btnSearch" type="button" class="btn btn-warning" onClick="showAutocompletionModal()"
+							data-toggle="modal" data-target="#modal" data-backdrop="static" data-keyboard="false"> 
+							<span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
+						</span>
+					</div>
+				</div>
+
+				<button id="btnReturnToBrowser" type="button" class="btn btn-success invisible" aria-label="Return to the browser" onclick="returnToBrowser()"
+					title="Reopen the browser in the latest state.">
+					<span class="glyphicon glyphicon-repeat" aria-hidden="true"></span> Return to Browser
+				</button>
 			</div>
 
 			<div id="suggestions">
@@ -100,21 +112,31 @@
 			</div>
 		</div>
 
-		<div id="browser" class="panel panel-default" style="display: none; margin-bottom: 0;">
+		<!---------------------- Browser ---------------------->
+		<div id="browser" class="panel panel-default">
 			<div id="browserHeader" class="panel-heading">
-				<h3 style="margin-top: 0;"><span class="glyphicon glyphicon-globe" aria-hidden="true"></span> RDF Browser</h3>
+				<div id="actionBtns" class="btn-group" role="group" aria-label="Actions">
+					<button id="btnFullscreenBrowser" type="button" class="btn btn-default" aria-label="View browser in full-screen" onclick="toggleBrowserFullscreen()">
+						<span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span> Full-screen
+					</button>
+					<button id="btnCloseBrowser" type="button" class="btn btn-default" aria-label="Close browser and return to entry point" onclick="closeBrowser()">
+						<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Close
+					</button>
+				</div>
+
+				<h3><span class="glyphicon glyphicon-globe" aria-hidden="true"></span> RDF Browser</h3>
 				
 				<div id="browsingHistory">
 					<span>History:&nbsp;&nbsp;&nbsp;</span>
-					<ol id="list" class="breadcrumb" style="display: inline; margin: 0; padding: 0;"></ol>
+					<ol id="list" class="breadcrumb"></ol>
 				</div>
 			</div>
 
-			<div id="browserBody" class="panel-body" style="color: black; overflow: auto;">...</div>
+			<div id="browserBody" class="panel-body">...</div>
 		</div>
 	</form>
 
-	<!-- Autocompletion Modal -->
+	<!---------------------- Autocompletion Modal ---------------------->
 	<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
@@ -135,27 +157,5 @@
 			</div>
 		</div>
 	</div>
-
-	<!-- Browser Modal -->
-	<!--<div class="modal modal-fullscreen fade" id="browserModal" tabindex="-1" role="dialog" aria-labelledby="browserModalTitle">
-		<div class="modal-dialog" role="document" style="width: 100%; height: 100%; margin: 0; padding: 0;">
-			<div class="modal-content" style="height: 100%; width: 100%; border: none; border-radius: 0;">
-				<div id="browserModalHeader" class="modal-header">
-					<button type="button" id="btnCloseBrowserModal" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-
-					<h4 id="modalTitle" class="modal-title">RDF Browser</h4>
-
-					<div id="browsingHistory">
-						<span>History:&nbsp;&nbsp;&nbsp;</span>
-						<ol id="list" class="breadcrumb" style="display: inline; margin: 0; padding: 0;"></ol>
-					</div>
-				</div>
-
-				<div id="browserModalBody" class="modal-body" style="overflow: auto;">...</div>
-			</div>
-		</div>
-	</div>-->
 </body>
 </html>

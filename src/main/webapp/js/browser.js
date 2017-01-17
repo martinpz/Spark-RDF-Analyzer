@@ -1,6 +1,15 @@
 var loader = '<div class="progress progress-striped active page-progress-bar"><div class="progress-bar" style="width: 100%;"></div></div>';
+var animationSpeed = 'fast';
 
 // ########################## Entry Point ##########################
+function simulateClickOnSearch() {
+	$('#btnSearch').click();
+}
+
+function showReturnToBrowser() {
+	$('#btnReturnToBrowser').removeClass('invisible');
+}
+
 function showAutocompletionModal() {
 	var input = $('#entryNode').val();
 
@@ -51,8 +60,8 @@ function startBrowsing(event) {
 
 // ########################## RDF Browser ##########################
 function showBrowser(centralNode, centralNodeURI) {
-	$('#browser').show('fast');
-	$('#entrypoint').hide('fast');
+	$('#browser').show(animationSpeed);
+	$('#entrypoint').hide(animationSpeed);
 
 	// Fill browser div with content.
 	if(useTextualBrowsing()) {
@@ -84,11 +93,15 @@ function updateBrowsingHistory(currentName, currentURI) {
 }
 
 function updateBrowserHeight() {
-	// Update the height of the body div w.r.t. to the header.
+	// Update the height of the body div w.r.t. to the outer divs.
 	var headerTop = $('#browserHeader').offset().top;
 	var headerHeight = $('#browserHeader').outerHeight();
 	var bottomSpace = 40;
-	var heightDiff = headerTop + headerHeight + bottomSpace;
+
+	// For a fullscreen browser, we only have to respect the header height.
+	var heightDiff = $('#browser').hasClass('fullscreen')
+		? headerHeight
+		: headerTop + headerHeight + bottomSpace;
 
 	$('#browserBody').css('max-height', 'calc(100vh - ' + heightDiff + 'px)');
 }
@@ -189,6 +202,23 @@ function displayNodesVisual(centralNode, centralNodeURI, neighbors) {
 	});
 
 	$('#browserBody').html(toShow);
+}
+
+// ########################## OnClick Events ##########################
+function toggleBrowserFullscreen() {
+	$('#browser').toggleClass('fullscreen');
+	updateBrowserHeight();
+}
+
+function closeBrowser() {
+	$('#browser').hide(animationSpeed);
+	$('#entrypoint').show(animationSpeed);
+	showReturnToBrowser();
+}
+
+function returnToBrowser() {
+	$('#browser').show(animationSpeed);
+	$('#entrypoint').hide(animationSpeed);
 }
 
 // ########################## Utility Functions ##########################
