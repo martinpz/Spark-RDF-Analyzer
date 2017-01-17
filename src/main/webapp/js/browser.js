@@ -86,7 +86,7 @@ function updateBrowserHeight() {
 	var bottomSpace = 40;
 	var heightDiff = headerTop + headerHeight + bottomSpace;
 
-	$('#browserBody').css('height', 'calc(100vh - ' + heightDiff + 'px)');
+	$('#browserBody').css('max-height', 'calc(100vh - ' + heightDiff + 'px)');
 }
 
 // ########################## Textual RDF Browser ##########################
