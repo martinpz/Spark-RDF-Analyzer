@@ -119,7 +119,7 @@ function updateBrowserHeight() {
 		? headerHeight
 		: headerTop + headerHeight + bottomSpace;
 
-	$('#browserBody').css('max-height', 'calc(100vh - ' + heightDiff + 'px)');
+	$('#browserBody').css('height', 'calc(100vh - ' + heightDiff + 'px)');
 }
 
 // ########################## Textual RDF Browser ##########################
@@ -189,8 +189,6 @@ function displayNodesTextual(centralNode, centralNodeURI, neighbors) {
 
 // ########################## Visual RDF Browser ##########################
 function prepareVisualBrowser(centralNode, centralNodeURI) {
-	return;
-
 	var xhttp = new XMLHttpRequest();
 
 	showLoader(centralNode);
@@ -198,8 +196,8 @@ function prepareVisualBrowser(centralNode, centralNodeURI) {
 
 	xhttp.onreadystatechange = function() {
 		if (xhttp.readyState == 4 && xhttp.status == 200) {
-			displayNodesVisual(centralNode, centralNodeURI, JSON.parse(xhttp.responseText));
 			updateBrowserHeight();
+			displayNodesVisual(centralNode, centralNodeURI, JSON.parse(xhttp.responseText));
 		}
 	}
 
@@ -210,14 +208,54 @@ function prepareVisualBrowser(centralNode, centralNodeURI) {
 }
 
 function displayNodesVisual(centralNode, centralNodeURI, neighbors) {
-	// Remove < and > from URI.
-	var toShow = '';
+	// Clear the container.
+	$('#browserBody').html('');
 
-	$.each(neighbors, function(URI, props) {
-		toShow += '';
+	console.log('Let us do the parsing.');
+	// sigma.parsers.json('test.json', {
+	// 	container: 'browserBody',
+	// 	settings: {
+	// 		defaultNodeColor: 'orange'
+	// 	}
+	// });
+
+ 	// Initialize sigma graph instance.
+    var s = new sigma('browserBody');
+
+    // Add nodes and edges to be displayed.
+    s.graph.addNode({
+		// Main attributes:
+		id: 'n0',
+		label: 'Hello',
+		// Display attributes:
+		x: 0,
+		y: 0,
+		size: 1,
+		color: '#f00'
+	}).addNode({
+		// Main attributes:
+		id: 'n1',
+		label: 'World !',
+		// Display attributes:
+		x: 1,
+		y: 1,
+		size: 1,
+		color: '#00f'
+	}).addEdge({
+		id: 'e0',
+		// Reference extremities:
+		source: 'n0',
+		target: 'n1'
 	});
 
-	$('#browserBody').html(toShow);
+	$.each(neighbors, function(URI, props) {
+		// toShow += '';
+	});
+
+    // Finally, let's ask our sigma instance to refresh:
+    s.refresh();
+
+	console.log('kay,done.');
 }
 
 // ########################## OnClick Events ##########################
