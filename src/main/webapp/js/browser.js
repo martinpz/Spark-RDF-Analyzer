@@ -197,11 +197,12 @@ function prepareVisualBrowser(centralNode, centralNodeURI) {
 	showLoader(centralNode);
 	updateBrowsingHistory(centralNode, centralNodeURI);
 	
-	// Show button for SVG export. But not in Safari.
-	var isSafari = !!navigator.userAgent.match(/Version\/[\d\.]+.*Safari/);
+	// Show button for SVG export. But disable in Safari.
+	$('#btnExportGraphSVG').show();
 
-	if (!isSafari) {
-		$('#btnExportGraphSVG').show();
+	if (navigator.userAgent.match(/Version\/[\d\.]+.*Safari/)) {
+		$('#btnExportGraphSVG').prop('disabled', true);
+		$('#btnExportGraphSVG').prop('title', 'SVG Export does not work in Safari.');
 	}
 
 	xhttp.onreadystatechange = function() {
