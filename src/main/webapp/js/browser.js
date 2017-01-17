@@ -199,7 +199,7 @@ function prepareVisualBrowser(centralNode, centralNodeURI) {
 	
 	// Show button for SVG export. But not in Safari.
 	var isSafari = !!navigator.userAgent.match(/Version\/[\d\.]+.*Safari/);
-	
+
 	if (!isSafari) {
 		$('#btnExportGraphSVG').show();
 	}
@@ -224,9 +224,10 @@ function displayNodesVisual(centralNode, centralNodeURI, neighbors) {
 	console.log('Let us do the parsing.');
 
 	var edgeCount = 0;
+	var numNeighbors = Object.keys(neighbors).length;
 	var g = {
-      nodes: [],
-      edges: []
+		nodes: [],
+		edges: []
     };
 
     // Add central nodes to the graph instance.
@@ -251,8 +252,8 @@ function displayNodesVisual(centralNode, centralNodeURI, neighbors) {
 		g.nodes.push({
 			id: URI.slice(1, -1),
 			label: name,
-			x: Math.random(),
-			y: Math.random(),
+			x: Math.cos(Math.PI * 2 * edgeCount / numNeighbors),
+			y: Math.sin(Math.PI * 2 * edgeCount / numNeighbors),
 			size: 1,
 			color: 'lightblue',
 			hover_color: 'darkblue'
