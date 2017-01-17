@@ -326,7 +326,6 @@ function returnToBrowser() {
 }
 
 function exportGraphAsSVG() {
-	console.log('exporting...');
 	var output = s.toSVG({
 		download: true,
 		filename: 'graphExport.svg',
@@ -334,7 +333,6 @@ function exportGraphAsSVG() {
 		labels: true,
 		data: true
 	});
-	console.log(output);
 }
 
 // ########################## Utility Functions ##########################
