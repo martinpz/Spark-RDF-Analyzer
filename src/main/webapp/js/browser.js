@@ -116,7 +116,7 @@ function prepareTextualBrowser(centralNode, centralNodeURI) {
 function displayNodesTextual(centralNode, centralNodeURI, neighbors) {
 	// Remove < and > from URI.
 	var toShow = '<p><strong>Selected Node:</strong> <a href="' + centralNodeURI.slice(1, -1) + '">' + centralNodeURI.slice(1, -1) + '</a></p>';
-	toShow += '<table>';
+	toShow += '<table class="tableBrowser">';
 
 	$.each(neighbors, function(URI, props) {
 		toShow += '<tr>';
@@ -125,8 +125,6 @@ function displayNodesTextual(centralNode, centralNodeURI, neighbors) {
 		// Right arrow = central node is source.
 		var direction = props.direction == 'out' ? 'right' : 'left';
 		var arrow = '<span class="glyphicon glyphicon-circle-arrow-' + direction + '"></span>';
-
-		var showCentralNode = '<strong>' + centralNode + '</strong>';
 
 		// The type of the connection, e.g. the predicate.
 		var type = '<a href="' + props.predicateURI.slice(1, -1) + '" target="_blank"">' + props.predicate + '</a>';
@@ -149,14 +147,13 @@ function displayNodesTextual(centralNode, centralNodeURI, neighbors) {
 
 		// Central node is source => write it left, otherwise right
 		toShow += '<td>' + arrow + '</td>';
-		toShow += '<td>' + ( direction == 'right' ? showCentralNode : neighbor ) + '</td>';
+		toShow += '<td>' + ( direction == 'right' ? centralNode : neighbor ) + '</td>';
 		toShow += '<td>' + type + '</td>';
-		toShow += '<td>' + ( direction == 'right' ? neighbor : showCentralNode ) + '</td>';
+		toShow += '<td>' + ( direction == 'right' ? neighbor : centralNode ) + '</td>';
 		toShow += '</tr>';
 	});
 
 	toShow += '</table>';
-	console.log(toShow);
 
 	$('#browserBody').html(toShow);
 }
