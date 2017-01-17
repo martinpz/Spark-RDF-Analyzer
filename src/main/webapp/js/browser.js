@@ -66,6 +66,10 @@ function useTextualBrowsing() {
 	return $('#textualBrowsing').prop('checked');
 }
 
+function showLoader() {
+	$('#browserBody').html('<p>Computing the neighbors for ' + centralNode + ' ...</p>' + loader);
+}
+
 function updateBrowsingHistory(currentName, currentURI) {
 	// Add link to pre-last element. Remove active marker.
 	var lastNode = $('#browsingHistory #list li').last();
@@ -93,9 +97,8 @@ function updateBrowserHeight() {
 function prepareTextualBrowser(centralNode, centralNodeURI) {
 	var xhttp = new XMLHttpRequest();
 
+	showLoader();
 	updateBrowsingHistory(centralNode, centralNodeURI);
-
-	$('#browserBody').html('<p>Computing the neighbors for ' + centralNode + ' ...</p>' + loader);
 
 	xhttp.onreadystatechange = function() {
 		if (xhttp.readyState == 4 && xhttp.status == 200) {
@@ -157,9 +160,8 @@ function prepareVisualBrowser(centralNode, centralNodeURI) {
 
 	var xhttp = new XMLHttpRequest();
 
+	showLoader();
 	updateBrowsingHistory(centralNode, centralNodeURI);
-
-	$('#browserBody').html('<p>Computing the neighbors for ' + centralNode + ' ...</p>' + loader);
 
 	xhttp.onreadystatechange = function() {
 		if (xhttp.readyState == 4 && xhttp.status == 200) {
@@ -176,40 +178,10 @@ function prepareVisualBrowser(centralNode, centralNodeURI) {
 
 function displayNodesVisual(centralNode, centralNodeURI, neighbors) {
 	// Remove < and > from URI.
-	var toShow = '<p><strong>Central Node:</strong> <a href="' + centralNodeURI.slice(1, -1) + '">' + centralNodeURI.slice(1, -1) + '</a></p>';
+	var toShow = '';
 
 	$.each(neighbors, function(URI, props) {
-		// An arrow. Indicating if central node is source or target.
-		// Right arrow = central node is source.
-		var direction = props.direction == 'out' ? 'right' : 'left';
-		var arrow = '<span class="glyphicon glyphicon-circle-arrow-' + direction + '" style="margin-right: 10px;"></span>';
-
-		var showCentralNode = '<span style="margin-right: 5px;"><strong>' + centralNode + '</strong></span>';
-
-		// The type of the connection, e.g. the predicate.
-		var type = '<a href="' + props.predicateURI.slice(1, -1) + '" target="_blank" style="margin-right: 5px;">' + props.predicate + '</a>';
-
-		// The link to browse to the neighbor node.
-		// OR the literal to be shown.
-		var neighbor = '';
-
-		if (props.name !== '') {
-			// When a name is set, use it for the neighbor.
-			neighbor = '<a href="#" onclick="prepareVisualBrowser';
-			neighbor += '(\'' + props.name + '\', \'' + URI + '\')';
-			neighbor += '" style="margin-right: 5px;">';
-			neighbor += props.name + '</a>';
-		} else {
-			// When there is no name, we have a literal.
-			neighbor = '<span style="margin-right: 5px; font-style: italic;">';
-			neighbor += props.URI + '</span>';
-		}
-
-		// Central node is source => write it left, otherwise right
-		toShow += '<div>' + arrow;
-		toShow += direction == 'right' ? showCentralNode + type + neighbor
-				: neighbor + type + showCentralNode;
-		toShow += '</div>';
+		toShow += '';
 	});
 
 	$('#browserBody').html(toShow);
