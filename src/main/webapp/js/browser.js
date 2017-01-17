@@ -51,46 +51,19 @@ function startBrowsing(event) {
 
 // ########################## RDF Browser ##########################
 function showBrowser(centralNode, centralNodeURI) {
-	// Set up the browser div with the user's configuration.
-	var conf = getBrowserConfiguration();
-	var browserType = conf.textual ? 'textual' : 'visual';
-
-	$('#browserBody').addClass(browserType);
 	$('#browser').show('fast');
 	$('#entrypoint').hide('fast');
 
 	// Fill browser div with content.
-	prepareBrowser(centralNode, centralNodeURI);
-}
-
-function getBrowserConfiguration() {
-	var textualBrowsing = $('#textualBrowsing').prop('checked');
-	var conf = {textual: textualBrowsing};
-
-	return conf;
-}
-
-function prepareBrowser(centralNode, centralNodeURI) {
-	var xhttp = new XMLHttpRequest();
-
-	updateBrowsingHistory(centralNode, centralNodeURI);
-
-	$('#browserBody').html('<p>Computing the neighbors for ' + centralNode + ' ...</p>' + loader);
-
-	xhttp.onreadystatechange = function() {
-		if (xhttp.readyState == 4 && xhttp.status == 200) {
-			displayNodes(centralNode, centralNodeURI, JSON.parse(xhttp.responseText));
-
-			// Update the height of the body div w.r.t. to the header.
-			var headerHeight = $('#browserHeader').outerHeight();
-			$('#browserBody').css('height', 'calc(100vh - ' + headerHeight + 'px)');
-		}
+	if(useTextualBrowsing()) {
+		prepareTextualBrowser(centralNode, centralNodeURI);
+	} else {
+		prepareVisualBrowser(centralNode, centralNodeURI);
 	}
+}
 
-	xhttp.open('GET', REST_API + 'directNeighbors/' + getCookie('graphName')
-			+ '?centralNode=' + encodeURIComponent(centralNodeURI)
-			+ '&numNeighbors=12', true);
-	xhttp.send();
+function useTextualBrowsing() {
+	return $('#textualBrowsing').prop('checked');
 }
 
 function updateBrowsingHistory(currentName, currentURI) {
@@ -100,13 +73,108 @@ function updateBrowsingHistory(currentName, currentURI) {
 	var lastName = lastNode.text();
 
 	lastNode.removeClass('active');
-	lastNode.html('<a href="#" onclick="' + 'prepareBrowser(\'' + lastName + '\', \'' + lastURI + '\')' + '">' + lastName + '</a>');
+	lastNode.html('<a href="#" onclick="' + 'prepareTextualBrowser(\'' + lastName + '\', \'' + lastURI + '\')' + '">' + lastName + '</a>');
 
 	// Append new last (= current) element. Make it active.
 	$('#browsingHistory #list').append('<li class="active" data-uri="' + currentURI + '">' + currentName + '</li>');
 }
 
-function displayNodes(centralNode, centralNodeURI, neighbors) {
+function updateBrowserHeight() {
+	// Update the height of the body div w.r.t. to the header.
+	var headerTop = $('#browserHeader').offset().top;
+	var headerHeight = $('#browserHeader').outerHeight();
+	var bottomSpace = 40;
+	var heightDiff = headerTop + headerHeight + bottomSpace;
+
+	$('#browserBody').css('height', 'calc(100vh - ' + heightDiff + 'px)');
+}
+
+// ########################## Textual RDF Browser ##########################
+function prepareTextualBrowser(centralNode, centralNodeURI) {
+	var xhttp = new XMLHttpRequest();
+
+	updateBrowsingHistory(centralNode, centralNodeURI);
+
+	$('#browserBody').html('<p>Computing the neighbors for ' + centralNode + ' ...</p>' + loader);
+
+	xhttp.onreadystatechange = function() {
+		if (xhttp.readyState == 4 && xhttp.status == 200) {
+			displayNodesTextual(centralNode, centralNodeURI, JSON.parse(xhttp.responseText));
+			updateBrowserHeight();
+		}
+	}
+
+	xhttp.open('GET', REST_API + 'directNeighbors/' + getCookie('graphName')
+			+ '?centralNode=' + encodeURIComponent(centralNodeURI)
+			+ '&numNeighbors=12', true);
+	xhttp.send();
+}
+
+function displayNodesTextual(centralNode, centralNodeURI, neighbors) {
+	// Remove < and > from URI.
+	var toShow = '<p><strong>Selected Node:</strong> <a href="' + centralNodeURI.slice(1, -1) + '">' + centralNodeURI.slice(1, -1) + '</a></p>';
+
+	$.each(neighbors, function(URI, props) {
+		// An arrow. Indicating if central node is source or target.
+		// Right arrow = central node is source.
+		var direction = props.direction == 'out' ? 'right' : 'left';
+		var arrow = '<span class="glyphicon glyphicon-circle-arrow-' + direction + '" style="margin-right: 10px;"></span>';
+
+		var showCentralNode = '<span style="margin-right: 5px;"><strong>' + centralNode + '</strong></span>';
+
+		// The type of the connection, e.g. the predicate.
+		var type = '<a href="' + props.predicateURI.slice(1, -1) + '" target="_blank" style="margin-right: 5px;">' + props.predicate + '</a>';
+
+		// The link to browse to the neighbor node.
+		// OR the literal to be shown.
+		var neighbor = '';
+
+		if (props.name !== '') {
+			// When a name is set, use it for the neighbor.
+			neighbor = '<a href="#" onclick="prepareTextualBrowser';
+			neighbor += '(\'' + props.name + '\', \'' + URI + '\')';
+			neighbor += '" style="margin-right: 5px;">';
+			neighbor += props.name + '</a>';
+		} else {
+			// When there is no name, we have a literal.
+			neighbor = '<span style="margin-right: 5px; font-style: italic;">';
+			neighbor += props.URI + '</span>';
+		}
+
+		// Central node is source => write it left, otherwise right
+		toShow += '<div>' + arrow;
+		toShow += direction == 'right' ? showCentralNode + type + neighbor
+				: neighbor + type + showCentralNode;
+		toShow += '</div>';
+	});
+
+	$('#browserBody').html(toShow);
+}
+
+// ########################## Visual RDF Browser ##########################
+function prepareVisualBrowser(centralNode, centralNodeURI) {
+	return;
+
+	var xhttp = new XMLHttpRequest();
+
+	updateBrowsingHistory(centralNode, centralNodeURI);
+
+	$('#browserBody').html('<p>Computing the neighbors for ' + centralNode + ' ...</p>' + loader);
+
+	xhttp.onreadystatechange = function() {
+		if (xhttp.readyState == 4 && xhttp.status == 200) {
+			displayNodesVisual(centralNode, centralNodeURI, JSON.parse(xhttp.responseText));
+			updateBrowserHeight();
+		}
+	}
+
+	xhttp.open('GET', REST_API + 'directNeighbors/' + getCookie('graphName')
+			+ '?centralNode=' + encodeURIComponent(centralNodeURI)
+			+ '&numNeighbors=12', true);
+	xhttp.send();
+}
+
+function displayNodesVisual(centralNode, centralNodeURI, neighbors) {
 	// Remove < and > from URI.
 	var toShow = '<p><strong>Central Node:</strong> <a href="' + centralNodeURI.slice(1, -1) + '">' + centralNodeURI.slice(1, -1) + '</a></p>';
 
@@ -127,7 +195,7 @@ function displayNodes(centralNode, centralNodeURI, neighbors) {
 
 		if (props.name !== '') {
 			// When a name is set, use it for the neighbor.
-			neighbor = '<a href="#" onclick="prepareBrowser';
+			neighbor = '<a href="#" onclick="prepareVisualBrowser';
 			neighbor += '(\'' + props.name + '\', \'' + URI + '\')';
 			neighbor += '" style="margin-right: 5px;">';
 			neighbor += props.name + '</a>';
