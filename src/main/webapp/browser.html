@@ -65,7 +65,7 @@
 		<div id="entrypoint">
 			<div class="panel panel-default" style="float: right;">
 				<div class="panel-heading">
-					<span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span> Browser Configuration
+					<span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Browser Configuration
 				</div>
 				<div class="panel-body" style="color: white; background-color: rgba(70, 130, 180, 0.95); height: 250px;">
 					<p>Configure your browsing experience.</p>
@@ -101,9 +101,9 @@
 			</div>
 		</div>
 
-		<div id="browser" style="display: none;">
-			<div id="browserHeader">
-				<h2>RDF Browser</h2>
+		<div id="browser" class="panel panel-default" style="display: none; margin-bottom: 0;">
+			<div id="browserHeader" class="panel-heading">
+				<h2><span class="glyphicon glyphicon-globe" aria-hidden="true"></span> RDF Browser</h2>
 				
 				<div id="browsingHistory">
 					<span>History:&nbsp;&nbsp;&nbsp;</span>
@@ -111,9 +111,7 @@
 				</div>
 			</div>
 
-			<div id="browserBody">
-				<p>This is the body of the browser.</p>
-			</div>
+			<div id="browserBody" class="panel-body" style="color: black; overflow: auto;">...</div>
 		</div>
 	</form>
 
