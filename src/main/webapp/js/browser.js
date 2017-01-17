@@ -1,6 +1,9 @@
 var loader = '<div class="progress progress-striped active page-progress-bar"><div class="progress-bar" style="width: 100%;"></div></div>';
 var animationSpeed = 'fast';
 
+// Global variable for the sigma graph instance.
+var s;
+
 // ########################## Entry Point ##########################
 function simulateClickOnSearch() {
 	$('#btnSearch').click();
@@ -193,6 +196,13 @@ function prepareVisualBrowser(centralNode, centralNodeURI) {
 
 	showLoader(centralNode);
 	updateBrowsingHistory(centralNode, centralNodeURI);
+	
+	// Show button for SVG export. But not in Safari.
+	var isSafari = !!navigator.userAgent.match(/Version\/[\d\.]+.*Safari/);
+	
+	if (!isSafari) {
+		$('#btnExportGraphSVG').show();
+	}
 
 	xhttp.onreadystatechange = function() {
 		if (xhttp.readyState == 4 && xhttp.status == 200) {
@@ -221,7 +231,7 @@ function displayNodesVisual(centralNode, centralNodeURI, neighbors) {
 
     // Add central nodes to the graph instance.
     g.nodes.push({
-		id: centralNodeURI,
+		id: centralNodeURI.slice(1, -1),
 		label: centralNode,
 		x: 0,
 		y: 0,
@@ -231,17 +241,15 @@ function displayNodesVisual(centralNode, centralNodeURI, neighbors) {
 
 	// Add all neighbor nodes to the graph instance.
 	$.each(neighbors, function(URI, props) {
-		// toShow += '';
-
 		// [Log] URI=<http://dbpedia.org/resource/Harry_and_the_Potters>
 		// [Log] {predicate: "artist", predicateURI: "<http://dbpedia.org/property/artist>", name: "Harry_and_the_Potters", URI: "<http://dbpedia.org/resource/Harry_and_the_Potters>", direction: "out"}
 
-		var name = props.name == '' ? URIS : props.name;
+		var name = props.name == '' ? URI.slice(1, -1) : props.name;
 		var src = props.direction == 'out' ? centralNodeURI : URI;
 		var tgt = props.direction == 'out' ? URI : centralNodeURI;
 
 		g.nodes.push({
-			id: URI,
+			id: URI.slice(1, -1),
 			label: name,
 			x: Math.random(),
 			y: Math.random(),
@@ -253,8 +261,8 @@ function displayNodesVisual(centralNode, centralNodeURI, neighbors) {
 		g.edges.push({
 			id: 'e' + edgeCount,
 			label: props.predicate,
-			source: centralNodeURI,
-			target: URI,
+			source: src.slice(1, -1),
+			target: tgt.slice(1, -1),
 			size: Math.random(),
 			color: 'green',
 			hover_color: 'orange',
@@ -265,7 +273,7 @@ function displayNodesVisual(centralNode, centralNodeURI, neighbors) {
 	});
 
     // Finally, let's ask our sigma instance to refresh:
-	var s = new sigma({
+	s = new sigma({
 		graph: g,
 		renderer: {
 			container: document.getElementById('container'),
@@ -313,6 +321,18 @@ function closeBrowser() {
 function returnToBrowser() {
 	$('#browser').show(animationSpeed);
 	$('#entrypoint').hide(animationSpeed);
+}
+
+function exportGraphAsSVG() {
+	console.log('exporting...');
+	var output = s.toSVG({
+		download: true,
+		filename: 'graphExport.svg',
+		size: 1000,
+		labels: true,
+		data: true
+	});
+	console.log(output);
 }
 
 // ########################## Utility Functions ##########################

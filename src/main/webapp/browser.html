@@ -12,6 +12,7 @@
 <script type="text/javascript" src="js/browser.js"></script>
 
 <script src="js/sigma/sigma.min.js"></script>
+<script src="js/sigma/plugins/sigma.exporters.svg.min.js"></script>
 
 <script type="text/javascript">
 	function getGraphName() {
@@ -119,6 +120,9 @@
 		<div id="browser" class="panel panel-default">
 			<div id="browserHeader" class="panel-heading">
 				<div id="actionBtns" class="btn-group" role="group" aria-label="Actions">
+					<button id="btnExportGraphSVG" type="button" class="btn btn-default" aria-label="Export graph as SVG" onclick="exportGraphAsSVG()" style="display: none;">
+						<span class="glyphicon glyphicon-cd" aria-hidden="true"></span> Export
+					</button>
 					<button id="btnFullscreenBrowser" type="button" class="btn btn-default" aria-label="View browser in full-screen" onclick="toggleBrowserFullscreen()">
 						<span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span> Full-screen
 					</button>
