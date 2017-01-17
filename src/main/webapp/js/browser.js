@@ -209,7 +209,7 @@ function prepareVisualBrowser(centralNode, centralNodeURI) {
 
 function displayNodesVisual(centralNode, centralNodeURI, neighbors) {
 	// Clear the container.
-	$('#browserBody').html('');
+	$('#browserBody').html('<div id="container"></div>');
 
 	console.log('Let us do the parsing.');
 	// sigma.parsers.json('test.json', {
@@ -220,7 +220,12 @@ function displayNodesVisual(centralNode, centralNodeURI, neighbors) {
 	// });
 
  	// Initialize sigma graph instance.
-    var s = new sigma('browserBody');
+    var s = new sigma('container');
+
+	s.settings({
+		edgeColor: 'default',
+		defaultEdgeColor: 'green'
+	});
 
     // Add nodes and edges to be displayed.
     s.graph.addNode({
