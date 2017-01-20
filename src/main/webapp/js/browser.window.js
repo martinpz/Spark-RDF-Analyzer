@@ -12,7 +12,7 @@ function showBrowser(centralNode, centralNodeURI) {
 }
 
 function showLoader(centralNode) {
-	$('#browserBody').html('<p>Computing the neighbors for ' + centralNode + ' ...</p>' + loader);
+	$('#browserBody').html('<p>Computing the neighbors for ' + centralNode + ' ...</p>' + LOADER);
 }
 
 function updateBrowserHeight() {
@@ -44,3 +44,15 @@ function returnToBrowser() {
 	$('#browser').show(ANIMATION_SPEED);
 	$('#entrypoint').hide(ANIMATION_SPEED);
 }
+
+$(document).ready(function() {
+	$('#btnExportGraphSVG').click( function() {
+		exportGraphAsSVG();
+	});
+	$('#btnFullscreenBrowser').click( function() {
+		toggleBrowserFullscreen();
+	});
+	$('#btnCloseBrowser').click( function() {
+		closeBrowser();
+	});
+});

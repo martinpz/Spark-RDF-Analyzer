@@ -19,7 +19,7 @@ function showAutocompletionModal() {
 	} else {
 		$('#modalTitle').text('Select your entry point!');
 		$('#modalBody').html(
-				'<p>Computing the autocomplete suggestions ...</p>' + loader);
+				'<p>Computing the autocomplete suggestions ...</p>' + LOADER);
 		$('#btnStartBrowsing').show();
 
 		var xhttp = new XMLHttpRequest();
@@ -54,3 +54,12 @@ function startBrowsing(event) {
 
 	showBrowser(selectedValue, selectedURI);
 }
+
+$(document).ready(function() {
+	$('#btnSearch').click( function() {
+		showAutocompletionModal();
+	});
+	$('#btnReturnToBrowser').click( function() {
+		returnToBrowser();
+	});
+});

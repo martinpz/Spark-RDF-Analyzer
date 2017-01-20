@@ -22,9 +22,7 @@ function prepareVisualBrowser(centralNode, centralNodeURI) {
 		}
 	}
 
-	xhttp.open('GET', REST_API + 'directNeighbors/' + getCookie('graphName')
-			+ '?centralNode=' + encodeURIComponent(centralNodeURI)
-			+ '&numNeighbors=12', true);
+    xhttp.open('GET', getNeighborhoodRequest(), true);
 	xhttp.send();
 }
 
