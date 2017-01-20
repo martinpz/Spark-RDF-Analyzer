@@ -88,48 +88,14 @@ public class Centrality {
 	}
 	public static String CalculateCloseness(String node){
 		
-		/*
-		 * 
-		 * 	Calculate steps this node needs to take to reach other nodes. 
-		 *  Suppose this node take 2,3,4 steps to reach 3 other nodes in the graph.
-		 *  Than we sum these values and take an inverse of it to find the closeness of this node.
-		 *  
-		 *  In this case 2+3+4 = 9 and than inverse of 9 is 1/9 = 0.1111.
-		 *
-		 * 	Rules:
-		 * 	
-		 * 	Be careful about the predicate directions i.e
-		 *  Node1 --> Node2 --> Node3 <--- Node4 In this case Node3 is unreachable from Node1
-		 *  Hence the distance from Node1 to Node4 is 0 while Node1 to Node3 is 2.
-		 * 
-		 */
-	
-//	    DataFrame peopleDF = Service.sqlCtx().read().json("/home/data/example.json");
-//	    peopleDF.cache().registerTempTable("people");
-//	    DataFrame firstRadiusObjects = Service.sqlCtx().sql(""
-//	    		+ "SELECT "
-//	    		+ "name, address.state1,address.state2 FROM people EXTERNAL VIEW explode(address) parttable as part ");
-//	    
-//		Row[] rowMaxInDegree = firstRadiusObjects.collect();
-//	    
-//		for(int i=0;i<rowMaxInDegree.length;i++){
-//			
-//			System.out.println("The name  : "+rowMaxInDegree[i].getString(0));
-//			System.out.println("The state1 : "+rowMaxInDegree[i].getString(1));
-//			System.out.println("The state2 : "+rowMaxInDegree[i].getString(2));
-//		}
-
-		String startnode = calculateStartNode();
+		DataFrame allSubjects = Service.sqlCtx().sql("SELECT subject,predicate,object FROM Graph");
 
 
-		Threader thread = new Threader(startnode);
-		thread.start();
-
-		return startnode;
+		return "";
 	}
 	public static String readResource(final String fileName, Charset charset) throws IOException {
         return Resources.toString(Resources.getResource(fileName), charset);
-	}	
+	}
 	
 	public static String calculateStartNode(){
 		
