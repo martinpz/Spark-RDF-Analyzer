@@ -12,7 +12,7 @@ function prepareTextualBrowser(centralNode, centralNodeURI) {
 		}
 	}
 
-	xhttp.open('GET', getNeighborhoodRequest(), true);
+	xhttp.open('GET', getNeighborhoodRequest(centralNodeURI), true);
 	xhttp.send();
 }
 

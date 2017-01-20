@@ -23,7 +23,7 @@ function numNeighbors() {
 	return $('#numNeighbors').val();
 }
 
-function getNeighborhoodRequest() {
+function getNeighborhoodRequest(centralNodeURI) {
     return REST_API + 'directNeighbors/' + getCookie('graphName')
 		+ '?centralNode=' + encodeURIComponent(centralNodeURI)
 		+ '&numNeighbors=' + numNeighbors()
