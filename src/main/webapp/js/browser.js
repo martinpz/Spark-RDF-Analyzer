@@ -339,13 +339,30 @@ function exportGraphAsSVG() {
 	});
 }
 
+function changeConfigOptions() {
+	// When textual browsing is selected: Disable properties related to visual browsing.
+	if( $('#textualBrowsing').is(":checked") ) {
+		$('#groupBySubject').prop('checked', false).prop('disabled', true);
+	} else {
+		$('#groupBySubject').prop('disabled', false);
+	}
+}
+
 $(document).ready(function() {
+	// Buttons for entry point.
 	$('#btnSearch').click( function() {
 		showAutocompletionModal();
 	});
 	$('#btnReturnToBrowser').click( function() {
 		returnToBrowser();
 	});
+
+	// Configuration options.
+	$('#textualBrowsing').change( function() {
+		changeConfigOptions();
+    });
+
+	// Buttons inside browser.
 	$('#btnExportGraphSVG').click( function() {
 		exportGraphAsSVG();
 	});
