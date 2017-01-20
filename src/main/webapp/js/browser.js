@@ -288,11 +288,9 @@ function displayNodesVisual(centralNode, centralNodeURI, neighbors) {
 			minEdgeSize: 0.5,
 			maxEdgeSize: 4,
 			enableEdgeHovering: true,
-			edgeHoverColor: 'edge',
-			defaultEdgeHoverColor: 'pink',
 			edgeLabelSize: 'proportional',
-			edgeHoverSizeRatio: 1,
-			edgeHoverExtremities: true,
+			edgeHoverSizeRatio: 3,
+			edgeHoverExtremities: true
 		}
 	});
 
