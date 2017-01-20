@@ -36,18 +36,21 @@ public class Neighborhood {
 	 *            The URI of the central node.
 	 * @param num
 	 *            How many neighbors to return.
+	 * @param groupNeighborsByPredicate
+	 *            Whether neighbors should be grouped by predicate or not.
 	 * 
 	 * @return A JSONObject mapping the URIs of the neighbors to a JSONObject of
 	 *         their properties for each neighbor.
 	 */
-	public static JSONObject getNeighbors(String graph, String centralNode, int num) {
+	public static JSONObject getNeighbors(String graph, String centralNode, int num,
+			boolean groupNeighborsByPredicate) {
 		if (num <= 0) {
 			throw new IllegalArgumentException("Requested number of neighbors must be greater than zero.");
 		}
 
 		JSONObject neighbors = new JSONObject();
 
-		for (String neighbor : queryNeighbors(graph, centralNode, num)) {
+		for (String neighbor : queryNeighbors(graph, centralNode, num, groupNeighborsByPredicate)) {
 			// Convert the neighbor String back to a JSONObject.
 			JSONObject jsonNeighbor = new JSONObject(neighbor);
 
@@ -67,14 +70,17 @@ public class Neighborhood {
 	 *            The URI of the central node.
 	 * @param num
 	 *            How many neighbors to return.
+	 * @param groupNeighborsByPredicate
+	 *            Whether neighbors should be grouped by predicate or not.
 	 * 
 	 * @return A List of JSON represented neighbors.
 	 */
-	private static List<String> queryNeighbors(String graph, String centralNode, int num) {
+	private static List<String> queryNeighbors(String graph, String centralNode, int num,
+			boolean groupNeighborsByPredicate) {
 		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + graph + ".parquet");
 		graphFrame.cache().registerTempTable("Graph");
 
-		DataFrame resultsFrame = Service.sqlCtx().sql(getSQLQuery(graph, centralNode, num));
+		DataFrame resultsFrame = Service.sqlCtx().sql(getSQLQuery(graph, centralNode, num, groupNeighborsByPredicate));
 
 		@SuppressWarnings("serial")
 		List<String> neighbors = resultsFrame.javaRDD().map(new Function<Row, String>() {
@@ -96,26 +102,41 @@ public class Neighborhood {
 	 *            The URI of the central node.
 	 * @param num
 	 *            How many neighbors to return.
+	 * @param groupNeighborsByPredicate
+	 *            Whether neighbors should be grouped by predicate or not.
 	 * 
 	 * @return The query String.
 	 */
-	private static String getSQLQuery(String graph, String centralNode, int num) {
+	private static String getSQLQuery(String graph, String centralNode, int num, boolean groupNeighborsByPredicate) {
 		StringBuilder sb = new StringBuilder();
 
+		// Build an outer query for modifications after the union took place.
+		sb.append(" SELECT neighbor, connection, direction ");
+		sb.append(" FROM ( ");
+
 		// All nodes which have the central node as source ...
-		sb.append("SELECT object AS neighbor, predicate AS connection, 'out' AS direction ");
-		sb.append("FROM Graph ");
-		sb.append("WHERE subject='" + centralNode + "' ");
-		// sb.append("LIMIT " + num);
+		sb.append(" SELECT object AS neighbor, predicate AS connection, 'out' AS direction ");
+		sb.append(" FROM Graph ");
+		sb.append(" WHERE subject='" + centralNode + "' ");
+		// sb.append(" LIMIT " + num);
 
 		// ... combine these with ...
 		sb.append(" UNION ");
 
 		// ... all nodes which have the central node as target.
-		sb.append("SELECT subject AS neighbor, predicate AS connection, 'in' AS direction ");
-		sb.append("FROM Graph ");
-		sb.append("WHERE object='" + centralNode + "' ");
-		// sb.append("LIMIT " + num);
+		sb.append(" SELECT subject AS neighbor, predicate AS connection, 'in' AS direction ");
+		sb.append(" FROM Graph ");
+		sb.append(" WHERE object='" + centralNode + "' ");
+		// sb.append(" LIMIT " + num);
+
+		// Close the outer query and apply modifications.
+		sb.append(" ) tmp ");
+
+		if (groupNeighborsByPredicate) {
+			sb.append(" GROUP BY connection ");
+		}
+
+		sb.append(" LIMIT " + num);
 
 		return sb.toString();
 	}
