@@ -341,6 +341,24 @@ function exportGraphAsSVG() {
 	});
 }
 
+$(document).ready(function() {
+	$('#btnSearch').click( function() {
+		showAutocompletionModal();
+	});
+	$('#btnReturnToBrowser').click( function() {
+		returnToBrowser();
+	});
+	$('#btnExportGraphSVG').click( function() {
+		exportGraphAsSVG();
+	});
+	$('#btnFullscreenBrowser').click( function() {
+		toggleBrowserFullscreen();
+	});
+	$('#btnCloseBrowser').click( function() {
+		closeBrowser();
+	});
+});
+
 // ########################## Utility Functions ##########################
 function getGraphName() {
 	$('#GraphName').html(getCookie('graphName'));

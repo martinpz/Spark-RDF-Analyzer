@@ -97,15 +97,13 @@
 					<div class="input-group">
 						<input id="entryNode" type="text" class="form-control" placeholder="Entry node">
 						<span class="input-group-btn">
-							<button id="btnSearch" type="button" class="btn btn-warning" onClick="showAutocompletionModal()"
-							data-toggle="modal" data-target="#modal" data-backdrop="static" data-keyboard="false"> 
+							<button id="btnSearch" type="button" class="btn btn-warning" data-toggle="modal" data-target="#modal" data-backdrop="static" data-keyboard="false"> 
 							<span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
 						</span>
 					</div>
 				</div>
 
-				<button id="btnReturnToBrowser" type="button" class="btn btn-success invisible" aria-label="Return to the browser" onclick="returnToBrowser()"
-					title="Reopen the browser in the latest state.">
+				<button id="btnReturnToBrowser" type="button" class="btn btn-success invisible" aria-label="Return to the browser" title="Reopen the browser in the latest state.">
 					<span class="glyphicon glyphicon-repeat" aria-hidden="true"></span> Return to Browser
 				</button>
 			</div>
@@ -120,13 +118,13 @@
 		<div id="browser" class="panel panel-default">
 			<div id="browserHeader" class="panel-heading">
 				<div id="actionBtns" class="btn-group" role="group" aria-label="Actions">
-					<button id="btnExportGraphSVG" type="button" class="btn btn-default" aria-label="Export graph as SVG" onclick="exportGraphAsSVG()" style="display: none;">
+					<button id="btnExportGraphSVG" type="button" class="btn btn-default" aria-label="Export graph as SVG" style="display: none;">
 						<span class="glyphicon glyphicon-export" aria-hidden="true"></span> SVG Export
 					</button>
-					<button id="btnFullscreenBrowser" type="button" class="btn btn-default" aria-label="View browser in full-screen" onclick="toggleBrowserFullscreen()">
+					<button id="btnFullscreenBrowser" type="button" class="btn btn-default" aria-label="View browser in full-screen">
 						<span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span> Full-screen
 					</button>
-					<button id="btnCloseBrowser" type="button" class="btn btn-default" aria-label="Close browser and return to entry point" onclick="closeBrowser()">
+					<button id="btnCloseBrowser" type="button" class="btn btn-default" aria-label="Close browser and return to entry point">
 						<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Close Browser
 					</button>
 				</div>
