@@ -1,7 +1,7 @@
 // ########################## RDF Browser Window ##########################
 function showBrowser(centralNode, centralNodeURI) {
-	$('#browser').show(animationSpeed);
-	$('#entrypoint').hide(animationSpeed);
+	$('#browser').show(ANIMATION_SPEED);
+	$('#entrypoint').hide(ANIMATION_SPEED);
 
 	// Fill browser div with content.
 	if(useTextualBrowsing()) {
@@ -29,23 +29,18 @@ function updateBrowserHeight() {
 	$('#browserBody').css('height', 'calc(100vh - ' + heightDiff + 'px)');
 }
 
-function exportGraphAsSVG() {
-	var output = s.toSVG({
-		download: true,
-		filename: 'graphExport.svg',
-		size: 1000,
-		labels: true,
-		data: true
-	});
-}
-
 function toggleBrowserFullscreen() {
 	$('#browser').toggleClass('fullscreen');
 	updateBrowserHeight();
 }
 
 function closeBrowser() {
-	$('#browser').hide(animationSpeed);
-	$('#entrypoint').show(animationSpeed);
+	$('#browser').hide(ANIMATION_SPEED);
+	$('#entrypoint').show(ANIMATION_SPEED);
 	showReturnToBrowser();
+}
+
+function returnToBrowser() {
+	$('#browser').show(ANIMATION_SPEED);
+	$('#entrypoint').hide(ANIMATION_SPEED);
 }

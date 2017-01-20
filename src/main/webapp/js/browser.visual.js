@@ -121,3 +121,13 @@ function displayNodesVisual(centralNode, centralNodeURI, neighbors) {
 		// console.log(e.type, e.data.edge, e.data.captor);
 	});
 }
+
+function exportGraphAsSVG() {
+	var output = s.toSVG({
+		download: true,
+		filename: 'graphExport.svg',
+		size: 1000,
+		labels: true,
+		data: true
+	});
+}

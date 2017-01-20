@@ -54,8 +54,3 @@ function startBrowsing(event) {
 
 	showBrowser(selectedValue, selectedURI);
 }
-
-function returnToBrowser() {
-	$('#browser').show(animationSpeed);
-	$('#entrypoint').hide(animationSpeed);
-}
