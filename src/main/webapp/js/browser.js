@@ -247,10 +247,10 @@ function displayNodesVisual(centralNode, centralNodeURI, neighbors) {
 		var name = props.name == '' ? URI.slice(1, -1) : props.name;
 		var source = props.direction == 'out' ? centralNodeURI : URI;
 		var target = props.direction == 'out' ? URI : centralNodeURI;
-		var colorNode = props.direction == 'out' ? 'lightblue' : 'lightseagreen';
-		var hoverColorNode = props.direction == 'out' ? 'blue' : 'seagreen';
-		var colorEdge = props.direction == 'out' ? 'lightgreen' : 'lightcoral';
-		var hoverColorEdge = props.direction == 'out' ? 'green' : 'coral';
+		var colorNode = props.direction == 'out' ? 'lightseagreen' : 'lightseagreen';
+		var hoverColorNode = props.direction == 'out' ? 'seagreen' : 'seagreen';
+		var colorEdge = props.direction == 'out' ? 'lightgreen' : 'coral';
+		var hoverColorEdge = props.direction == 'out' ? 'green' : 'orangered';
 
 		g.nodes.push({
 			id: URI.slice(1, -1),
