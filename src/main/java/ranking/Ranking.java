@@ -56,14 +56,11 @@ public class Ranking {
 						return new Tuple2<String, String>(row.getString(0), row.getString(1));
 					}
 					
+				// this can be optimized if we use reduceByKey instead of groupByKey
 				}).distinct().groupByKey().cache();
 		
 
-		/*
-		 *  adding 2 more columns to key,[value] such that it becomes key,[[value],(1/count(value)),cij]
-		 *  cij = suppose if node1 has a link to node2 and node3. Than cij for node1 = 2.
-		 */
-		 
+		// Step 1
 		masterData = rows.mapValues(new Function<Iterable<String>,Tuple3<Iterable<String>,Double,Double>>() {
 	        @Override
 	        public Tuple3<Iterable<String>,Double,Double> call(Iterable<String> b) {
@@ -72,27 +69,27 @@ public class Ranking {
 	        }
 	      });
 		
+		for(int i = 0 ; i<5; i++){
+			
+			// Step 2
+			System.out.println("step 2 working");
+	        refData = new HashMap<String,Tuple2<Double,Double>>();
+	        masterData.collect().forEach(line -> refData.put(line._1, new Tuple2(line._2._2(),line._2._3())));
+	        
+			// Step 3
+			System.out.println("step 3 working");
+	        reshuffledNodes = reshuffleFromMasterData(masterData,refData);
+
+			// Step 4
+			System.out.println("step 4 working");
+	        masterData  = CalculateNewPjs(reshuffledNodes);
+		}
+		
+		System.out.println("donedonedonedonedonedonedonedonedone");
+		masterData.foreach(line -> System.out.println(line));
 		
 
-		/*
-		 *  We are saving here String,<Double,Double> so that we can save
-		 * 	NodeName,< pj , 1/n > values in this format
-		 */
-        refData = new HashMap<String,Tuple2<Double,Double>>();
-        masterData.collect().forEach(line -> refData.put(line._1, new Tuple2(line._2._2(),line._2._3())));
-	    
-
-        System.out.println(" --- Final Data in Step 2 --- ");
-
-        reshuffledNodes = reshuffleFromMasterData(masterData,refData);
-
-        // <key,[[nodeNames], [node 1/n's], nodepjs]>
-        newpjs  = CalculateNewPjs(reshuffledNodes);
       
-        // update the new pjs for references
-        Map<String,Double> refData2 = new HashMap<String,Double>();
-        newpjs.collect().forEach(line -> refData2.put(line._1, line._2._3()));
-        
         
         
 	}
@@ -109,7 +106,7 @@ public class Ranking {
         	@Override
 			public Tuple4<Iterable<String>,Tuple2<ArrayList<Double>,ArrayList<Double>>,Double,Double> call(Tuple3<Iterable<String>,Double, Double> line)
 					throws Exception {
-        		// key,([names],Tuple2[ [1/n's],[pj's] ],1/n,pj)
+        		// key,([names],Tuple2[ [1/n's],[pj's] ],pj,1/n)
         		return new Tuple4(line._1(),getPointsToN(refData, line._1()),line._2(),line._3());
 			}
         });
