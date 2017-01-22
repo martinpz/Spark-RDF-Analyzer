@@ -16,6 +16,9 @@ import org.apache.spark.sql.Row;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+
+import ranking.Ranking;
+
 import org.apache.spark.sql.Dataset;
 
 public class Centrality {
@@ -90,7 +93,7 @@ public class Centrality {
 		
 		DataFrame allSubjects = Service.sqlCtx().sql("SELECT subject,predicate,object FROM Graph");
 
-
+		Ranking.CreateAdjacency(allSubjects);
 		return "";
 	}
 	public static String readResource(final String fileName, Charset charset) throws IOException {
