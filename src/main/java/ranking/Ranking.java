@@ -76,7 +76,7 @@ public class Ranking {
 			}
 		}).groupByKey().distinct().cache();
 
-		rowss.foreach(line -> System.out.println(line));
+//		rowss.foreach(line -> System.out.println(line));
 		
 		
 		// Step 1
@@ -88,7 +88,7 @@ public class Ranking {
 	        }
 	      });
 		
-		for(int i = 0 ; i<5; i++){
+		for(int i = 0 ; i<1; i++){
 			
 			// Step 2
 			System.out.println("step 2 working");
