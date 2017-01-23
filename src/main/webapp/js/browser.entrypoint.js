@@ -1,12 +1,4 @@
 // ########################## RDF Browser Entry Point ##########################
-function simulateClickOnSearch() {
-	$('#btnSearch').click();
-}
-
-function showReturnToBrowser() {
-	$('#btnReturnToBrowser').removeClass('invisible');
-}
-
 function showAutocompletionModal() {
 	var input = $('#entryNode').val();
 
@@ -56,7 +48,21 @@ function startBrowsing(event) {
 	showBrowser(selectedValue, selectedURI);
 }
 
+function simulateClickOnSearch() {
+	$('#btnSearch').click();
+}
+
+function showReturnToBrowser() {
+	$('#btnReturnToBrowser').removeClass('invisible');
+}
+
 $(document).ready(function() {
+	// On 'Enter' in search field simulate click on search.
+	$('#entryNode').keypress( function(e) {
+		if (e.which == 13) {
+			simulateClickOnSearch();
+		}
+	});
 	$('#btnSearch').click( function() {
 		showAutocompletionModal();
 	});
