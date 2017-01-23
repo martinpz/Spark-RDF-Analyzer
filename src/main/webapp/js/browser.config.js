@@ -6,10 +6,6 @@ function getBrowsingType() {
 	return $('#browsingType').val();
 }
 
-// function groupByPredicate() {
-//	return $('#groupByPredicate').prop('checked');
-// }
-
 function numNeighbors() {
 	if ($('#limitNeighbors').prop('checked')) {
 		return $('#numNeighbors').val();
