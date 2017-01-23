@@ -98,7 +98,10 @@ public class Centrality {
 	}
 	public static String CalculateCloseness(String node){
 		
-		DataFrame allSubjects = Service.sqlCtx().sql("SELECT subject,predicate,object FROM Graph");
+		DataFrame allSubjects = Service.sqlCtx().sql("SELECT subject,predicate,object FROM Graph where "
+				+ "predicate NOT LIKE 'a' AND predicate NOT LIKE 'foaf:firstName' "
+				+ "AND predicate NOT LIKE 'foaf:lastName' AND object NOT LIKE 'sioc:ip_address' "
+				+ "AND predicate NOT LIKE 'rdf:type'");
 
 		Ranking.CreateAdjacency(allSubjects);
 		return "";

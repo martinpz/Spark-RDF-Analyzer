@@ -2,6 +2,7 @@ package ranking;
 
 
 import java.util.ArrayList;
+import static org.apache.spark.sql.functions.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,7 @@ public class Ranking {
 					}
 				// this can be optimized if we use reduceByKey instead of groupByKey
 		}).distinct().groupByKey().cache();
+		
 		
 		// Step 1
 		masterData = rows.mapValues(new Function<Iterable<String>,Tuple3<Iterable<String>,Double,Double>>() {
