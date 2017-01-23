@@ -27,3 +27,7 @@ function updateBrowsingHistory(currentName, currentURI) {
 		$(this).html('<a href="#" onclick="' + 'prepareTextualBrowser(\'' + name + '\', \'' + URI + '\')' + '">' + name + '</a>');
 	});
 }
+
+function clearBrowsingHistory() {
+	$('#browsingHistory #list').html('');
+}

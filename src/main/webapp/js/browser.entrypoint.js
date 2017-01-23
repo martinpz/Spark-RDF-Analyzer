@@ -52,6 +52,7 @@ function startBrowsing(event) {
 	// Close modal.
 	$('#btnCloseModal').click();
 
+	clearBrowsingHistory();
 	showBrowser(selectedValue, selectedURI);
 }
 
