@@ -90,16 +90,21 @@
 						<p>This will use a textual representation of the RDF graph.</p>
 					</div>
 
-					<div class="range">
-						<input id="numNeighbors" data-slider-id='numNeighborsSlider' type="text" data-slider-min="5" data-slider-max="100" data-slider-step="1" data-slider-value="40" value="20"/><br>
-						<label>Maximum number of neighbors to show</label>
+					<div class="checkbox">
+						<label><input id="limitNeighbors" type="checkbox" value="">Limit number of neighbors</label>
+						<p>Check this box if you want to limit the displayed number of neighbors.</p>
+					</div>
+
+					<div id="numNeighborsDiv" class="range">
+						<input id="numNeighbors" data-slider-id='numNeighborsSlider' type="text" data-slider-min="5" data-slider-max="100" data-slider-step="1" data-slider-value="40" value="20" />
+						&nbsp; <span id="sliderVal">40</span><br>
 						<p>Select how many neighbor nodes should be displayed at most.</p>
 					</div>
 
-					<div class="checkbox">
+					<!--<div class="checkbox">
 						<label><input id="groupByPredicate" type="checkbox" value="">Group neighbors by predicate</label>
 						<p>This will strongly reduce the number of nodes displayed at once.</p>
-					</div>
+					</div>-->
 				</div>
 			</div>
 

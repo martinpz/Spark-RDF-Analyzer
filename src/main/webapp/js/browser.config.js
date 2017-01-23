@@ -20,7 +20,11 @@ function groupByPredicate() {
 }
 
 function numNeighbors() {
-	return $('#numNeighbors').val();
+	if ($("#limitNeighbors").checked) {
+		return $('#numNeighbors').val();
+	} else {
+		return false;
+	}
 }
 
 function getNeighborhoodRequest(centralNodeURI) {
@@ -29,12 +33,21 @@ function getNeighborhoodRequest(centralNodeURI) {
 		+ '&numNeighbors=' + numNeighbors();
 }
 
-$(document).ready(function() {
+$(document).ready( function() {
     $("#numNeighbors").slider({
-        tooltip: 'always'
+        tooltip: 'hide'
     });
+	
+	$("#numNeighbors").on("slide", function(slideEvt) {
+		$("#sliderVal").text(slideEvt.value);
+	});
 
-	// $('#textualBrowsing').change( function() {
-	// 	changeConfigOptions();
-    // });
+	// Enable slider when neighbor limitation is selected.
+	$("#limitNeighbors").click( function() {
+		if (this.checked) {
+			$("#numNeighborsDiv").show(ANIMATION_SPEED);
+		} else {
+			$("#numNeighborsDiv").hide(ANIMATION_SPEED);
+		}
+	});
 });

@@ -12,9 +12,16 @@
     font-style: italic;
 }
 
+#configuration.panel-body #numNeighborsDiv {
+    display: none;
+}
+
+#configuration.panel-body #sliderVal {
+    font-weight: bold;
+}
+
 #configuration.panel-body #numNeighborsSlider {
     width: 350px;
-    margin-top: 25px;
 }
 
 #configuration.panel-body #numNeighborsSlider .slider-selection {
