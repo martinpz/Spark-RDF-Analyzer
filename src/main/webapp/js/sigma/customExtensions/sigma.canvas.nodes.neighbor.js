@@ -1,9 +1,11 @@
 /**
- * Extends sigma with custom shape for central nodes.
+ * Extends sigma with custom shape for neighbor nodes.
  */
-sigma.canvas.nodes.centralNode = function(node, context, settings) {
+sigma.canvas.nodes.neighbor = function(node, context, settings) {
     var prefix = settings('prefix') || '',
         size = node[prefix + 'size'];
+
+    console.log('NEIGHBOR NODE!');
 
     context.fillStyle = node.color || settings('defaultNodeColor');
     context.beginPath();

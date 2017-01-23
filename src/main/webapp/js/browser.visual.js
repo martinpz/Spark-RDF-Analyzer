@@ -76,7 +76,7 @@ function arrangeNodesByDirection(centralNode, centralNodeURI, neighbors) {
 		x: 0,
 		y: 0,
 		size: 5,
-		color: 'lightblue'
+		color: getColorScheme().centralNode
 	});
 
 	// Add all neighbor nodes to the graph instance.
@@ -85,22 +85,27 @@ function arrangeNodesByDirection(centralNode, centralNodeURI, neighbors) {
 		// [Log] {predicate: "artist", predicateURI: "<http://dbpedia.org/property/artist>", name: "Harry_and_the_Potters", URI: "<http://dbpedia.org/resource/Harry_and_the_Potters>", direction: "out"}
 
 		var name = props.name == '' ? URI.slice(1, -1) : props.name;
-		var source = props.direction == 'out' ? centralNodeURI : URI;
-		var target = props.direction == 'out' ? URI : centralNodeURI;
-		var colorNode = props.direction == 'out' ? 'lightseagreen' : 'lightseagreen';
-		var hoverColorNode = props.direction == 'out' ? 'seagreen' : 'seagreen';
-		var colorEdge = props.direction == 'out' ? 'lightgreen' : 'coral';
-		var hoverColorEdge = props.direction == 'out' ? 'green' : 'orangered';
-		var factor = props.direction == 'out' ? 2 : -2;
+		var source = URI;
+		var target = centralNodeURI;
+		var colorNode = getColorScheme().neighbor;
+		var colorEdge = getColorScheme().inEdge;
+		var factor = -2;
+
+		if( props.direction == 'out' ) {
+			source = centralNodeURI;
+			target = URI;
+			colorEdge = getColorScheme().outEdge;
+			factor = 2;
+		}
 
 		g.nodes.push({
 			id: URI.slice(1, -1),
 			label: name,
+			type: 'neighbor',
 			x: factor * Math.abs(Math.cos(Math.PI * 2 * edgeCount / numNeighbors)),
 			y: Math.sin(Math.PI * 2 * edgeCount / numNeighbors),
 			size: 3,
-			color: colorNode,
-			hover_color: hoverColorNode
+			color: colorNode
 		});
 
 		g.edges.push({
@@ -110,7 +115,6 @@ function arrangeNodesByDirection(centralNode, centralNodeURI, neighbors) {
 			target: target.slice(1, -1),
 			size: 1, // Math.random(),
 			color: colorEdge,
-			hover_color: hoverColorEdge,
 			type: 'arrow'
 		});
 
