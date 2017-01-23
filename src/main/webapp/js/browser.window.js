@@ -31,14 +31,15 @@ function displayNodes(centralNode, centralNodeURI, neighbors) {
 	switch (getBrowsingType()) {
 		case 'circular':
 			arrangeNodesCircular(centralNode, centralNodeURI, neighbors);
-			enableSVGexport();
+			showSVGexport();
 			break;
 		case 'direction':
 			arrangeNodesByDirection(centralNode, centralNodeURI, neighbors);
-			enableSVGexport();
+			showSVGexport();
 			break;
 		case 'textual':
 			displayNodesTextual(centralNode, centralNodeURI, neighbors);
+			hideSVGexport();
 			break;
 		default:
 			console.error('Undefined browsing type.');
@@ -46,14 +47,18 @@ function displayNodes(centralNode, centralNodeURI, neighbors) {
 	}
 }
 
-function enableSVGexport() {
-	// Show button for SVG export. But disable in Safari.
+function showSVGexport() {
+	// Show button for SVG export. But disable in Safari, since it is not supported.
 	$('#btnExportGraphSVG').show();
 
 	if (navigator.userAgent.match(/Version\/[\d\.]+.*Safari/)) {
 		$('#btnExportGraphSVG').prop('disabled', true);
 		$('#btnExportGraphSVG').prop('title', 'SVG Export does not work in Safari.');
 	}
+}
+
+function hideSVGexport() {
+	$('#btnExportGraphSVG').hide();
 }
 
 function showLoader(centralNode) {
