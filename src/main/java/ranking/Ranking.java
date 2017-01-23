@@ -33,7 +33,7 @@ public class Ranking {
 	 * We perform 4 steps. 
 	 * Step 1: We get the masterData in the following format --> key,([nodeNames],pj,1/n)
 	 * Step 2: We get the References in the following format --> key,(pj,1/n)
-	 * Step 3: We get the combined data in this format       --> key,([nodenames],[[1/n],[pjs]],1/n,pj)
+	 * Step 3: We get the combined data in this format       --> key,([nodenames],[ [1/n],[pjs] ],1/n,pj)
 	 * Step 4: We get the masterData with new pjs            --> key,([nodeNames],pj,1/n)
 	 * 
 	 * After step 4, we see the data is in the same format. Hence we can go back to step 1 to perform steps with
@@ -55,11 +55,9 @@ public class Ranking {
 					public Tuple2<String, String> call(Row row) throws Exception {
 						return new Tuple2<String, String>(row.getString(0), row.getString(1));
 					}
-					
 				// this can be optimized if we use reduceByKey instead of groupByKey
-				}).distinct().groupByKey().cache();
+		}).distinct().groupByKey().cache();
 		
-
 		// Step 1
 		masterData = rows.mapValues(new Function<Iterable<String>,Tuple3<Iterable<String>,Double,Double>>() {
 	        @Override
@@ -136,7 +134,7 @@ public class Ranking {
 				
 				// here we're summing the pj*1/n values.
 				for(int i=0;i<tuple._1.size();i++){
-					finalSum += tuple._1.get(i) * tuple._1.get(i);
+					finalSum += tuple._1.get(i) * tuple._2.get(i);
 				}
 				
 				finalSum = (finalSum*0.85)+0.15;
