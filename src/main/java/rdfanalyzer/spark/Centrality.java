@@ -10,6 +10,7 @@ import java.nio.charset.Charset;
 import javax.sound.sampled.AudioFormat.Encoding;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -22,6 +23,8 @@ import ranking.Ranking;
 import org.apache.spark.sql.Dataset;
 
 public class Centrality {
+	
+	private final static Logger logger = Logger.getLogger(Centrality.class);
 
 	public static ConnAdapter objAdapter = new ConnAdapter();
 	public static DataFrame graphFrame;
@@ -54,6 +57,10 @@ public class Centrality {
 		else if(metricType.equals("4")){
 			System.out.println("[LOGS] Present in metric type 4");
 			return CalculateCloseness(nodeName);
+		}
+		else if(metricType.equals("5")){
+			System.out.println("[LOGS] Present in metric type 5");
+			return "<h1>"+calculateStartNode()+"</h1>";
 		}
 		
 		return "none";
