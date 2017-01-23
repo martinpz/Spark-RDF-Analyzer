@@ -18,7 +18,7 @@ function prepareTextualBrowser(centralNode, centralNodeURI) {
 
 function displayNodesTextual(centralNode, centralNodeURI, neighbors) {
 	// Remove < and > from URI.
-	var toShow = '<p><strong>Selected Node:</strong> <a href="' + centralNodeURI.slice(1, -1) + '">' + centralNodeURI.slice(1, -1) + '</a></p>';
+	var toShow = '<p><strong>Selected Node:</strong> <a href="' + centralNodeURI.slice(1, -1) + '" target="_blank">' + centralNodeURI.slice(1, -1) + '</a></p>';
 	toShow += '<table class="tableBrowser">';
 
 	$.each(neighbors, function(URI, props) {

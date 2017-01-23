@@ -26,8 +26,7 @@ function numNeighbors() {
 function getNeighborhoodRequest(centralNodeURI) {
     return REST_API + 'directNeighbors/' + getCookie('graphName')
 		+ '?centralNode=' + encodeURIComponent(centralNodeURI)
-		+ '&numNeighbors=' + numNeighbors()
-        + '&groupNeighborsByPredicate=' + groupByPredicate();
+		+ '&numNeighbors=' + numNeighbors();
 }
 
 $(document).ready(function() {
