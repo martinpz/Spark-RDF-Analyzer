@@ -37,15 +37,15 @@ function calculateCentralityMetric(){
 	*/
 
 	// step 1
-	//var graphName = getCookie('graphName');
+	var graphName = getCookie('graphName');
 
 	// step 2
-	//var Node1 = getCookie('selectedNode1');
-	//Node1 = Node1.replaceAll("/","$");
-	//Node1 = Node1.replaceAll("#","&");
+	var Node1 = getCookie('selectedNode1');
+	Node1 = Node1.replaceAll("/","$");
+	Node1 = Node1.replaceAll("#","&");
 	
 	// step 3
-	//var metric = $('input[name=metricRadio]:checked').val();
+	var metric = $('input[name=metricRadio]:checked').val();
 
 	// step 4
 	var xhttp = new XMLHttpRequest();
@@ -54,16 +54,19 @@ function calculateCentralityMetric(){
 		if (xhttp.readyState == 4 && xhttp.status == 200) {
 			console.log(xhttp.responseText);
 			$('#centrality_result').html(xhttp.responseText);
-
+			
 			document.getElementById('divSearch').style.visibility = 'hidden';		
 			enableCalculateButton();
+			
+			alert(xhttp.responseText);
 
 		}
 	}
 	
-	var graphName = "sib200";
-	var Node1 = "<http:$$www.ins.cwi.nl$sib$user$u62>";
-	var metric = "4";
+//	var graphName = "sib200";
+//	var Node1 = "<http:$$www.ins.cwi.nl$sib$user$u62>";
+//	var metric = "4";
+
 	xhttp.open("GET", REST_API + "calculateCentrality/" + graphName +"/"+ Node1 +"/"+ metric, true);
 	xhttp.send();
 	
@@ -208,6 +211,9 @@ keyframes ellipsis {to { width:20px;
 							</div>
 							<div class="radio">
 							  <label><input type="radio" value="4" name="metricRadio">Closeness Centrality</label>
+							</div>
+							<div class="radio">
+							  <label><input type="radio" value="5" name="metricRadio">Start Node</label>
 							</div>
 						</section>
 					</div>
