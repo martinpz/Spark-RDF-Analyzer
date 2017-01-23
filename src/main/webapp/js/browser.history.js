@@ -28,6 +28,10 @@ function updateBrowsingHistory(currentName, currentURI) {
 	});
 }
 
+function removeLastHistoryElement() {
+	$('#browsingHistory #list li').last().remove();
+}
+
 function clearBrowsingHistory() {
 	$('#browsingHistory #list').html('');
 }

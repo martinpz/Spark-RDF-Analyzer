@@ -25,7 +25,7 @@ function prepareBrowser(centralNode, centralNodeURI) {
 
 function displayNodes(centralNode, centralNodeURI, neighbors) {
 	// Clear the container.
-	$('#browserBody').html('<div id="container"></div>');
+	$('#browserBody').html('<div id="container" data-central-node="' + centralNode + '" data-central-node-uri="' + centralNodeURI + '"></div>');
 
 	// Determine how to display the graph.
 	switch (getBrowsingType()) {
@@ -82,6 +82,15 @@ function updateBrowserHeight() {
 	$('#browserBody').css('height', 'calc(100vh - ' + heightDiff + 'px)');
 }
 
+function reloadGraph() {
+	// Reload the graph with the stored values for the central node.
+	var centralNode = $('#container').attr('data-central-node');
+	var centralNodeURI = $('#container').attr('data-central-node-uri');
+
+	removeLastHistoryElement();
+	prepareBrowser(centralNode, centralNodeURI);
+}
+
 function toggleBrowserFullscreen() {
 	$('#browser').toggleClass('fullscreen');
 	updateBrowserHeight();
@@ -99,6 +108,9 @@ function returnToBrowser() {
 }
 
 $(document).ready(function() {
+	$('#btnReloadGraph').click( function() {
+		reloadGraph();
+	});
 	$('#btnExportGraphSVG').click( function() {
 		exportGraphAsSVG();
 	});
