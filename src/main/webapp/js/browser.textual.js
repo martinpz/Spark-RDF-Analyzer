@@ -1,21 +1,4 @@
 // ########################## RDF Browser Text-Based ##########################
-function prepareTextualBrowser(centralNode, centralNodeURI) {
-	var xhttp = new XMLHttpRequest();
-
-	showLoader(centralNode);
-	updateBrowsingHistory(centralNode, centralNodeURI);
-
-	xhttp.onreadystatechange = function() {
-		if (xhttp.readyState == 4 && xhttp.status == 200) {
-			displayNodesTextual(centralNode, centralNodeURI, JSON.parse(xhttp.responseText));
-			updateBrowserHeight();
-		}
-	}
-
-	xhttp.open('GET', getNeighborhoodRequest(centralNodeURI), true);
-	xhttp.send();
-}
-
 function displayNodesTextual(centralNode, centralNodeURI, neighbors) {
 	// Remove < and > from URI.
 	var toShow = '<p><strong>Selected Node:</strong> <a href="' + centralNodeURI.slice(1, -1) + '" target="_blank">' + centralNodeURI.slice(1, -1) + '</a></p>';
@@ -38,7 +21,7 @@ function displayNodesTextual(centralNode, centralNodeURI, neighbors) {
 
 		if (props.name !== '') {
 			// When a name is set, use it for the neighbor.
-			neighbor = '<a href="#" onclick="prepareTextualBrowser';
+			neighbor = '<a href="#" onclick="prepareBrowser';
 			neighbor += '(\'' + props.name + '\', \'' + URI + '\')';
 			neighbor += '">';
 			neighbor += props.name + '</a>';
@@ -58,5 +41,5 @@ function displayNodesTextual(centralNode, centralNodeURI, neighbors) {
 
 	toShow += '</table>';
 
-	$('#browserBody').html(toShow);
+	$('#container').html(toShow);
 }

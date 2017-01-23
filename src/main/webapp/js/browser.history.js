@@ -24,7 +24,7 @@ function updateBrowsingHistory(currentName, currentURI) {
 		var URI = $(this).attr('data-uri');
 
 		$(this).removeClass('active');
-		$(this).html('<a href="#" onclick="' + 'prepareTextualBrowser(\'' + name + '\', \'' + URI + '\')' + '">' + name + '</a>');
+		$(this).html('<a href="#" onclick="' + 'prepareBrowser(\'' + name + '\', \'' + URI + '\')' + '">' + name + '</a>');
 	});
 }
 

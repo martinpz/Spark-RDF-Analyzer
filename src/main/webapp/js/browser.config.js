@@ -6,18 +6,6 @@ function getBrowsingType() {
 	return $('#browsingType').val();
 }
 
-function arrangeCircular() {
-	return getBrowsingType() === 'circular';
-}
-
-function arrangeByDirection() {
-	return getBrowsingType() === 'direction';
-}
-
-function useTextualBrowsing() {
-	return getBrowsingType() === 'textual';
-}
-
 // function groupByPredicate() {
 //	return $('#groupByPredicate').prop('checked');
 // }

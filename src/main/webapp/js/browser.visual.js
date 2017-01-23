@@ -1,35 +1,7 @@
 // ########################## RDF Browser Graphical ##########################
 var s; // Global variable for the sigma graph instance.
 
-function prepareVisualBrowser(centralNode, centralNodeURI) {
-	var xhttp = new XMLHttpRequest();
-
-	showLoader(centralNode);
-	updateBrowsingHistory(centralNode, centralNodeURI);
-	
-	// Show button for SVG export. But disable in Safari.
-	$('#btnExportGraphSVG').show();
-
-	if (navigator.userAgent.match(/Version\/[\d\.]+.*Safari/)) {
-		$('#btnExportGraphSVG').prop('disabled', true);
-		$('#btnExportGraphSVG').prop('title', 'SVG Export does not work in Safari.');
-	}
-
-	xhttp.onreadystatechange = function() {
-		if (xhttp.readyState == 4 && xhttp.status == 200) {
-			updateBrowserHeight();
-			displayNodesVisual(centralNode, centralNodeURI, JSON.parse(xhttp.responseText));
-		}
-	}
-
-    xhttp.open('GET', getNeighborhoodRequest(centralNodeURI), true);
-	xhttp.send();
-}
-
-function displayNodesVisual(centralNode, centralNodeURI, neighbors) {
-	// Clear the container.
-	$('#browserBody').html('<div id="container"></div>');
-
+function arrangeNodesCircular(centralNode, centralNodeURI, neighbors) {
 	var edgeCount = 0;
 	var numNeighbors = Object.keys(neighbors).length;
 	var g = {
@@ -37,7 +9,7 @@ function displayNodesVisual(centralNode, centralNodeURI, neighbors) {
 		edges: []
     };
 
-    // Add central node to the graph instance.
+	// Add central node to the graph instance.
     g.nodes.push({
 		id: centralNodeURI.slice(1, -1),
 		label: centralNode,
@@ -102,6 +74,14 @@ function displayNodesVisual(centralNode, centralNodeURI, neighbors) {
 		}
 	});
 
+	bindListeners();
+}
+
+function arrangeNodesByDirection(centralNode, centralNodeURI, neighbors) {
+	// TODO
+}
+
+function bindListeners() {
 	// Bind event handlers to nodes and edges.
 	s.bind('overNode outNode clickNode', function(e) {
 		// console.log(e.type, e.data.node.label, e.data.captor);
@@ -111,7 +91,7 @@ function displayNodesVisual(centralNode, centralNodeURI, neighbors) {
 		} else if (e.type === 'outNode') {
 			// console.log('EXITED!!!');
 		} else if (e.type === 'clickNode') {
-			prepareVisualBrowser(e.data.node.label, '<' + e.data.node.id + '>');
+			prepareBrowser(e.data.node.label, '<' + e.data.node.id + '>');
 		}
 	});
 

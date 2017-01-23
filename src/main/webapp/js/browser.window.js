@@ -3,11 +3,56 @@ function showBrowser(centralNode, centralNodeURI) {
 	$('#browser').show(ANIMATION_SPEED);
 	$('#entrypoint').hide(ANIMATION_SPEED);
 
-	// Fill browser div with content.
-	if(useTextualBrowsing()) {
-		prepareTextualBrowser(centralNode, centralNodeURI);
-	} else {
-		prepareVisualBrowser(centralNode, centralNodeURI);
+	prepareBrowser(centralNode, centralNodeURI);
+}
+
+function prepareBrowser(centralNode, centralNodeURI) {
+	var xhttp = new XMLHttpRequest();
+
+	showLoader(centralNode);
+	updateBrowsingHistory(centralNode, centralNodeURI);
+
+	xhttp.onreadystatechange = function() {
+		if (xhttp.readyState == 4 && xhttp.status == 200) {
+			updateBrowserHeight();
+			displayNodes(centralNode, centralNodeURI, JSON.parse(xhttp.responseText));
+		}
+	}
+
+	xhttp.open('GET', getNeighborhoodRequest(centralNodeURI), true);
+	xhttp.send();
+}
+
+function displayNodes(centralNode, centralNodeURI, neighbors) {
+	// Clear the container.
+	$('#browserBody').html('<div id="container"></div>');
+
+	// Determine how to display the graph.
+	switch (getBrowsingType()) {
+		case 'circular':
+			arrangeNodesCircular(centralNode, centralNodeURI, neighbors);
+			enableSVGexport();
+			break;
+		case 'direction':
+			arrangeNodesByDirection(centralNode, centralNodeURI, neighbors);
+			enableSVGexport();
+			break;
+		case 'textual':
+			displayNodesTextual(centralNode, centralNodeURI, neighbors);
+			break;
+		default:
+			console.error('Undefined browsing type.');
+			break;
+	}
+}
+
+function enableSVGexport() {
+	// Show button for SVG export. But disable in Safari.
+	$('#btnExportGraphSVG').show();
+
+	if (navigator.userAgent.match(/Version\/[\d\.]+.*Safari/)) {
+		$('#btnExportGraphSVG').prop('disabled', true);
+		$('#btnExportGraphSVG').prop('title', 'SVG Export does not work in Safari.');
 	}
 }
 
