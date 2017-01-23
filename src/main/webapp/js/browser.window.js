@@ -54,6 +54,9 @@ function showSVGexport() {
 	if (navigator.userAgent.match(/Version\/[\d\.]+.*Safari/)) {
 		$('#btnExportGraphSVG').prop('disabled', true);
 		$('#btnExportGraphSVG').prop('title', 'SVG Export does not work in Safari.');
+	} else {
+		$('#btnExportGraphSVG').prop('disabled', false);
+		$('#btnExportGraphSVG').prop('title', 'Export the graph as a vector graphic.');
 	}
 }
 
