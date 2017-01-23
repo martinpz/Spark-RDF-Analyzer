@@ -2,25 +2,28 @@
 const LOADER = '<div class="progress progress-striped active page-progress-bar"><div class="progress-bar" style="width: 100%;"></div></div>';
 const ANIMATION_SPEED = 'fast';
 
-// function changeConfigOptions() {
-// 	// When textual browsing is selected: Disable properties related to visual browsing.
-// 	if( $('#textualBrowsing').is(":checked") ) {
-// 		$('#groupByPredicate').prop('checked', false).prop('disabled', true);
-// 	} else {
-// 		$('#groupByPredicate').prop('disabled', false);
-// 	}
-// }
+function getBrowsingType() {
+	return $('#browsingType').val();
+}
+
+function arrangeCircular() {
+	return getBrowsingType() === 'circular';
+}
+
+function arrangeByDirection() {
+	return getBrowsingType() === 'direction';
+}
 
 function useTextualBrowsing() {
-	return $('#textualBrowsing').prop('checked');
+	return getBrowsingType() === 'textual';
 }
 
-function groupByPredicate() {
-	return $('#groupByPredicate').prop('checked');
-}
+// function groupByPredicate() {
+//	return $('#groupByPredicate').prop('checked');
+// }
 
 function numNeighbors() {
-	if ($("#limitNeighbors").checked) {
+	if ($('#limitNeighbors').prop('checked')) {
 		return $('#numNeighbors').val();
 	} else {
 		return 0;
@@ -34,20 +37,20 @@ function getNeighborhoodRequest(centralNodeURI) {
 }
 
 $(document).ready( function() {
-    $("#numNeighbors").slider({
+    $('#numNeighbors').slider({
         tooltip: 'hide'
     });
 	
-	$("#numNeighbors").on("slide", function(slideEvt) {
-		$("#sliderVal").text(slideEvt.value);
+	$('#numNeighbors').on('slide', function(slideEvt) {
+		$('#sliderVal').text(slideEvt.value);
 	});
 
 	// Enable slider when neighbor limitation is selected.
-	$("#limitNeighbors").click( function() {
+	$('#limitNeighbors').click( function() {
 		if (this.checked) {
-			$("#numNeighborsDiv").show(ANIMATION_SPEED);
+			$('#numNeighborsDiv').show(ANIMATION_SPEED);
 		} else {
-			$("#numNeighborsDiv").hide(ANIMATION_SPEED);
+			$('#numNeighborsDiv').hide(ANIMATION_SPEED);
 		}
 	});
 });

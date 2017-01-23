@@ -83,11 +83,13 @@
 					<span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Browser Configuration
 				</div>
 				<div id="configuration" class="panel-body">
-					<p>Configure your browsing experience.</p>
-
-					<div class="checkbox">
-						<label><input id="textualBrowsing" type="checkbox" value="">Use text-based browsing</label>
-						<p>This will use a textual representation of the RDF graph.</p>
+					<div>
+						<label for="browsingType">Select your browsing type</label>
+						<select class="form-control" id="browsingType">
+							<option value="circular">Circular arrangement</option>
+							<option value="direction">Arranged by direction</option>
+							<option value="textual">Textual browsing</option>
+						</select>
 					</div>
 
 					<div class="checkbox">
