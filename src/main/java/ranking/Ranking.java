@@ -2,8 +2,11 @@ package ranking;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
+
 import static org.apache.spark.sql.functions.*;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -59,9 +62,25 @@ public class Ranking {
 				// this can be optimized if we use reduceByKey instead of groupByKey
 		}).distinct().groupByKey().cache();
 		
+		JavaPairRDD<String,Iterable<String>> rowss = rows.flatMapToPair(new PairFlatMapFunction<Tuple2<String,Iterable<String>>, String, String>() {
+
+			@Override
+			public Iterable<Tuple2<String, String>> call(Tuple2<String, Iterable<String>> arg0) throws Exception {
+				List<Tuple2<String, String>> results = new ArrayList<>();
+				
+				for(String item:arg0._2){
+					results.add(new Tuple2<String,String>(item,arg0._1));
+				}
+				
+				return results;
+			}
+		}).groupByKey().distinct().cache();
+
+		rowss.foreach(line -> System.out.println(line));
+		
 		
 		// Step 1
-		masterData = rows.mapValues(new Function<Iterable<String>,Tuple3<Iterable<String>,Double,Double>>() {
+		masterData = rowss.mapValues(new Function<Iterable<String>,Tuple3<Iterable<String>,Double,Double>>() {
 	        @Override
 	        public Tuple3<Iterable<String>,Double,Double> call(Iterable<String> b) {
 	        	double listSize = (double)Iterables.size(b);
