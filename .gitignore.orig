@@ -3,5 +3,9 @@
 .settings
 target
 *.jar
+<<<<<<< HEAD
+src/main/webapp/js/
+=======
 /src/main/webapp/js/app-config.js
 
+>>>>>>> master

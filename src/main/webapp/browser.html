@@ -1,0 +1,137 @@
+<html>
+<head>
+<title>Spark RDF Analyzer - Browser</title>
+
+<link rel="stylesheet" type="text/css" href="bootstrap.css">
+<link rel="stylesheet" type="text/css" href="loader.css">
+<link rel="stylesheet" type="text/css" href="loader2.css">
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<script type="text/javascript" src="js/app-config.js"></script>
+<script type="text/javascript" src="js/browser.js"></script>
+<script type="text/javascript">
+	function getGraphName() {
+		var name = getCookie('graphName');
+		document.getElementById("GraphName").innerHTML = name;
+	}
+
+	function getCookie(name) {
+		var value = "; " + document.cookie;
+		var parts = value.split("; " + name + "=");
+
+		if (parts.length == 2) {
+			return parts.pop().split(";").shift();
+		}
+	}
+</script>
+</head>
+
+<body onload="getGraphName()" background="./img/bg.jpg"
+	style="-webkit-background-size: cover; -moz-background-size: cover; -o-background-size: cover; background-size: cover;">
+	<div class="navbar navbar-inverse" style="background-color: rgba(70, 130, 180, 0.95);">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-inverse-collapse">
+				<span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="index.html">SPARK RDF ANALYSIS</a> <a id="slash" class="navbar-brand" href="#">/</a> <a id="GraphName"
+				class="navbar-brand" href="#"><b>reading...</b></a>
+		</div>
+		<div class="navbar-collapse collapse navbar-inverse-collapse">
+			<ul class="nav navbar-nav navbar-right">
+			</ul>
+		</div>
+	</div>
+
+	<form id="IDbardh" class="form-horizontal col-md-8 col-md-offset-2"
+		style="padding-bottom: 20px; background-color: rgba(70, 130, 180, 0.95); border-radius: 15px" action="" method="post">
+		<br>
+		<fieldset>
+			<nav class="navbar navbar-default">
+				<div class="container">
+					<ul class="nav navbar-nav">
+						<li><a href="statistics.html"><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>&nbsp;Statistics</a></li>
+						<li><a href="structure.html"><span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>&nbsp;Structure</a></li>
+						<li><a href="./conviewer/index.html"><span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span>&nbsp;Connectivity
+								Viewer</a></li>
+						<li><a href="visualizer.html"><span class="glyphicon glyphicon-dashboard" aria-hidden="true"></span>&nbsp;Schema Visualizer</a></li>
+						<li class="active"><a href="browser.html"><span class="glyphicon glyphicon-globe" aria-hidden="true"></span>&nbsp;RDF Browser</a></li>
+					</ul>
+				</div>
+			</nav>
+		</fieldset>
+
+		<div id="entrypoint">
+			<h1>Select your entry point!</h1>
+			<p>
+				Here you can select from two opportunities to start browsing through the RDF graph.<br> Either manually select a node you want to
+				start with or use one of our suggestions.
+			</p>
+
+			<div id="manual">
+				<h2>Manual selection</h2>
+				<p>Enter a node's name and click button 'Search'.</p>
+				<input type="text" class="form-control" id="entryNode" style="width: 300px; display: inline;"> <a href="#"
+					class="btn btn-warning" id="btnSearch" onClick="showAutocompletionModal()" role="button" data-toggle="modal" data-target="#modal"
+					data-backdrop="static" data-keyboard="false" style="width: 120px; margin-left: 10px; margin-top: -2px;"><span
+					class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</a>
+			</div>
+
+			<div id="suggestions">
+				<h2>Suggested entry points</h2>
+				<p>Here we recommend some possible entry points that may be interesting for you.</p>
+			</div>
+		</div>
+	</form>
+
+	<!-- Autocompletion Modal -->
+	<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" id="btnCloseModal" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+
+					<h4 class="modal-title" id="modalTitle">Modal title</h4>
+				</div>
+
+				<div id="modalBody" class="modal-body">...</div>
+
+				<div class="modal-footer">
+					<button type="button" id="btnCancelModal" class="btn btn-default" data-dismiss="modal">Cancel</button>
+					<button type="button" id="btnStartBrowsing" class="btn btn-primary" onClick="startBrowsing(event)" data-toggle="modal"
+						data-target="#browserModal" data-backdrop="static" data-keyboard="false">Start Browsing</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Browser Modal -->
+	<div class="modal modal-fullscreen fade" id="browserModal" tabindex="-1" role="dialog" aria-labelledby="browserModalTitle">
+		<div class="modal-dialog" role="document" style="width: 100%; height: 100%; margin: 0; padding: 0;">
+			<div class="modal-content" style="height: 100%; width: 100%; border: none; border-radius: 0;">
+				<div id="browserModalHeader" class="modal-header">
+					<button type="button" id="btnCloseBrowserModal" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+
+					<h4 id="modalTitle" class="modal-title">RDF Browser</h4>
+
+					<div id="browsingHistory">
+						<span>History:&nbsp;&nbsp;&nbsp;</span>
+						<ol id="list" class="breadcrumb" style="display: inline; margin: 0; padding: 0;"></ol>
+					</div>
+				</div>
+
+				<div id="browserModalBody" class="modal-body" style="overflow: auto;">...</div>
+
+				<!--<div class="modal-footer" style="position: fixed; bottom: 0; width: 100%;">
+					<button type="button" id="btnCancelBrowserModal" class="btn btn-default" data-dismiss="modal">Exit Browser</button>
+				</div>-->
+			</div>
+		</div>
+	</div>
+</body>
+</html>
