@@ -41,8 +41,8 @@ public class Neighborhood {
 	 *         their properties for each neighbor.
 	 */
 	public static JSONObject getNeighbors(String graph, String centralNode, int num) {
-		if (num <= 0) {
-			throw new IllegalArgumentException("Requested number of neighbors must be greater than zero.");
+		if (num < 0) {
+			throw new IllegalArgumentException("Requested number of neighbors must be greater or equal to zero.");
 		}
 
 		JSONObject neighbors = new JSONObject();
@@ -123,7 +123,12 @@ public class Neighborhood {
 
 		// Close the outer query and apply modifications.
 		sb.append(" ) tmp ");
-		sb.append(" LIMIT " + num);
+
+		// Only limit the neighbors if a number bigger than zero is given.
+		// Zero means that no LIMIT should be applied.
+		if (num > 0) {
+			sb.append(" LIMIT " + num);
+		}
 
 		return sb.toString();
 	}

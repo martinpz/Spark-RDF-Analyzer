@@ -23,7 +23,7 @@ function numNeighbors() {
 	if ($("#limitNeighbors").checked) {
 		return $('#numNeighbors').val();
 	} else {
-		return false;
+		return 0;
 	}
 }
 
