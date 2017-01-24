@@ -147,11 +147,16 @@
 				<p>Here we recommend some possible entry points that may be interesting for you.</p>
 
 				<!-- TODO This part must be removed for production. -->
-				FOR TESTING: <a href="#" onClick="testBrowser()" style="background-color: white;">Start with Kings of Leon</a>
+				#1 FOR TESTING: <a href="#" 
+					onClick="testBrowser('Kings_of_Leon', '<http://dbpedia.org/resource/Kings_of_Leon>')" 
+					style="background-color: white;">Start with Kings of Leon</a><br>
+				#2 FOR TESTING: <a href="#" 
+					onClick="testBrowser('Harry_Potter_and_the_Order_of_the_Phoenix_(film)', '<http://dbpedia.org/resource/Harry_Potter_and_the_Order_of_the_Phoenix_(film)>')" 
+					style="background-color: white;">Start with Harry Potter and the Order of the Phoenix (film)</a><br>
 				<script type="text/javascript">
-				function testBrowser() {
+				function testBrowser(name, URI) {
 					clearBrowsingHistory();
-					showBrowser('Kings_of_Leon', '<http://dbpedia.org/resource/Kings_of_Leon>');
+					showBrowser(name, URI);
 				}
 				</script>
 				<!-- TODO This part must be removed for production. -->
