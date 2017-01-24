@@ -3,40 +3,28 @@ const LOADER = '<div class="progress progress-striped active page-progress-bar">
 const ANIMATION_SPEED = 'fast';
 const COLORS = {
 	default: {
-		centralNode: 'orangered',
-		inEdge: 'coral',
-		outEdge: 'lightgreen',
-		neighbor: 'seagreen'
+		centralNode: '255, 127, 80',
+		inEdge: '255, 69, 0',
+		outEdge: '0, 139, 0',
+		neighbor: '50, 205, 50'
 	},
-	lemonStand: {
-		centralNode: '#404040',
-		inEdge: '#6DBDD6',
-		outEdge: '#B71427',
-		neighbor: '#FFE658'
+	contrast: {
+		centralNode: '64, 64, 64',
+		inEdge: '109, 189, 214',
+		outEdge: '183, 20, 39',
+		neighbor: '255, 230, 88'
 	},
-	mintCom: {
-		centralNode: '#585858',
-		inEdge: '#118C4E',
-		outEdge: '#C1E1A6',
-		neighbor: '#FF9009'
+	mixed: {
+		centralNode: '107, 186, 167',
+		inEdge: '17, 140, 78',
+		outEdge: '193, 225, 166',
+		neighbor: '255, 144, 9'
 	},
-	rollStudio: {
-		centralNode: '#6BBAA7',
-		inEdge: '#FBA100',
-		outEdge: '#6C648B',
-		neighbor: '#B6A19E'
-	},
-	aQuest: {
-		centralNode: '#945D60',
-		inEdge: '#626E60',
-		outEdge: '#AF473C',
-		neighbor: '#3C3C3C'
-	},
-	fieldWork: {
-		centralNode: '#7CDBD5',
-		inEdge: '#F53240',
-		outEdge: '#F9BE02',
-		neighbor: '#02C8A7'
+	light: {
+		centralNode: '124, 219, 213',
+		inEdge: '245, 50, 64',
+		outEdge: '249, 190, 2',
+		neighbor: '2, 200, 167'
 	}
 };
 
@@ -87,7 +75,7 @@ $(document).ready( function() {
 		colorGroup += '<label><input type="radio" name="colorScheme" value="' + name + '">';
 
 		$.each(colorsForWhat, function(forWhat, hexCode) {
-			colorGroup += '<span style="background-color: ' + hexCode + '">&nbsp; &nbsp;</span>';
+			colorGroup += '<span style="background-color: rgb(' + hexCode + ')">&nbsp; &nbsp;</span>';
 		});
 
 		colorGroup += '</label></div>';

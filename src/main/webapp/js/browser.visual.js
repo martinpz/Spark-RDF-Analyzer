@@ -76,7 +76,7 @@ function arrangeNodesByDirection(centralNode, centralNodeURI, neighbors) {
 		x: 0,
 		y: 0,
 		size: 5,
-		color: getColorScheme().centralNode
+		color: 'rgb(' + getColorScheme().centralNode + ')'
 	});
 
 	// Add all neighbor nodes to the graph instance.
@@ -87,14 +87,18 @@ function arrangeNodesByDirection(centralNode, centralNodeURI, neighbors) {
 		var name = props.name == '' ? URI.slice(1, -1) : props.name;
 		var source = URI;
 		var target = centralNodeURI;
-		var colorNode = getColorScheme().neighbor;
-		var colorEdge = getColorScheme().inEdge;
+		var opacity = 0.5;
+		var colorNode = 'rgba(' + getColorScheme().neighbor + ',  ' + opacity + ')';
+		var colorNodeHover = 'rgb(' + getColorScheme().neighbor + ')';
+		var colorEdge = 'rgba(' + getColorScheme().inEdge + ', ' + opacity + ')';
+		var colorEdgeHover = 'rgb(' + getColorScheme().inEdge + ')';
 		var factor = -2;
 
 		if( props.direction == 'out' ) {
 			source = centralNodeURI;
 			target = URI;
-			colorEdge = getColorScheme().outEdge;
+			colorEdge = 'rgba(' + getColorScheme().outEdge + ', ' + opacity + ')';
+			colorEdgeHover = 'rgb(' + getColorScheme().outEdge + ')';
 			factor = 2;
 		}
 
@@ -105,7 +109,8 @@ function arrangeNodesByDirection(centralNode, centralNodeURI, neighbors) {
 			x: factor * Math.abs(Math.cos(Math.PI * 2 * edgeCount / numNeighbors)),
 			y: Math.sin(Math.PI * 2 * edgeCount / numNeighbors),
 			size: 3,
-			color: colorNode
+			color: colorNode,
+			hover_color: colorNodeHover
 		});
 
 		g.edges.push({
@@ -113,8 +118,9 @@ function arrangeNodesByDirection(centralNode, centralNodeURI, neighbors) {
 			label: props.predicate,
 			source: source.slice(1, -1),
 			target: target.slice(1, -1),
-			size: 1, // Math.random(),
+			size: 3, // Math.random(),
 			color: colorEdge,
+			hover_color: colorEdgeHover,
 			type: 'arrow'
 		});
 
@@ -135,14 +141,15 @@ function instantiateGraph(g) {
 		},
 		settings: {
 			doubleClickEnabled: false,
-			drawEdgeLabels: false,
+			drawEdgeLabels: true,
 			drawLabels: false, // on nodes
 			enableCamera: true, // false = disable zoom and movement
 			enableEdgeHovering: true,
-			enableHovering: false, // for nodes
+			enableHovering: true, // for nodes
 			edgeLabelSize: 'proportional',
-			edgeHoverSizeRatio: 2,
-			edgeHoverExtremities: false // true = hover the nodes, connected to an edge, too
+			//edgeHoverSizeRatio: 3,
+			edgeHoverExtremities: true, // true = hover the nodes, connected to an edge, too
+			sideMargin: 0.05
 		}
 	});
 }
