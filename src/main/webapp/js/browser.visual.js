@@ -57,7 +57,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePosition)
 		var node = {
 			id: URI.slice(1, -1),
 			label: props.name,
-			// type: 'neighbor',
+			type: 'neighbor',
 			x: position.x,
 			y: position.y,
 			size: 2,
