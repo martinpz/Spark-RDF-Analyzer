@@ -22,15 +22,15 @@ const SIGMA_GRAPH_SETTINGS = {
     // {string}
     defaultNodeType: 'def',
     // {string}
-    defaultEdgeType: 'def',
+    defaultEdgeType: 'arrow',
     // {string}
-    defaultLabelColor: '#000',
+    defaultLabelColor: 'black',
     // {string}
-    defaultEdgeColor: '#000',
+    defaultEdgeColor: 'black',
     // {string}
-    defaultNodeColor: '#000',
+    defaultNodeColor: 'gold',
     // {string}
-    defaultLabelSize: 20,
+    defaultLabelSize: 14,
     // {string} Indicates how to choose the edges color. Available values:
     //          "source", "target", "default"
     edgeColor: 'source',
@@ -45,11 +45,11 @@ const SIGMA_GRAPH_SETTINGS = {
     labelColor: 'default',
     // {string} Indicates how to choose the labels size. Available values:
     //          "fixed", "proportional"
-    labelSize: 'proportional',
+    labelSize: 'fixed',
     // {string} The ratio between the font size of the label and the node size.
-    labelSizeRatio: 2,
+    labelSizeRatio: 1,
     // {number} The minimum size a node must have to see its label displayed.
-    labelThreshold: 4,
+    labelThreshold: 7,
     // {number} The oversampling factor used in WebGL renderer.
     webglOversamplingRatio: 2,
     // {number} The size of the border of hovered nodes.
@@ -87,12 +87,12 @@ const SIGMA_GRAPH_SETTINGS = {
     //          "edge", "default"
     edgeHoverColor: 'edge',
     // {number} The size multiplicator of hovered edges.
-    edgeHoverSizeRatio: 2,
+    edgeHoverSizeRatio: 1.5,
     // {string}
     defaultEdgeHoverColor: '#000',
     // {boolean} Indicates if the edge extremities must be hovered when the
     //           edge is hovered.
-    edgeHoverExtremities: false,
+    edgeHoverExtremities: true,
     // {booleans} The different drawing modes:
     //           false: Layered not displayed.
     //           true: Layered displayed.
@@ -132,8 +132,8 @@ const SIGMA_GRAPH_SETTINGS = {
     //          of the nodes will be their size.
     minEdgeSize: 1,
     maxEdgeSize: 2,
-    minNodeSize: 1,
-    maxNodeSize: 2,
+    minNodeSize: 2,
+    maxNodeSize: 10,
 
 
 

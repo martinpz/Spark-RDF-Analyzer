@@ -24,7 +24,7 @@ function calculatePositionByDirection(currEdgeNum, totalNumNeighbors, direction)
 }
 
 function arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePosition) {
-	const OPACITY = 0.5;
+	const OPACITY = 0.4;
 	var literalCount = 0;
 	var edgeCount = 0;
 	var numNeighbors = Object.keys(neighbors).length;
@@ -41,7 +41,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePosition)
 		type: 'centralNode',
 		x: 0,
 		y: 0,
-		size: 1,
+		size: 10,
 		color: 'rgb(' + getColorScheme().centralNode + ')'
 	});
 
@@ -60,20 +60,19 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePosition)
 			// type: 'neighbor',
 			x: position.x,
 			y: position.y,
-			size: 1,
+			size: 2,
 			color: 'rgba(' + getColorScheme().neighbor + ',  ' + OPACITY + ')',
 			hover_color: 'rgb(' + getColorScheme().neighbor + ')'
 		};
 
 		var edge = {
-			id: 'e' + edgeCount,
+			id: props.direction + '_e_' + edgeCount,
 			label: props.predicate,
 			source: centralNodeID,
 			target: node.id,
 			size: 1,
 			color: 'rgba(' + getColorScheme().outEdge + ', ' + OPACITY + ')',
-			hover_color: 'rgb(' + getColorScheme().outEdge + ')',
-			type: 'arrow'
+			hover_color: 'rgb(' + getColorScheme().outEdge + ')'
 		};
 
 		if( props.direction == 'in' ) {
