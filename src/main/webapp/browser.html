@@ -138,6 +138,16 @@
 			<div id="suggestions">
 				<h2>Suggested entry points</h2>
 				<p>Here we recommend some possible entry points that may be interesting for you.</p>
+
+				<!-- TODO This part must be removed for production. -->
+				FOR TESTING: <a href="#" onClick="testBrowser()" style="background-color: white;">Start with Kings of Leon</a>
+				<script type="text/javascript">
+				function testBrowser() {
+					clearBrowsingHistory();
+					showBrowser('Kings_of_Leon', '<http://dbpedia.org/resource/Kings_of_Leon>');
+				}
+				</script>
+				<!-- TODO This part must be removed for production. -->
 			</div>
 		</div>
 
