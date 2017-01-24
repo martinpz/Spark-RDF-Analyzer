@@ -1,25 +1,11 @@
 /**
- * Extends sigma with custom shape for neighbor nodes.
+ * Extends sigma with custom shape for literal nodes.
  */
-sigma.canvas.nodes.neighbor = function(node, context, settings) {
-    var prefix = settings('prefix') || '',
-        size = node[prefix + 'size'];
-
-    context.fillStyle = node.color || settings('defaultNodeColor');
-    context.beginPath();
-
-    context.rect(
-        node[prefix + 'x'] - ( size * 2 ),
-        node[prefix + 'y'] - ( size * 2 ),
-        size * 4,
-        size * 4
-    );
-
-    context.closePath();
-    context.fill();
+sigma.canvas.nodes.literal = function(node, context, settings) {
+    sigma.canvas.nodes.star(node, context, settings);
 };
 
-sigma.canvas.labels.neighbor = function(node, context, settings) {
+sigma.canvas.labels.literal = function(node, context, settings) {
     var fontSize,
         prefix = settings('prefix') || '',
         size = node[prefix + 'size'];
@@ -69,11 +55,11 @@ sigma.canvas.labels.neighbor = function(node, context, settings) {
     }
 }
 
-sigma.canvas.hovers.neighbor = function(node, context, settings) {
+sigma.canvas.hovers.literal = function(node, context, settings) {
     console.log('node:', node);
 
     // Render the node and its label again.
     // This is necessary that the edge does not overlay the node.
-    sigma.canvas.nodes.neighbor(node, context, settings);
-    sigma.canvas.labels.neighbor(node, context, settings);
+    sigma.canvas.nodes.literal(node, context, settings);
+    sigma.canvas.labels.literal(node, context, settings);
 }

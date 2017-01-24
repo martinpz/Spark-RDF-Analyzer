@@ -85,6 +85,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePosition)
 			// Special handling for literals. They don't have a name, but only an URI.
 			node.id = 'LITERAL_' + literalCount;
 			node.label = URI.slice(1, -1);
+			node.type = 'literal';
 			node.color = 'rgba(127, 127, 127, ' + OPACITY + ')';
 			node.hover_color = 'rgb(127, 127, 127)';
 
