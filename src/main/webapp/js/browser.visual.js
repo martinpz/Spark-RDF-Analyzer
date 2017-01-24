@@ -24,8 +24,11 @@ function calculatePositionByDirection(currEdgeNum, totalNumNeighbors, direction)
 }
 
 function arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePosition) {
+	const OPACITY = 0.5;
+	var literalCount = 0;
 	var edgeCount = 0;
 	var numNeighbors = Object.keys(neighbors).length;
+	var centralNodeID = centralNodeURI.slice(1, -1);
 	var g = {
 		nodes: [],
 		edges: []
@@ -33,12 +36,12 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePosition)
 
 	// Add central node to the graph instance.
     g.nodes.push({
-		id: centralNodeURI.slice(1, -1),
+		id: centralNodeID,
 		label: centralNode,
 		type: 'centralNode',
 		x: 0,
 		y: 0,
-		size: 5,
+		size: 1,
 		color: 'rgb(' + getColorScheme().centralNode + ')'
 	});
 
@@ -46,47 +49,53 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePosition)
 	$.each(neighbors, function(URI, props) {
 		// [Log] URI=<http://dbpedia.org/resource/Harry_and_the_Potters>
 		// [Log] {predicate: "artist", predicateURI: "<http://dbpedia.org/property/artist>", name: "Harry_and_the_Potters", URI: "<http://dbpedia.org/resource/Harry_and_the_Potters>", direction: "out"}
-
-		var name = props.name == '' ? URI.slice(1, -1) : props.name;
-		var source = URI;
-		var target = centralNodeURI;
-		var opacity = 0.5;
-		var colorNode = 'rgba(' + getColorScheme().neighbor + ',  ' + opacity + ')';
-		var colorNodeHover = 'rgb(' + getColorScheme().neighbor + ')';
-		var colorEdge = 'rgba(' + getColorScheme().inEdge + ', ' + opacity + ')';
-		var colorEdgeHover = 'rgb(' + getColorScheme().inEdge + ')';
-
+		
 		// Calculate position for node with given function.
 		var position = calculatePosition(edgeCount, numNeighbors, props.direction);
-
-		if( props.direction == 'out' ) {
-			source = centralNodeURI;
-			target = URI;
-			colorEdge = 'rgba(' + getColorScheme().outEdge + ', ' + opacity + ')';
-			colorEdgeHover = 'rgb(' + getColorScheme().outEdge + ')';
-		}
-
-		g.nodes.push({
+		
+		// Create default node and edge. Assume OUT-going connection.
+		var node = {
 			id: URI.slice(1, -1),
-			label: name,
-			type: 'neighbor',
+			label: props.name,
+			// type: 'neighbor',
 			x: position.x,
 			y: position.y,
-			size: 3,
-			color: colorNode,
-			hover_color: colorNodeHover
-		});
+			size: 1,
+			color: 'rgba(' + getColorScheme().neighbor + ',  ' + OPACITY + ')',
+			hover_color: 'rgb(' + getColorScheme().neighbor + ')'
+		};
 
-		g.edges.push({
+		var edge = {
 			id: 'e' + edgeCount,
 			label: props.predicate,
-			source: source.slice(1, -1),
-			target: target.slice(1, -1),
-			size: 3,
-			color: colorEdge,
-			hover_color: colorEdgeHover,
+			source: centralNodeID,
+			target: node.id,
+			size: 1,
+			color: 'rgba(' + getColorScheme().outEdge + ', ' + OPACITY + ')',
+			hover_color: 'rgb(' + getColorScheme().outEdge + ')',
 			type: 'arrow'
-		});
+		};
+
+		if( props.direction == 'in' ) {
+			// Change properties for IN-going connection.
+			edge.source = node.id;
+			edge.target = centralNodeID;
+			edge.color = 'rgba(' + getColorScheme().inEdge + ', ' + OPACITY + ')';
+			edge.hover_color = 'rgb(' + getColorScheme().inEdge + ')';
+		} else if (props.name == '') {
+			// Special handling for literals. They don't have a name, but only an URI.
+			node.id = 'LITERAL_' + literalCount;
+			node.label = URI.slice(1, -1);
+			node.color = 'rgba(127, 127, 127, ' + OPACITY + ')';
+			node.hover_color = 'rgb(127, 127, 127)';
+
+			edge.target = node.id;
+
+			++literalCount;
+		}
+
+		g.nodes.push(node);
+		g.edges.push(edge);
 
 		++edgeCount;
 	});
@@ -121,19 +130,22 @@ function instantiateGraph(g) {
 function bindListeners() {
 	// Bind event handlers to nodes and edges.
 	s.bind('overNode outNode clickNode', function(e) {
-		// console.log(e.type, e.data.node.label, e.data.captor);
+		console.log(e.type, e.data.node, e.data.captor);
 
 		if (e.type === 'overNode') {
 			// console.log('HOVER!!!');
 		} else if (e.type === 'outNode') {
 			// console.log('EXITED!!!');
 		} else if (e.type === 'clickNode') {
-			prepareBrowser(e.data.node.label, '<' + e.data.node.id + '>');
+			// Don't browse when clicking a literal.
+			if ( !(e.data.node.id).startsWith('LITERAL') ) {
+				prepareBrowser(e.data.node.label, '<' + e.data.node.id + '>');
+			}
 		}
 	});
 
 	s.bind('overEdge outEdge clickEdge', function(e) {
-		// console.log(e.type, e.data.edge, e.data.captor);
+		console.log(e.type, e.data.edge, e.data.captor);
 	});
 }
 
