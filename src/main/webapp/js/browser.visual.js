@@ -101,6 +101,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePosition)
 	});
 
 	instantiateGraph(g);
+	performNOverlap();
 	bindListeners();
 }
 
@@ -114,6 +115,11 @@ function instantiateGraph(g) {
 		},
 		settings: SIGMA_GRAPH_SETTINGS
 	});
+}
+
+function performNOverlap() {
+	s.configNoverlap( SIGMA_NOVERLAP_SETTINGS );
+	s.startNoverlap();
 }
 
 function bindListeners() {

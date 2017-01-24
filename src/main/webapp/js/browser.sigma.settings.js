@@ -236,3 +236,11 @@ const SIGMA_GRAPH_SETTINGS = {
     // {number} The default animation time.
     animationsTime: 200
 };
+
+const SIGMA_NOVERLAP_SETTINGS = {
+    nodeMargin: 5,
+    scaleNodes: 1.2,
+    gridSize: 100,
+    easing: 'quadraticInOut', // animation transition function (see sigma.utils.easing for available transitions)
+    duration: 1000 // animation duration
+}
