@@ -112,40 +112,41 @@ function instantiateGraph(g) {
 			container: document.getElementById('container'),
 			type: 'canvas'
 		},
-		settings: {
-			doubleClickEnabled: false,
-			drawEdgeLabels: true,
-			drawLabels: false, // on nodes
-			enableCamera: true, // false = disable zoom and movement
-			enableEdgeHovering: true,
-			enableHovering: true, // for nodes
-			edgeLabelSize: 'proportional',
-			//edgeHoverSizeRatio: 3,
-			edgeHoverExtremities: true, // true = hover the nodes, connected to an edge, too
-			sideMargin: 0.05
-		}
+		settings: SIGMA_GRAPH_SETTINGS
 	});
 }
 
 function bindListeners() {
-	// Bind event handlers to nodes and edges.
-	s.bind('overNode outNode clickNode', function(e) {
-		console.log(e.type, e.data.node, e.data.captor);
+	s.bind('overNode', function(e) {
+		// TODO
+		// console.log(e.type, e.data.node, e.data.captor);
+	});
 
-		if (e.type === 'overNode') {
-			// console.log('HOVER!!!');
-		} else if (e.type === 'outNode') {
-			// console.log('EXITED!!!');
-		} else if (e.type === 'clickNode') {
-			// Don't browse when clicking a literal.
-			if ( !(e.data.node.id).startsWith('LITERAL') ) {
-				prepareBrowser(e.data.node.label, '<' + e.data.node.id + '>');
-			}
+	s.bind('outNode', function(e) {
+		// TODO
+		// console.log(e.type, e.data.node, e.data.captor);
+	});
+
+	s.bind('clickNode', function(e) {
+		// Don't browse when clicking a literal.
+		if ( !(e.data.node.id).startsWith('LITERAL') ) {
+			prepareBrowser(e.data.node.label, '<' + e.data.node.id + '>');
 		}
 	});
 
-	s.bind('overEdge outEdge clickEdge', function(e) {
-		console.log(e.type, e.data.edge, e.data.captor);
+	s.bind('overEdge', function(e) {
+		// TODO
+		// console.log(e.type, e.data.edge, e.data.captor);
+	});
+
+	s.bind('outEdge', function(e) {
+		// TODO
+		// console.log(e.type, e.data.edge, e.data.captor);
+	});
+
+	s.bind('clickEdge', function(e) {
+		// TODO
+		// console.log(e.type, e.data.edge, e.data.captor);
 	});
 }
 
