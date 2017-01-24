@@ -4,27 +4,27 @@ const ANIMATION_SPEED = 'fast';
 const COLORS = {
 	default: {
 		centralNode: '255, 127, 80',
-		inEdge: '255, 69, 0',
-		outEdge: '0, 139, 0',
-		neighbor: '50, 205, 50'
+		in: '255, 69, 0',
+		out: '0, 139, 0',
+		literal: '50, 205, 50'
 	},
 	contrast: {
 		centralNode: '64, 64, 64',
-		inEdge: '109, 189, 214',
-		outEdge: '183, 20, 39',
-		neighbor: '255, 230, 88'
+		in: '109, 189, 214',
+		out: '183, 20, 39',
+		literal: '255, 230, 88'
 	},
 	mixed: {
 		centralNode: '107, 186, 167',
-		inEdge: '17, 140, 78',
-		outEdge: '193, 225, 166',
-		neighbor: '255, 144, 9'
+		in: '17, 140, 78',
+		out: '193, 225, 166',
+		literal: '255, 144, 9'
 	},
 	light: {
 		centralNode: '124, 219, 213',
-		inEdge: '245, 50, 64',
-		outEdge: '249, 190, 2',
-		neighbor: '2, 200, 167'
+		in: '245, 50, 64',
+		out: '249, 190, 2',
+		literal: '2, 200, 167'
 	}
 };
 

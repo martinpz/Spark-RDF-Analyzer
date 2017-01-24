@@ -1,61 +1,16 @@
 // ########################## RDF Browser Graphical ##########################
 var s; // Global variable for the sigma graph instance.
 
-function arrangeNodesRandomized(centralNode, centralNodeURI, neighbors) {
-	const OPACITY = 0.4;
-	var literalCount = 0;
-	var container = {
-		width: $('#container').width(),
-		height: $('#container').height(),
-	}
-	var g = {
-		nodes: [],
-		edges: []
-    };
-
-	// Add all neighbor nodes to the graph instance.
-	$.each(neighbors, function(URI, props) {
-		// Create default node by assuming OUT-going connection.
-		var node = {
-			id: URI.slice(1, -1),
-			label: props.name,
-			type: 'neighbor',
-			x: Math.random() * container.width,
-			y: Math.random() * container.height,
-			size: 1,
-			color: 'rgba(' + getColorScheme().outEdge + ',  ' + OPACITY + ')',
-			hover_color: 'rgb(' + getColorScheme().outEdge + ')'
-		};
-
-		if ( props.direction == 'in' ) {
-			// Change properties for IN-going connection.
-			node.color = 'rgba(' + getColorScheme().inEdge + ', ' + OPACITY + ')';
-			node.hover_color = 'rgb(' + getColorScheme().inEdge + ')';
-		} else if (props.name == '') {
-			// Special handling for literals. They don't have a name, but only an URI.
-			node.id = 'LITERAL_' + literalCount;
-			node.label = URI.slice(1, -1);
-			node.type = 'literal';
-			node.color = 'rgba(127, 127, 127, ' + OPACITY + ')';
-			node.hover_color = 'rgb(127, 127, 127)';
-
-			++literalCount;
-		}
-
-		g.nodes.push(node);
-	});
-
-	instantiateGraph(g);
-	performNOverlap(20);
-	bindListeners();
-}
-
 function arrangeNodesCircular(centralNode, centralNodeURI, neighbors) {
-	arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePositionCircular);
+	arrangeNodes(centralNode, centralNodeURI, neighbors, true, calculatePositionCircular);
 }
 
 function arrangeNodesByDirection(centralNode, centralNodeURI, neighbors) {
-	arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePositionByDirection);
+	arrangeNodes(centralNode, centralNodeURI, neighbors, true, calculatePositionByDirection);
+}
+
+function arrangeNodesRandomized(centralNode, centralNodeURI, neighbors) {
+	arrangeNodes(centralNode, centralNodeURI, neighbors, false, calculatePositionRandomly);
 }
 
 function calculatePositionCircular(currEdgeNum, totalNumNeighbors, direction) {
@@ -72,9 +27,21 @@ function calculatePositionByDirection(currEdgeNum, totalNumNeighbors, direction)
 	};
 }
 
-function arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePosition) {
+function calculatePositionRandomly(currEdgeNum, totalNumNeighbors, direction) {
+	const negate = currEdgeNum % 2 == 0;
+	const container = {
+		width: $('#container').width() / 2,
+		height: $('#container').height() / 2
+	};
+
+	return {
+		x: ( negate ? -1 : 1 ) * Math.random() * container.width,
+		y: ( negate ? -1 : 1 ) * Math.random() * container.height
+	};
+}
+
+function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calculatePosition) {
 	const OPACITY = 0.4;
-	var literalCount = 0;
 	var edgeCount = 0;
 	var numNeighbors = Object.keys(neighbors).length;
 	var centralNodeID = 'CENTRALNODE'; // centralNodeURI.slice(1, -1);
@@ -109,9 +76,9 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePosition)
 			type: 'neighbor',
 			x: position.x,
 			y: position.y,
-			size: 2,
-			color: 'rgba(' + getColorScheme().neighbor + ',  ' + OPACITY + ')',
-			hover_color: 'rgb(' + getColorScheme().neighbor + ')'
+			size: 30,
+			color: 'rgba(' + getColorScheme().out + ',  ' + OPACITY + ')',
+			hover_color: 'rgb(' + getColorScheme().out + ')'
 		};
 
 		var edge = {
@@ -119,32 +86,36 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePosition)
 			label: props.predicate,
 			source: centralNodeID,
 			target: node.id,
-			size: 1,
-			color: 'rgba(' + getColorScheme().outEdge + ', ' + OPACITY + ')',
-			hover_color: 'rgb(' + getColorScheme().outEdge + ')'
+			size: 1
+			//color: 'rgba(' + getColorScheme().out + ', ' + OPACITY + ')',
+			//hover_color: 'rgb(' + getColorScheme().out + ')'
 		};
 
 		if( props.direction == 'in' ) {
 			// Change properties for IN-going connection.
 			edge.source = node.id;
 			edge.target = centralNodeID;
-			edge.color = 'rgba(' + getColorScheme().inEdge + ', ' + OPACITY + ')';
-			edge.hover_color = 'rgb(' + getColorScheme().inEdge + ')';
+			//edge.color = 'rgba(' + getColorScheme().in + ', ' + OPACITY + ')';
+			//edge.hover_color = 'rgb(' + getColorScheme().in + ')';
+
+			node.color = 'rgba(' + getColorScheme().in + ', ' + OPACITY + ')';
+			node.hover_color = 'rgb(' + getColorScheme().in + ')';
 		} else if (props.name == '') {
 			// Special handling for literals. They don't have a name, but only an URI.
-			node.id = 'LITERAL_' + literalCount;
+			node.id = 'LITERAL_' + edgeCount;
 			node.label = URI.slice(1, -1);
 			node.type = 'literal';
-			node.color = 'rgba(127, 127, 127, ' + OPACITY + ')';
-			node.hover_color = 'rgb(127, 127, 127)';
+			node.color = 'rgba(' + getColorScheme().literal + ', ' + OPACITY + ')';
+			node.hover_color = 'rgb(' + getColorScheme().literal + ')';
 
 			edge.target = node.id;
-
-			++literalCount;
 		}
 
 		g.nodes.push(node);
-		g.edges.push(edge);
+
+		if (withEdges) {
+			g.edges.push(edge);
+		}
 
 		++edgeCount;
 	});
