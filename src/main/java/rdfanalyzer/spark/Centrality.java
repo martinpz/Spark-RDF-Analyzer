@@ -19,6 +19,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
 import ranking.Ranking;
+import ranking.testing;
 
 import org.apache.spark.sql.Dataset;
 
@@ -104,7 +105,8 @@ public class Centrality {
 				+ "AND predicate NOT LIKE 'rdf:type'" + "AND predicate NOT LIKE 'sib:requested'"
 				+ "AND predicate NOT LIKE 'sib:approved'");
 
-		Ranking.CreateAdjacency(allSubjects);
+//		Ranking.CreateAdjacency(allSubjects);
+		testing.doTest();
 		return "";
 	}
 	public static String readResource(final String fileName, Charset charset) throws IOException {

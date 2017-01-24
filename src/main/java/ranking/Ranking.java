@@ -35,6 +35,13 @@ public class Ranking {
 	
 	/*
 	 * We perform 4 steps. 
+	 * Start : In the start we have the data in the following structure.   --> key, [nodeNames]
+	 * Step 1: We convert the data into master data.  --> key, [nodeNames], 1/n, pjs
+	 * Step 2: We get the rows data by adding nodes in pointsTo column which points to this node.  --> key,([nodeNames],[[nodes1/n],[nodePjs]],1/n)
+	 * Step 3: We get the masterData --> key,([nodeNames],1/n,newPjs)
+	 * 
+	 * 
+	 * 
 	 * Step 1: We get the masterData in the following format --> key,([nodeNames],pj,1/n)
 	 * Step 2: We get the References in the following format --> key,(pj,1/n)
 	 * Step 3: We get the combined data in this format       --> key,([nodenames],[ [1/n],[pjs] ],1/n,pj)
@@ -88,7 +95,7 @@ public class Ranking {
 	        }
 	      });
 		
-		for(int i = 0 ; i<1; i++){
+//		for(int i = 0 ; i<1; i++){
 			
 			// Step 2
 			System.out.println("step 2 working");
@@ -102,7 +109,7 @@ public class Ranking {
 			// Step 4
 			System.out.println("step 4 working");
 	        masterData  = CalculateNewPjs(reshuffledNodes);
-		}
+//		}
 		
 		System.out.println("donedonedonedonedonedonedonedonedone");
 		masterData.foreach(line -> System.out.println(line));
