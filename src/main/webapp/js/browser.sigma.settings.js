@@ -33,7 +33,7 @@ const SIGMA_GRAPH_SETTINGS = {
     defaultLabelSize: 14,
     // {string} Indicates how to choose the edges color. Available values:
     //          "source", "target", "default"
-    edgeColor: 'source',
+    edgeColor: 'target',
     // {number} Defines the minimal edge's arrow display size.
     minArrowSize: 0,
     // {string}
