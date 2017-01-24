@@ -106,7 +106,7 @@ public class Centrality {
 				+ "AND predicate NOT LIKE 'sib:approved'");
 
 //		Ranking.CreateAdjacency(allSubjects);
-		testing.doTest();
+		testing.doTest(allSubjects);
 		return "";
 	}
 	public static String readResource(final String fileName, Charset charset) throws IOException {

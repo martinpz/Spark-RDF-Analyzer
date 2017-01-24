@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.hadoop.mapred.lib.HashPartitioner;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
+import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Row;
 
 import rdfanalyzer.spark.Service;
 import scala.Tuple2;
@@ -19,10 +22,19 @@ public class testing {
 
 	public static List<Tuple2<String,String>> list = new ArrayList<>();
 	
-	public static void doTest(){
+	public static void doTest(DataFrame records){
 
 		createData();
-
+//		JavaPairRDD<String,String> counters = records.select("subject","object").toJavaRDD().mapToPair(
+//				new PairFunction<Row,String,String>(){
+//
+//					@Override
+//					public Tuple2<String, String> call(Row row) throws Exception {
+//						return new Tuple2<String, String>(row.getString(0), row.getString(1));
+//					}
+//				// this can be optimized if we use reduceByKey instead of groupByKey
+//		});
+				
 		JavaPairRDD<String,String> counters = Service.sparkCtx().parallelizePairs(list);
 //		GroupByKeyTest(counters);
 		
@@ -34,11 +46,16 @@ public class testing {
 		JavaPairRDD<String,Tuple3<String,Double,Double>> flattedPair = PerformOperationReshuffle(list);	
 
 		
-		// this will give us key,([names],[1/n],[pj*1/n])
-		JavaPairRDD<String,Tuple3<ArrayList<String>, Double, ArrayList<Double>>> shuffledwithnumbers = CombinerOutGoingToIncoming(flattedPair);
+		// this will give us key,([names],pj,[1/n])
+		JavaPairRDD<String,Tuple3<ArrayList<String>, Double, ArrayList<Double>>> shuffledwithnumbers = CombinerOutGoingToIncoming(flattedPair).cache();
+		
+		final JavaPairRDD<String,Tuple3<ArrayList<String>, Double, ArrayList<Double>>> shuffledwithnumbers2 = shuffledwithnumbers;
+
 
 		
+		
 		// here we just finalized new pjs by converting [pj*1/n] to [(pj*1/n)*0.85+0.15]
+		// this will return [pj*[1/n]]
 		shuffledwithnumbers = shuffledwithnumbers.mapValues(new Function<Tuple3<ArrayList<String>,Double,ArrayList<Double>>, Tuple3<ArrayList<String>,Double,ArrayList<Double>>>() {
 
 			@Override
@@ -48,8 +65,33 @@ public class testing {
 			}
 		});
 		
-		shuffledwithnumbers.foreach(line->System.out.println(line));
-		
+		// 
+		shuffledwithnumbers = shuffledwithnumbers.mapValues(new Function<Tuple3<ArrayList<String>,Double,ArrayList<Double>>, Tuple3<ArrayList<String>,Double,ArrayList<Double>>>() {
+
+			@Override
+			public Tuple3<ArrayList<String>, Double, ArrayList<Double>> call(
+					Tuple3<ArrayList<String>, Double, ArrayList<Double>> line) throws Exception {
+				return new Tuple3<ArrayList<String>,Double,ArrayList<Double>>(line._1(),(line._2()*0.85)+0.15,line._3());
+			}
+		});
+
+//		for(String name:nodeNames){
+//			
+//			List<Tuple3<ArrayList<String>,Double,ArrayList<Double>>> shuff = shuffledwithnumbers2.lookup(name);
+//		}
+
+
+
+//		shuffledwithnumbers.mapValues(new Function<Tuple3<ArrayList<String>,Double,ArrayList<Double>>, U>() {
+//
+//			@Override
+//			public U call(Tuple3<ArrayList<String>, Double, ArrayList<Double>> arg0) throws Exception {
+//				
+//				ArrayList<Tuple3<ArrayList<String>, Double, ArrayList<Double>>> items;
+//				
+//				return null;
+//			}
+//		})
 		
 
 		// now multiply all 1/n * pj values with 0.85 and add them to 0.15.
