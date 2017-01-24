@@ -2,21 +2,7 @@
  * Extends sigma with custom shape for neighbor nodes.
  */
 sigma.canvas.nodes.neighbor = function(node, context, settings) {
-    var prefix = settings('prefix') || '',
-        size = node[prefix + 'size'];
-
-    context.fillStyle = node.color || settings('defaultNodeColor');
-    context.beginPath();
-
-    context.rect(
-        node[prefix + 'x'] - ( size * 2 ),
-        node[prefix + 'y'] - ( size * 2 ),
-        size * 4,
-        size * 4
-    );
-
-    context.closePath();
-    context.fill();
+    sigma.canvas.nodes.equilateral(node, context, settings);
 };
 
 sigma.canvas.labels.neighbor = function(node, context, settings) {

@@ -2,6 +2,9 @@
  * Extends sigma with custom shape for central nodes.
  */
 sigma.canvas.nodes.centralNode = function(node, context, settings) {
+    sigma.canvas.nodes.circle(node, context, settings);
+
+    /*
     var prefix = settings('prefix') || '',
         size = node[prefix + 'size'];
 
@@ -17,6 +20,7 @@ sigma.canvas.nodes.centralNode = function(node, context, settings) {
 
     context.closePath();
     context.fill();
+    */
 };
 
 sigma.canvas.labels.centralNode = function(node, context, settings) {
@@ -64,7 +68,7 @@ sigma.canvas.labels.centralNode = function(node, context, settings) {
             label_arr[i],
             Math.round(node[prefix + 'x']),
             Math.round(node[prefix + 'y']) + ( fontSize * ( i - offset ) ),
-            size * 18
+            ( size * 2 ) - 4
         );
     }
 }

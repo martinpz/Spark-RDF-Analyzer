@@ -28,7 +28,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePosition)
 	var literalCount = 0;
 	var edgeCount = 0;
 	var numNeighbors = Object.keys(neighbors).length;
-	var centralNodeID = centralNodeURI.slice(1, -1);
+	var centralNodeID = 'CENTRALNODE'; // centralNodeURI.slice(1, -1);
 	var g = {
 		nodes: [],
 		edges: []
@@ -41,7 +41,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePosition)
 		type: 'centralNode',
 		x: 0,
 		y: 0,
-		size: 10,
+		size: 70,
 		color: 'rgb(' + getColorScheme().centralNode + ')'
 	});
 
@@ -86,6 +86,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePosition)
 			node.id = 'LITERAL_' + literalCount;
 			node.label = URI.slice(1, -1);
 			node.type = 'literal';
+			node.size = 2;
 			node.color = 'rgba(127, 127, 127, ' + OPACITY + ')';
 			node.hover_color = 'rgb(127, 127, 127)';
 
@@ -134,8 +135,13 @@ function bindListeners() {
 	});
 
 	s.bind('clickNode', function(e) {
-		// Don't browse when clicking a literal.
-		if ( !(e.data.node.id).startsWith('LITERAL') ) {
+		// TODO
+		// console.log(e.type, e.data.node, e.data.captor);
+	});
+
+	s.bind('doubleClickNode', function(e) {
+		// Don't browse when clicking a literal or the central node.
+		if ( !(e.data.node.id).startsWith('LITERAL') && !(e.data.node.id).startsWith('CENTRALNODE') ) {
 			prepareBrowser(e.data.node.label, '<' + e.data.node.id + '>');
 		}
 	});

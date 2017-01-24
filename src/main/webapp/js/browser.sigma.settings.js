@@ -99,7 +99,7 @@ const SIGMA_GRAPH_SETTINGS = {
     drawEdges: true,
     drawNodes: true,
     drawLabels: true,
-    drawEdgeLabels: false,
+    drawEdgeLabels: true,
     // {boolean} Indicates if the edges must be drawn in several frames or in
     //           one frame, as the nodes and labels are drawn.
     batchEdgesDrawing: false,
@@ -133,7 +133,7 @@ const SIGMA_GRAPH_SETTINGS = {
     minEdgeSize: 1,
     maxEdgeSize: 2,
     minNodeSize: 2,
-    maxNodeSize: 10,
+    maxNodeSize: 70,
 
 
 
@@ -158,7 +158,7 @@ const SIGMA_GRAPH_SETTINGS = {
     zoomingRatio: 1.7,
     // {number} Defines by how much multiplicating the zooming level when the
     //          user zooms by double clicking.
-    doubleClickZoomingRatio: 2.2,
+    doubleClickZoomingRatio: 1,
     // {number} The minimum zooming level.
     zoomMin: 0.0625,
     // {number} The maximum zooming level.
@@ -166,7 +166,7 @@ const SIGMA_GRAPH_SETTINGS = {
     // {number} The duration of animations following a mouse scrolling.
     mouseZoomDuration: 200,
     // {number} The duration of animations following a mouse double click.
-    doubleClickZoomDuration: 200,
+    doubleClickZoomDuration: 0,
     // {number} The duration of animations following a mouse dropping.
     mouseInertiaDuration: 200,
     // {number} The inertia power (mouse captor).
