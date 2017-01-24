@@ -37,6 +37,10 @@ function displayNodes(centralNode, centralNodeURI, neighbors) {
 			arrangeNodesByDirection(centralNode, centralNodeURI, neighbors);
 			showSVGexport();
 			break;
+		case 'random':
+			arrangeNodesRandomized(centralNode, centralNodeURI, neighbors);
+			showSVGexport();
+			break;
 		case 'textual':
 			displayNodesTextual(centralNode, centralNodeURI, neighbors);
 			hideSVGexport();

@@ -1,6 +1,55 @@
 // ########################## RDF Browser Graphical ##########################
 var s; // Global variable for the sigma graph instance.
 
+function arrangeNodesRandomized(centralNode, centralNodeURI, neighbors) {
+	const OPACITY = 0.4;
+	var literalCount = 0;
+	var container = {
+		width: $('#container').width(),
+		height: $('#container').height(),
+	}
+	var g = {
+		nodes: [],
+		edges: []
+    };
+
+	// Add all neighbor nodes to the graph instance.
+	$.each(neighbors, function(URI, props) {
+		// Create default node by assuming OUT-going connection.
+		var node = {
+			id: URI.slice(1, -1),
+			label: props.name,
+			type: 'neighbor',
+			x: Math.random() * container.width,
+			y: Math.random() * container.height,
+			size: 1,
+			color: 'rgba(' + getColorScheme().outEdge + ',  ' + OPACITY + ')',
+			hover_color: 'rgb(' + getColorScheme().outEdge + ')'
+		};
+
+		if ( props.direction == 'in' ) {
+			// Change properties for IN-going connection.
+			node.color = 'rgba(' + getColorScheme().inEdge + ', ' + OPACITY + ')';
+			node.hover_color = 'rgb(' + getColorScheme().inEdge + ')';
+		} else if (props.name == '') {
+			// Special handling for literals. They don't have a name, but only an URI.
+			node.id = 'LITERAL_' + literalCount;
+			node.label = URI.slice(1, -1);
+			node.type = 'literal';
+			node.color = 'rgba(127, 127, 127, ' + OPACITY + ')';
+			node.hover_color = 'rgb(127, 127, 127)';
+
+			++literalCount;
+		}
+
+		g.nodes.push(node);
+	});
+
+	instantiateGraph(g);
+	performNOverlap(20);
+	bindListeners();
+}
+
 function arrangeNodesCircular(centralNode, centralNodeURI, neighbors) {
 	arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePositionCircular);
 }
@@ -86,7 +135,6 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePosition)
 			node.id = 'LITERAL_' + literalCount;
 			node.label = URI.slice(1, -1);
 			node.type = 'literal';
-			node.size = 2;
 			node.color = 'rgba(127, 127, 127, ' + OPACITY + ')';
 			node.hover_color = 'rgb(127, 127, 127)';
 
@@ -102,7 +150,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePosition)
 	});
 
 	instantiateGraph(g);
-	performNOverlap();
+	performNOverlap(5);
 	bindListeners();
 }
 
@@ -118,8 +166,13 @@ function instantiateGraph(g) {
 	});
 }
 
-function performNOverlap() {
-	s.configNoverlap( SIGMA_NOVERLAP_SETTINGS );
+function performNOverlap(margin) {
+	s.configNoverlap({
+		nodeMargin: margin,
+		scaleNodes: 1.2,
+		easing: 'quadraticInOut', // animation transition function (see sigma.utils.easing for available transitions)
+		duration: 1000 // animation duration 
+	});
 	s.startNoverlap();
 }
 

@@ -50,7 +50,7 @@ sigma.canvas.labels.neighbor = function(node, context, settings) {
             label_arr[i],
             Math.round(node[prefix + 'x']),
             Math.round(node[prefix + 'y']) + ( fontSize * ( i - offset ) ),
-            size * 18
+            ( size * 2 ) - 6
         );
     }
 }
