@@ -2,65 +2,28 @@
 var s; // Global variable for the sigma graph instance.
 
 function arrangeNodesCircular(centralNode, centralNodeURI, neighbors) {
-	var edgeCount = 0;
-	var numNeighbors = Object.keys(neighbors).length;
-	var g = {
-		nodes: [],
-		edges: []
-    };
-
-	// Add central node to the graph instance.
-    g.nodes.push({
-		id: centralNodeURI.slice(1, -1),
-		label: centralNode,
-		x: 0,
-		y: 0,
-		size: 5,
-		color: 'brown'
-	});
-
-	// Add all neighbor nodes to the graph instance.
-	$.each(neighbors, function(URI, props) {
-		// [Log] URI=<http://dbpedia.org/resource/Harry_and_the_Potters>
-		// [Log] {predicate: "artist", predicateURI: "<http://dbpedia.org/property/artist>", name: "Harry_and_the_Potters", URI: "<http://dbpedia.org/resource/Harry_and_the_Potters>", direction: "out"}
-
-		var name = props.name == '' ? URI.slice(1, -1) : props.name;
-		var source = props.direction == 'out' ? centralNodeURI : URI;
-		var target = props.direction == 'out' ? URI : centralNodeURI;
-		var colorNode = props.direction == 'out' ? 'lightseagreen' : 'lightseagreen';
-		var hoverColorNode = props.direction == 'out' ? 'seagreen' : 'seagreen';
-		var colorEdge = props.direction == 'out' ? 'lightgreen' : 'coral';
-		var hoverColorEdge = props.direction == 'out' ? 'green' : 'orangered';
-
-		g.nodes.push({
-			id: URI.slice(1, -1),
-			label: name,
-			x: Math.cos(Math.PI * 2 * edgeCount / numNeighbors),
-			y: Math.sin(Math.PI * 2 * edgeCount / numNeighbors),
-			size: 2,
-			color: colorNode,
-			hover_color: hoverColorNode
-		});
-
-		g.edges.push({
-			id: 'e' + edgeCount,
-			label: props.predicate,
-			source: source.slice(1, -1),
-			target: target.slice(1, -1),
-			size: 1, // Math.random(),
-			color: colorEdge,
-			hover_color: hoverColorEdge,
-			type: 'arrow'
-		});
-
-		++edgeCount;
-	});
-
-	instantiateGraph(g);
-	bindListeners();
+	arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePositionCircular);
 }
 
 function arrangeNodesByDirection(centralNode, centralNodeURI, neighbors) {
+	arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePositionByDirection);
+}
+
+function calculatePositionCircular(currEdgeNum, totalNumNeighbors, direction) {
+	return { 
+		x: Math.cos(Math.PI * 2 * currEdgeNum / totalNumNeighbors),
+		y: Math.sin(Math.PI * 2 * currEdgeNum / totalNumNeighbors) 
+	};
+}
+
+function calculatePositionByDirection(currEdgeNum, totalNumNeighbors, direction) {
+	return {
+		x: ( direction == 'out' ? 2 : -2 ) * Math.abs(Math.cos(Math.PI * 2 * currEdgeNum / totalNumNeighbors)),
+		y: Math.sin(Math.PI * 2 * currEdgeNum / totalNumNeighbors)
+	};
+}
+
+function arrangeNodes(centralNode, centralNodeURI, neighbors, calculatePosition) {
 	var edgeCount = 0;
 	var numNeighbors = Object.keys(neighbors).length;
 	var g = {
@@ -92,22 +55,23 @@ function arrangeNodesByDirection(centralNode, centralNodeURI, neighbors) {
 		var colorNodeHover = 'rgb(' + getColorScheme().neighbor + ')';
 		var colorEdge = 'rgba(' + getColorScheme().inEdge + ', ' + opacity + ')';
 		var colorEdgeHover = 'rgb(' + getColorScheme().inEdge + ')';
-		var factor = -2;
+
+		// Calculate position for node with given function.
+		var position = calculatePosition(edgeCount, numNeighbors, props.direction);
 
 		if( props.direction == 'out' ) {
 			source = centralNodeURI;
 			target = URI;
 			colorEdge = 'rgba(' + getColorScheme().outEdge + ', ' + opacity + ')';
 			colorEdgeHover = 'rgb(' + getColorScheme().outEdge + ')';
-			factor = 2;
 		}
 
 		g.nodes.push({
 			id: URI.slice(1, -1),
 			label: name,
 			type: 'neighbor',
-			x: factor * Math.abs(Math.cos(Math.PI * 2 * edgeCount / numNeighbors)),
-			y: Math.sin(Math.PI * 2 * edgeCount / numNeighbors),
+			x: position.x,
+			y: position.y,
 			size: 3,
 			color: colorNode,
 			hover_color: colorNodeHover
@@ -118,7 +82,7 @@ function arrangeNodesByDirection(centralNode, centralNodeURI, neighbors) {
 			label: props.predicate,
 			source: source.slice(1, -1),
 			target: target.slice(1, -1),
-			size: 3, // Math.random(),
+			size: 3,
 			color: colorEdge,
 			hover_color: colorEdgeHover,
 			type: 'arrow'
