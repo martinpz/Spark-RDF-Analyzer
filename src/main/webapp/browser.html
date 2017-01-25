@@ -83,7 +83,7 @@
 			</nav>
 		</fieldset>
 
-		<!---------------------- Entry Point ---------------------->
+		<!---------------------- Browser Configuration ---------------------->
 		<div id="entrypoint">
 			<div class="panel panel-default" style="float: right;">
 				<div class="panel-heading">
@@ -116,6 +116,7 @@
 				</div>
 			</div>
 
+			<!---------------------- Entry Point ---------------------->
 			<div id="welcome">
 				<h1>Select your entry point!</h1>
 				<p>
@@ -126,13 +127,18 @@
 
 			<div id="manual">
 				<h2>Manual selection</h2>
-				<p>Enter a node's name and click button 'Search'.</p>
+				<p>
+					Enter a node's name and click button 'Search'.<br>
+					<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> 
+					To start from another node, just perform a new search! This will reset the browser to its initial state.
+				</p>
 				<div class="col-lg-4" style="padding-left: 0;">
 					<div class="input-group">
 						<input id="entryNode" type="text" class="form-control" placeholder="Entry node">
 						<span class="input-group-btn">
 							<button id="btnSearch" type="button" class="btn btn-warning" data-toggle="modal" data-target="#modal" data-backdrop="static" data-keyboard="false"> 
-							<span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
+								<span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search
+							</button>
 						</span>
 					</div>
 				</div>
