@@ -24,18 +24,18 @@ public class testing {
 	
 	public static void doTest(DataFrame records){
 
-		createData();
-//		JavaPairRDD<String,String> counters = records.select("subject","object").toJavaRDD().mapToPair(
-//				new PairFunction<Row,String,String>(){
-//
-//					@Override
-//					public Tuple2<String, String> call(Row row) throws Exception {
-//						return new Tuple2<String, String>(row.getString(0), row.getString(1));
-//					}
-//				// this can be optimized if we use reduceByKey instead of groupByKey
-//		});
+//		createData();
+		JavaPairRDD<String,String> counters = records.select("subject","object").toJavaRDD().mapToPair(
+				new PairFunction<Row,String,String>(){
+
+					@Override
+					public Tuple2<String, String> call(Row row) throws Exception {
+						return new Tuple2<String, String>(row.getString(0), row.getString(1));
+					}
+				// this can be optimized if we use reduceByKey instead of groupByKey
+		});
 				
-		JavaPairRDD<String,String> counters = Service.sparkCtx().parallelizePairs(list);
+//		JavaPairRDD<String,String> counters = Service.sparkCtx().parallelizePairs(list);
 //		GroupByKeyTest(counters);
 		
 		// this gives us object,[subject] from object,subject. Or we can say key,[names]
@@ -46,80 +46,155 @@ public class testing {
 		JavaPairRDD<String,Tuple3<String,Double,Double>> flattedPair = PerformOperationReshuffle(list);	
 
 		
-		// this will give us key,([names],pj,[1/n])
-		JavaPairRDD<String,Tuple3<ArrayList<String>, Double, ArrayList<Double>>> shuffledwithnumbers = CombinerOutGoingToIncoming(flattedPair).cache();
+		// this will give us key,([names],[pj],[1/n])
+		JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> shuffledwithnumbers = CombinerOutGoingToIncoming(flattedPair).cache();
 		
-		final JavaPairRDD<String,Tuple3<ArrayList<String>, Double, ArrayList<Double>>> shuffledwithnumbers2 = shuffledwithnumbers;
+		JavaPairRDD<String,Double> pairedrdd = null;
 
-
+		for(int i = 0 ; i< 10; i++){
+		// here we created the new pjs by multiplying the values.
+			
+		pairedrdd = returnNewPjsForKeys(shuffledwithnumbers);
+		if(i == 0){
+			break;
+		}
 		
 		
-		// here we just finalized new pjs by converting [pj*1/n] to [(pj*1/n)*0.85+0.15]
-		// this will return [pj*[1/n]]
-		shuffledwithnumbers = shuffledwithnumbers.mapValues(new Function<Tuple3<ArrayList<String>,Double,ArrayList<Double>>, Tuple3<ArrayList<String>,Double,ArrayList<Double>>>() {
+		JavaPairRDD<String,Tuple2<Tuple2<String,Double>,Double>> pair = shuffledwithnumbers.flatMapToPair(new PairFlatMapFunction<Tuple2<String,Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>>, String, Tuple2<String,Double>>() {
 
 			@Override
-			public Tuple3<ArrayList<String>, Double, ArrayList<Double>> call(
-					Tuple3<ArrayList<String>, Double, ArrayList<Double>> line) throws Exception {
-				return new Tuple3<ArrayList<String>,Double,ArrayList<Double>>(line._1(),(line._2()*0.85)+0.15,line._3());
+			public Iterable<Tuple2<String, Tuple2<String,Double>>> call(
+					Tuple2<String, Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> arg0)
+					throws Exception {
+				
+				
+				List<Tuple2<String, Tuple2<String,Double>>> results = new ArrayList<>();
+				
+				for(int i=0;i<arg0._2._1().size();i++){
+					
+					results.add(new Tuple2<String,Tuple2<String,Double>>(arg0._2._1().get(i),new Tuple2(arg0._1,arg0._2._3().get(i))));
+				}
+				
+				return results;
 			}
-		});
-		
-		// 
-		shuffledwithnumbers = shuffledwithnumbers.mapValues(new Function<Tuple3<ArrayList<String>,Double,ArrayList<Double>>, Tuple3<ArrayList<String>,Double,ArrayList<Double>>>() {
+		}).join(pairedrdd);
+
+		// key,(name,pj,1/n)
+		 JavaPairRDD<String, Tuple3<String, Double, Double>> doo = pair.mapToPair(new PairFunction<Tuple2<String,Tuple2<Tuple2<String,Double>,Double>>, String, Tuple3<String,Double,Double>>() {
 
 			@Override
-			public Tuple3<ArrayList<String>, Double, ArrayList<Double>> call(
-					Tuple3<ArrayList<String>, Double, ArrayList<Double>> line) throws Exception {
-				return new Tuple3<ArrayList<String>,Double,ArrayList<Double>>(line._1(),(line._2()*0.85)+0.15,line._3());
+			public Tuple2<String, Tuple3<String, Double, Double>> call(
+					Tuple2<String, Tuple2<Tuple2<String, Double>, Double>> arg0) throws Exception {
+
+				return new Tuple2<String, Tuple3<String, Double, Double>>(arg0._2._1._1,new Tuple3(arg0._1,arg0._2._1._2,arg0._2._2));
 			}
 		});
-
-//		for(String name:nodeNames){
-//			
-//			List<Tuple3<ArrayList<String>,Double,ArrayList<Double>>> shuff = shuffledwithnumbers2.lookup(name);
-//		}
-
-
-
-//		shuffledwithnumbers.mapValues(new Function<Tuple3<ArrayList<String>,Double,ArrayList<Double>>, U>() {
-//
-//			@Override
-//			public U call(Tuple3<ArrayList<String>, Double, ArrayList<Double>> arg0) throws Exception {
-//				
-//				ArrayList<Tuple3<ArrayList<String>, Double, ArrayList<Double>>> items;
-//				
-//				return null;
-//			}
-//		})
+		 
+		 shuffledwithnumbers = performFinalCombiner(doo);
+		}		
+		System.out.println("donedonedonedonedonedonedone");
 		
-
-		// now multiply all 1/n * pj values with 0.85 and add them to 0.15.
-
-		
-		
-//		// this combines the object,subject to object,[subject]
-//		JavaPairRDD<String,ArrayList<String>> newlyCombined = CombinerOutGoingEdgesWrtKey(flattedPair);
+		List<Tuple2<Double, String>> importantNodes = GetTopNNodes(pairedrdd,5);
+		for(Tuple2<Double, String> tuple:importantNodes){
+			System.out.println("The important node is "+tuple._2);
+		}
 		
 	}
 	
-//	public static JavaPairRDD<String,String> PerformOperationReshuffle(JavaPairRDD<String,Tuple3<ArrayList<String>,Double,Double>> list){
-//		return list.flatMapToPair(new PairFlatMapFunction<Tuple2<String,ArrayList<String>>, String,String>() {
-//
-//			@Override
-//			public Iterable<Tuple2<String, String>> call(Tuple2<String, ArrayList<String>> arg0) throws Exception {
-//				// TODO Auto-generated method stub
-//				List<Tuple2<String, String>> results = new ArrayList<>();
-//				
-//				for(String item:arg0._2){
-//					results.add(new Tuple2<String,String>(item,arg0._1));
-//				}
-//				
-//				return results;
-//			}
-//		});
-//
-//	}
+	public static List<Tuple2<Double, String>> GetTopNNodes(JavaPairRDD<String,Double> pairedrdd,int NImportantNodes){
+		return pairedrdd.mapToPair(new PairFunction<Tuple2<String,Double>, Double, String>() {
+
+			@Override
+			public Tuple2<Double, String> call(Tuple2<String, Double> arg0) throws Exception {
+				// TODO Auto-generated method stub
+				return new Tuple2(arg0._2,arg0._1);
+			}
+		}).cache().sortByKey().take(NImportantNodes);
+	}
+	
+	public static JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> performFinalCombiner(JavaPairRDD<String, Tuple3<String, Double, Double>> finalCombiner){
+		
+		Function<Tuple3<String, Double, Double>,Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>> createCombiner = new Function<Tuple3<String, Double, Double>, Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>>() {
+			
+			// this is called when we face the key for the first time. So we initialize our arraylist w.r.t key.
+			@Override
+			public Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>> call(Tuple3<String, Double, Double> arg0) throws Exception {
+				
+				ArrayList names = new ArrayList<String>();
+				ArrayList one_by_n = new ArrayList<Double>();
+				ArrayList pjs = new ArrayList<Double>();
+
+				names.add(arg0._1());
+				pjs.add(arg0._2());
+				one_by_n.add(arg0._3());
+			
+				
+				return new Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>(names,pjs,one_by_n);
+			}
+		};
+
+		Function2<Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>,
+		Tuple3<String, Double, Double>,
+		Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>> merger = new Function2<Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>, Tuple3<String, Double, Double>, Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>>() {
+			
+			// this is called when we face the key next time. So we add an item to the arraylist of that key.
+			@Override
+			public Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>> call(
+					Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>> existingListForSameKey,
+					Tuple3<String, Double, Double> newValueForSameKey) throws Exception {
+				
+				existingListForSameKey._1().add(newValueForSameKey._1());
+				existingListForSameKey._2().add(newValueForSameKey._2());
+				existingListForSameKey._3().add(newValueForSameKey._3());
+				
+				return existingListForSameKey;
+				
+			}
+		};
+		
+		
+		Function2<Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>,Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>,Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>>
+		mergeCombiners = new Function2<Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>,
+				Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>,
+				Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>>(){
+
+
+			@Override
+			public Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>> call(
+					Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>> part1,
+					Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>> part2) throws Exception {
+				
+				part1._1().addAll(part2._1());
+				part1._2().addAll(part2._2());
+				part1._3().addAll(part2._3());
+				
+				return new Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>(part1._1(),part1._2(),part1._3());
+			}
+			
+		};
+//		finalCombiner.combineByKey(createCombiner, merger, mergeCombiners).foreach(line->System.out.println(line));
+		return finalCombiner.combineByKey(createCombiner, merger, mergeCombiners);
+	}
+	
+	public static JavaPairRDD<String,Double> returnNewPjsForKeys(JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> shuffledwithnumbers){
+		return shuffledwithnumbers.mapValues(new Function<Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>, Double>() {
+
+			@Override
+			public Double call(
+					Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>> line) throws Exception {
+				
+				double newrank = 0.0;
+				for(int i=0;i<line._2().size();i++){
+					newrank += line._2().get(i)*line._3().get(i);
+				}
+				
+				newrank = (newrank*0.85)+0.15;
+				
+				return newrank;
+			}
+		}).cache();
+	}
+	
 
 	public static JavaPairRDD<String,Tuple3<String,Double,Double>> PerformOperationReshuffle(JavaPairRDD<String,Tuple3<ArrayList<String>,Double,Double>> list){
 		return list.flatMapToPair(new PairFlatMapFunction<Tuple2<String,Tuple3<ArrayList<String>,Double,Double>>, String, Tuple3<String,Double,Double>>() {
@@ -199,90 +274,79 @@ public class testing {
 			
 		};
 		
-		counters.combineByKey(createCombiner, merger, mergeCombiners).foreach(line->System.out.println(line));
+//		counters.combineByKey(createCombiner, merger, mergeCombiners).foreach(line->System.out.println(line));
 		return counters.combineByKey(createCombiner, merger, mergeCombiners);
 	}
 
 	
-	public static JavaPairRDD<String,Tuple3<ArrayList<String>, Double, ArrayList<Double>>> CombinerOutGoingToIncoming(JavaPairRDD<String,Tuple3<String,Double,Double>> counters){
+	public static JavaPairRDD<String, Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> CombinerOutGoingToIncoming(JavaPairRDD<String,Tuple3<String,Double,Double>> counters){
 		
-		Function<Tuple3<String,Double,Double>,Tuple3<ArrayList<String>,Double, ArrayList<Double>>> createCombiner = new Function<Tuple3<String,Double,Double>, Tuple3<ArrayList<String>,Double, ArrayList<Double>>>() {
+		Function<Tuple3<String,Double,Double>,Tuple3<ArrayList<String>,ArrayList<Double>, ArrayList<Double>>> createCombiner = new Function<Tuple3<String,Double,Double>, Tuple3<ArrayList<String>,ArrayList<Double>, ArrayList<Double>>>() {
 			
 			// this is called when we face the key for the first time. So we initialize our arraylist w.r.t key.
 
 			@Override
-			public Tuple3<ArrayList<String>, Double, ArrayList<Double>> call(Tuple3<String, Double, Double> line)
+			public Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>> call(Tuple3<String, Double, Double> line)
 					throws Exception {
 				
 				ArrayList<String> names = new ArrayList<>();
 				ArrayList<Double> one_by_n = new ArrayList<>();
-				Double pj_into_1_by_n = 0.0;
+				ArrayList<Double> pj = new ArrayList<>();
 				
 				
 
 				names.add(line._1());
-				pj_into_1_by_n = line._2()*line._3();
+				pj.add(line._2());
 				one_by_n.add(line._3());
 				
-				return new Tuple3<ArrayList<String>, Double, ArrayList<Double>>(names,pj_into_1_by_n,one_by_n);
+				return new Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>(names,pj,one_by_n);
 			}
 		};
 		
-		Function2<Tuple3<ArrayList<String>,Double,ArrayList<Double>>,
+		Function2<Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>,
 				  Tuple3<String,Double,Double>,
-				  Tuple3<ArrayList<String>,Double,ArrayList<Double>>> merger = new Function2<Tuple3<ArrayList<String>,Double,ArrayList<Double>>, Tuple3<String,Double,Double>, Tuple3<ArrayList<String>,Double,ArrayList<Double>>>() {
+				  Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>> merger = new Function2<Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>, Tuple3<String,Double,Double>, Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>>() {
 					
 					@Override
-					public Tuple3<ArrayList<String>, Double, ArrayList<Double>> call(
-							Tuple3<ArrayList<String>, Double, ArrayList<Double>> prevRecordForSameKey, Tuple3<String, Double, Double> newRecordForSameKey)
+					public Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>> call(
+							Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>> prevRecordForSameKey, Tuple3<String, Double, Double> newRecordForSameKey)
 							throws Exception {
 						
 						ArrayList<String> names = prevRecordForSameKey._1();
 						ArrayList<Double> one_by_n = prevRecordForSameKey._3();
-						Double pj_into_1_by_n = prevRecordForSameKey._2();
+						ArrayList<Double> pj = prevRecordForSameKey._2();
 
 						names.add(newRecordForSameKey._1());
 						one_by_n.add(newRecordForSameKey._3());
-						pj_into_1_by_n = (newRecordForSameKey._2()*newRecordForSameKey._3()) + prevRecordForSameKey._2();
+						pj.add(newRecordForSameKey._2());
 						
-						return new Tuple3<ArrayList<String>,Double,ArrayList<Double>>(names,pj_into_1_by_n,one_by_n);
+						return new Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>(names,pj,one_by_n);
 					}
 				};
 
 			
 		
-		Function2<Tuple3<ArrayList<String>, Double, ArrayList<Double>>
-		,Tuple3<ArrayList<String>, Double, ArrayList<Double>>,
-		Tuple3<ArrayList<String>, Double, ArrayList<Double>>> mergeCombiners = new Function2<Tuple3<ArrayList<String>, Double, ArrayList<Double>>,
-				Tuple3<ArrayList<String>, Double, ArrayList<Double>>,
-				Tuple3<ArrayList<String>, Double, ArrayList<Double>>>(){
+		Function2<Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>
+		,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>,
+		Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> mergeCombiners = new Function2<Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>,
+				Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>,
+				Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>>(){
 
-			// this is called to merge different arraylists for the same key being merged at different partitions.
-//			@Override
-//			public Tuple3<ArrayList<String>,Double,Double> call(Tuple3<ArrayList<String>,Double,Double> tuplePartition1, Tuple3<ArrayList<String>,Double,Double> tuplePartition2) throws Exception {
-//				
-//				ArrayList<String> newlist = tuplePartition1._1();
-//				
-//				newlist.addAll(tuplePartition2._1());
-//				
-//				double sizeofList = newlist.size();
-//
-//				return new Tuple3(newlist,sizeofList,1.0/sizeofList);
-//			}
 
 			@Override
-			public Tuple3<ArrayList<String>, Double, ArrayList<Double>> call(
-					Tuple3<ArrayList<String>, Double, ArrayList<Double>> partition1,
-					Tuple3<ArrayList<String>, Double, ArrayList<Double>> partition2) throws Exception {
+			public Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>> call(
+					Tuple3<ArrayList<String>,ArrayList<Double>, ArrayList<Double>> partition1,
+					Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>> partition2) throws Exception {
 				
 				ArrayList<String> names = partition1._1();
 				ArrayList<Double> one_by_n = partition1._3();
-				Double pj_into_1_by_n = partition1._2() + partition2._2();
+				ArrayList<Double> pj = partition1._2();
 
 				one_by_n.addAll(partition2._3());
 				names.addAll(partition2._1());
+				pj.addAll(partition2._2());
 				
-				return new Tuple3<ArrayList<String>, Double, ArrayList<Double>>(names,pj_into_1_by_n,one_by_n);
+				return new Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>(names,pj,one_by_n);
 			}
 			
 		};
