@@ -41,7 +41,6 @@ public class testing {
 		// this gives us object,[subject] from object,subject. Or we can say key,[names]
 		JavaPairRDD<String,Tuple3<ArrayList<String>,Double,Double>> list =  CombinerOutGoingEdgesWrtKey(counters);
 		
-		
 		// this gives us key,(name,pj,1/n), note that here, we convert keys to value and values(first flat them) to keys.
 		JavaPairRDD<String,Tuple3<String,Double,Double>> flattedPair = PerformOperationReshuffle(list);	
 
@@ -54,13 +53,18 @@ public class testing {
 		for(int i = 0 ; i< 10; i++){
 
 			// here we created the new pjs by multiplying the values.
-		
+
+			
 		pairedrdd = returnNewPjsForKeys(shuffledwithnumbers);
-		if(i == 0){
+
+		if(i==9)
+		{
 			break;
 		}
 		
-		
+		/*
+		 *  paiedrdd =  <String,Double>
+		 */
 		JavaPairRDD<String,Tuple2<Tuple2<String,Double>,Double>> pair = shuffledwithnumbers.flatMapToPair(new PairFlatMapFunction<Tuple2<String,Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>>, String, Tuple2<String,Double>>() {
 
 			@Override
@@ -87,7 +91,7 @@ public class testing {
 			public Tuple2<String, Tuple3<String, Double, Double>> call(
 					Tuple2<String, Tuple2<Tuple2<String, Double>, Double>> arg0) throws Exception {
 
-				return new Tuple2<String, Tuple3<String, Double, Double>>(arg0._2._1._1,new Tuple3(arg0._1,arg0._2._1._2,arg0._2._2));
+				return new Tuple2<String, Tuple3<String, Double, Double>>(arg0._2._1._1,new Tuple3(arg0._1,arg0._2._2,arg0._2._1._2));
 			}
 		});
 		 
@@ -98,7 +102,8 @@ public class testing {
 		
 		String result="";
 		for(int i=0;i<importantNodes.size();i++){
-			result+=importantNodes.get(i)._2+"<br/>";
+//			result+=importantNodes.get(i)._2+"<br/>";
+			System.out.println("(Name,Rank)(" + importantNodes.get(i)._2 + ","+importantNodes.get(i)._1()+")");
 		}
 		
 		return result;
@@ -112,7 +117,7 @@ public class testing {
 				// TODO Auto-generated method stub
 				return new Tuple2(arg0._2,arg0._1);
 			}
-		}).cache().sortByKey().take(NImportantNodes);
+		}).cache().sortByKey(false).take(NImportantNodes);
 	}
 	
 	public static JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> performFinalCombiner(JavaPairRDD<String, Tuple3<String, Double, Double>> finalCombiner){
@@ -199,6 +204,9 @@ public class testing {
 	}
 	
 
+	/*
+	 * Converts keys to values and array of values to keys. For Step 1 mentioned on stackoverflow question.
+	 */
 	public static JavaPairRDD<String,Tuple3<String,Double,Double>> PerformOperationReshuffle(JavaPairRDD<String,Tuple3<ArrayList<String>,Double,Double>> list){
 		return list.flatMapToPair(new PairFlatMapFunction<Tuple2<String,Tuple3<ArrayList<String>,Double,Double>>, String, Tuple3<String,Double,Double>>() {
 
