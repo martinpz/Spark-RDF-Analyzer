@@ -22,7 +22,7 @@ public class testing {
 
 	public static List<Tuple2<String,String>> list = new ArrayList<>();
 	
-	public static void doTest(DataFrame records){
+	public static String doTest(DataFrame records){
 
 //		createData();
 		JavaPairRDD<String,String> counters = records.select("subject","object").toJavaRDD().mapToPair(
@@ -52,8 +52,9 @@ public class testing {
 		JavaPairRDD<String,Double> pairedrdd = null;
 
 		for(int i = 0 ; i< 10; i++){
-		// here we created the new pjs by multiplying the values.
-			
+
+			// here we created the new pjs by multiplying the values.
+		
 		pairedrdd = returnNewPjsForKeys(shuffledwithnumbers);
 		if(i == 0){
 			break;
@@ -92,13 +93,15 @@ public class testing {
 		 
 		 shuffledwithnumbers = performFinalCombiner(doo);
 		}		
-		System.out.println("donedonedonedonedonedonedone");
-		
+
 		List<Tuple2<Double, String>> importantNodes = GetTopNNodes(pairedrdd,5);
-		for(Tuple2<Double, String> tuple:importantNodes){
-			System.out.println("The important node is "+tuple._2);
+		
+		String result="";
+		for(int i=0;i<importantNodes.size();i++){
+			result+=importantNodes.get(i)._2+"<br/>";
 		}
 		
+		return result;
 	}
 	
 	public static List<Tuple2<Double, String>> GetTopNNodes(JavaPairRDD<String,Double> pairedrdd,int NImportantNodes){
