@@ -1,10 +1,9 @@
 package ranking;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import org.apache.hadoop.mapred.lib.HashPartitioner;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
@@ -12,17 +11,48 @@ import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
 import rdfanalyzer.spark.Service;
 import scala.Tuple2;
 import scala.Tuple3;
 
-public class testing {
+public class RDFAnalyzerPageRank {
 
+	public static class PageRanksCase implements Serializable{
+		
+		private String node;
+//		private Double importance; 
+		
+		public void setNode(String node) { this.node = node; }
+//		public void setImportance(Double importance) { this.importance = importance; }
+
+		public String getNode(String node) { return this.node; }
+//		public Double getImportance(String node) { return this.importance; }
+	}
+	
+	
+	public static JavaPairRDD<String,Tuple2<Tuple2<String,Double>,Double>> pair;
+	public static JavaPairRDD<String, Tuple3<String, Double, Double>> doo ;
 	public static List<Tuple2<String,String>> list = new ArrayList<>();
 	
-	public static String doTest(DataFrame records){
+	
+	/*
+	 *  If our overall rank decreases by less than this delta_threshold
+	 *  we will stop calculating pagerank.
+	 */
+	public static final int DELTA_THRESHOLD = 10;
+
+    /*
+	 * We use this last score to find out by how much % our new score is decreased.
+	 * If it is decreased by <= 20% than we stop.
+	 */
+	public static double lastscore = 99999999.0;
+	
+	
+	
+	public static void PerformPageRank(DataFrame records) throws Exception{
 
 //		createData();
 		JavaPairRDD<String,String> counters = records.select("subject","object").toJavaRDD().mapToPair(
@@ -34,38 +64,121 @@ public class testing {
 					}
 				// this can be optimized if we use reduceByKey instead of groupByKey
 		});
-				
+
 //		JavaPairRDD<String,String> counters = Service.sparkCtx().parallelizePairs(list);
-//		GroupByKeyTest(counters);
-		
+
 		// this gives us object,[subject] from object,subject. Or we can say key,[names]
 		JavaPairRDD<String,Tuple3<ArrayList<String>,Double,Double>> list =  CombinerOutGoingEdgesWrtKey(counters);
 		
 		// this gives us key,(name,pj,1/n), note that here, we convert keys to value and values(first flat them) to keys.
 		JavaPairRDD<String,Tuple3<String,Double,Double>> flattedPair = PerformOperationReshuffle(list);	
 
-		
 		// this will give us key,([names],[pj],[1/n])
-		JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> shuffledwithnumbers = CombinerOutGoingToIncoming(flattedPair).cache();
+		JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> shuffledwithnumbers = CombinerOutGoingToIncoming(flattedPair);
 		
-		JavaPairRDD<String,Double> pairedrdd = null;
+		JavaPairRDD<String,Double> pairedrdd  = null;
 
-		for(int i = 0 ; i< 10; i++){
-
-			// here we created the new pjs by multiplying the values.
-
-			
-		pairedrdd = returnNewPjsForKeys(shuffledwithnumbers);
-
-		if(i==9)
+		while(true)
 		{
+		// here we created the new pjs by multiplying the values.
+		pairedrdd = returnNewPjsForKeys(shuffledwithnumbers);
+		
+		if(getDeltaScore(pairedrdd)<=DELTA_THRESHOLD){
+			// stop
+			JavaRDD<PageRanksCase> finalData = GetTopNNodes(pairedrdd);
+//			WriteInfoToParquet(finalData);
 			break;
 		}
+
+		pairedrdd = pairedrdd.mapToPair(new PairFunction<Tuple2<String,Double>, String, Double>() {
+
+			@Override
+			public Tuple2<String, Double> call(Tuple2<String, Double> arg0) throws Exception {
+				
+				return new Tuple2<String,Double>(arg0._1,arg0._2);
+			}
+		});	
 		
 		/*
 		 *  paiedrdd =  <String,Double>
 		 */
-		JavaPairRDD<String,Tuple2<Tuple2<String,Double>,Double>> pair = shuffledwithnumbers.flatMapToPair(new PairFlatMapFunction<Tuple2<String,Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>>, String, Tuple2<String,Double>>() {
+		pair = ReshuffleAndJoinToNewRanks(shuffledwithnumbers,pairedrdd);
+		
+
+		// key,(name,pj,1/n)
+		 doo = 	UndoMethodDidForJoin(pair);	 
+
+		 
+		 shuffledwithnumbers = performFinalCombiner(doo);
+		} // for loop
+
+//		JavaRDD<PageRanksCase> finalData = GetTopNNodes(pairedrddd);
+//		WriteInfoToParquet(finalData);
+	}
+	
+	
+	
+	
+	
+	/*
+	 ***********************************************************************************************************
+	 **********************************************  Functions  ************************************************
+	 ***********************************************************************************************************
+	 ***********************************************************************************************************
+	 */
+	
+	
+	public static Double getDeltaScore(JavaPairRDD<String,Double> pairedrdd){
+		double value = 0;
+		List<Double> items = pairedrdd.values().collect();
+		Double score = items.stream().mapToDouble(Double::doubleValue).sum();
+		
+//		for(int i=0;i<items.size();i++){
+//			System.out.println("The starting score is:" + items.get(i));
+//		}
+		
+		double decrease = lastscore - score;
+		double percentageDecrease = (decrease/lastscore) * 100;
+		
+		System.out.println("The score is:" + score);
+		System.out.println("The deltascore is:" + percentageDecrease);
+
+		lastscore = score;
+		return percentageDecrease;
+	}
+	
+	// Writes the keys and their importance to parquet.
+	public static void WriteInfoToParquet(JavaRDD<PageRanksCase> finalData){
+
+		try{
+			System.out.println("coming here");
+			DataFrame finalFrame = Service.sqlCtx().createDataFrame(finalData,PageRanksCase.class);
+			System.out.println("coming here too");
+			finalFrame.write().parquet(rdfanalyzer.spark.Configuration.storage() + "sib200PageRank.parquet");
+		}
+		catch(NullPointerException e){
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	
+	public static JavaPairRDD<String, Tuple3<String, Double, Double>> UndoMethodDidForJoin(JavaPairRDD<String,Tuple2<Tuple2<String,Double>,Double>> pair){
+		
+		return pair.mapToPair(new PairFunction<Tuple2<String,Tuple2<Tuple2<String,Double>,Double>>, String, Tuple3<String,Double,Double>>() {
+
+			@Override
+			public Tuple2<String, Tuple3<String, Double, Double>> call(
+					Tuple2<String, Tuple2<Tuple2<String, Double>, Double>> arg0) throws Exception {
+
+				return new Tuple2<String, Tuple3<String, Double, Double>>(arg0._2._1._1,new Tuple3(arg0._1,arg0._2._2,arg0._2._1._2));
+			}
+		});
+	}
+	
+	
+	public static JavaPairRDD<String,Tuple2<Tuple2<String,Double>,Double>> ReshuffleAndJoinToNewRanks(JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> shuffledwithnumbers,JavaPairRDD<String,Double> pairedrddd){
+		
+		return shuffledwithnumbers.flatMapToPair(new PairFlatMapFunction<Tuple2<String,Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>>, String, Tuple2<String,Double>>() {
 
 			@Override
 			public Iterable<Tuple2<String, Tuple2<String,Double>>> call(
@@ -82,42 +195,21 @@ public class testing {
 				
 				return results;
 			}
-		}).join(pairedrdd);
-
-		// key,(name,pj,1/n)
-		 JavaPairRDD<String, Tuple3<String, Double, Double>> doo = pair.mapToPair(new PairFunction<Tuple2<String,Tuple2<Tuple2<String,Double>,Double>>, String, Tuple3<String,Double,Double>>() {
-
-			@Override
-			public Tuple2<String, Tuple3<String, Double, Double>> call(
-					Tuple2<String, Tuple2<Tuple2<String, Double>, Double>> arg0) throws Exception {
-
-				return new Tuple2<String, Tuple3<String, Double, Double>>(arg0._2._1._1,new Tuple3(arg0._1,arg0._2._2,arg0._2._1._2));
-			}
-		});
-		 
-		 shuffledwithnumbers = performFinalCombiner(doo);
-		}		
-
-		List<Tuple2<Double, String>> importantNodes = GetTopNNodes(pairedrdd,5);
-		
-		String result="";
-		for(int i=0;i<importantNodes.size();i++){
-//			result+=importantNodes.get(i)._2+"<br/>";
-			System.out.println("(Name,Rank)(" + importantNodes.get(i)._2 + ","+importantNodes.get(i)._1()+")");
-		}
-		
-		return result;
+		}).join(pairedrddd);
 	}
 	
-	public static List<Tuple2<Double, String>> GetTopNNodes(JavaPairRDD<String,Double> pairedrdd,int NImportantNodes){
-		return pairedrdd.mapToPair(new PairFunction<Tuple2<String,Double>, Double, String>() {
+	public static JavaRDD<PageRanksCase> GetTopNNodes(JavaPairRDD<String,Double> pairedrdd){
+		
+		return pairedrdd.map(new Function<Tuple2<String,Double>, PageRanksCase>() {
 
 			@Override
-			public Tuple2<Double, String> call(Tuple2<String, Double> arg0) throws Exception {
-				// TODO Auto-generated method stub
-				return new Tuple2(arg0._2,arg0._1);
+			public PageRanksCase call(Tuple2<String, Double> line) throws Exception {
+				PageRanksCase pgrank  = new PageRanksCase();
+//				pgrank.setImportance(line._2);
+				pgrank.setNode(line._1());
+				return pgrank;
 			}
-		}).cache().sortByKey(false).take(NImportantNodes);
+		});
 	}
 	
 	public static JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> performFinalCombiner(JavaPairRDD<String, Tuple3<String, Double, Double>> finalCombiner){
@@ -160,7 +252,7 @@ public class testing {
 			}
 		};
 		
-		
+
 		Function2<Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>,Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>,Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>>
 		mergeCombiners = new Function2<Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>,
 				Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>,
@@ -184,13 +276,13 @@ public class testing {
 		return finalCombiner.combineByKey(createCombiner, merger, mergeCombiners);
 	}
 	
-	public static JavaPairRDD<String,Double> returnNewPjsForKeys(JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> shuffledwithnumbers){
-		return shuffledwithnumbers.mapValues(new Function<Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>, Double>() {
+	public static JavaPairRDD<String, Double> returnNewPjsForKeys(JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> shuffledwithnumbers){
+		return shuffledwithnumbers.mapValues(new Function<Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>, Double>() {
 
 			@Override
-			public Double call(
-					Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>> line) throws Exception {
-				
+			public Double call(Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>> line)
+					throws Exception {
+
 				double newrank = 0.0;
 				for(int i=0;i<line._2().size();i++){
 					newrank += line._2().get(i)*line._3().get(i);
@@ -200,7 +292,7 @@ public class testing {
 				
 				return newrank;
 			}
-		}).cache();
+		});
 	}
 	
 
@@ -231,14 +323,7 @@ public class testing {
 		});
 		
 	}
-
-//	public static JavaPairRDD<String,Iterable<String>> GroupByKeyTest(JavaPairRDD<String,String> counters){
-//		
-//		counters.groupByKey(4).distinct().cache().foreach(line->System.out.println(line));
-//		return counters.groupByKey(4).distinct().cache();
-//	}
 	
-
 	public static JavaPairRDD<String,Tuple3<ArrayList<String>,Double,Double>> CombinerOutGoingEdgesWrtKey(JavaPairRDD<String,String> counters){
 		
 		Function<String,Tuple3<ArrayList<String>,Double,Double>> createCombiner = new Function<String, Tuple3<ArrayList<String>,Double,Double>>() {
@@ -267,7 +352,7 @@ public class testing {
 				return new Tuple3<ArrayList<String>,Double,Double>(newlist,sizeofList,1.0/sizeofList);
 			}
 		};
-		
+
 		Function2<Tuple3<ArrayList<String>,Double,Double>,Tuple3<ArrayList<String>,Double,Double>,Tuple3<ArrayList<String>,Double,Double>> mergeCombiners = new Function2<Tuple3<ArrayList<String>,Double,Double>,Tuple3<ArrayList<String>,Double,Double>,Tuple3<ArrayList<String>,Double,Double>>(){
 
 			// this is called to merge different arraylists for the same key being merged at different partitions.
