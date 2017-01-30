@@ -11,6 +11,7 @@ import javax.sound.sampled.AudioFormat.Encoding;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.apache.spark.graphx.lib.PageRank;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -18,8 +19,7 @@ import org.apache.spark.sql.Row;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
-import ranking.Ranking;
-import ranking.testing;
+import ranking.RDFAnalyzerPageRank;
 
 import org.apache.spark.sql.Dataset;
 
@@ -30,7 +30,7 @@ public class Centrality {
 	public static ConnAdapter objAdapter = new ConnAdapter();
 	public static DataFrame graphFrame;
 	
-	public static String main(String metricType,String dataset, String nodeName){
+	public static String main(String metricType,String dataset, String nodeName) throws Exception{
 
 		graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + dataset + ".parquet");
 		graphFrame.cache().registerTempTable("Graph");
@@ -97,19 +97,40 @@ public class Centrality {
 		
 		return "betweenness";
 	}
-	public static String CalculateCloseness(String node){
+	public static String CalculateCloseness(String node) throws Exception{
+		
+		long highestIndegree = getHighestIndegree();
+		long highestoutdegree = getHighestOutDegree();
 		
 		DataFrame allSubjects = Service.sqlCtx().sql("SELECT subject, predicate, object FROM Graph where "
-				+ "predicate NOT LIKE 'a' AND predicate NOT LIKE 'foaf:firstName' "
-				+ "AND predicate NOT LIKE 'foaf:lastName' AND object NOT LIKE 'sioc:ip_address' "
-				+ "AND predicate NOT LIKE 'rdf:type'" + "AND predicate NOT LIKE 'sib:requested'"
-				+ "AND predicate NOT LIKE 'sib:approved'");
+				+ "predicate NOT LIKE 'a' "
+				+ "AND predicate NOT LIKE 'rdf:type'");
 
-//		Ranking.CreateAdjacency(allSubjects);
-		return testing.doTest(allSubjects);
+		RDFAnalyzerPageRank.PerformPageRank(allSubjects);
+		return "";
 	}
 	public static String readResource(final String fileName, Charset charset) throws IOException {
         return Resources.toString(Resources.getResource(fileName), charset);
+	}
+	
+	public static long getHighestIndegree(){
+		
+		DataFrame maxInDegreeFrame = Service.sqlCtx()
+				.sql("SELECT first(tbl1.object),MAX(tbl1.OutdegreeCount) FROM"
+						+ "(SELECT object,COUNT(subject) AS OutdegreeCount FROM Graph GROUP BY object)tbl1");
+
+		Row[] rowMaxInDegree = maxInDegreeFrame.collect();
+
+		return rowMaxInDegree[0].getLong(1);
+	}
+	public static long getHighestOutDegree(){
+		
+		DataFrame maxOutDegreeFrame = Service.sqlCtx()
+				.sql("SELECT first(tbl1.subject),MAX(tbl1.OutdegreeCount) FROM"
+						+ "(SELECT subject,COUNT(object) AS OutdegreeCount FROM Graph GROUP BY subject)tbl1");
+
+		Row[] rowMaxOutDegree = maxOutDegreeFrame.collect();
+		return rowMaxOutDegree[0].getLong(1);
 	}
 	
 	public static String calculateStartNode(){
