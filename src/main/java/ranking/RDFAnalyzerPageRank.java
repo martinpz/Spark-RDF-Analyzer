@@ -77,15 +77,16 @@ public class RDFAnalyzerPageRank {
 		JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> shuffledwithnumbers = CombinerOutGoingToIncoming(flattedPair);
 		
 		JavaPairRDD<String,Double> pairedrdd  = null;
-
+		int i = 0;
 		while(true)
 		{
 		// here we created the new pjs by multiplying the values.
 		pairedrdd = returnNewPjsForKeys(shuffledwithnumbers);
+
 		
 		if(getDeltaScore(pairedrdd)<=DELTA_THRESHOLD){
 			// stop
-			JavaRDD<PageRanksCase> finalData = GetTopNNodes(pairedrdd);
+			JavaRDD<PageRanksCase> finalData = ConvertPairRDDToRDD(pairedrdd);
 //			WriteInfoToParquet(finalData);
 			break;
 		}
@@ -198,7 +199,24 @@ public class RDFAnalyzerPageRank {
 		}).join(pairedrddd);
 	}
 	
-	public static JavaRDD<PageRanksCase> GetTopNNodes(JavaPairRDD<String,Double> pairedrdd){
+	
+	public static void printTopNNodes(JavaPairRDD<String,Double> pairedrdd){
+		
+		List<Tuple2<Double,String>> rddd = pairedrdd.mapToPair(new PairFunction<Tuple2<String,Double>, Double, String>() {
+
+			@Override
+			public Tuple2<Double, String> call(Tuple2<String, Double> line) throws Exception {
+				return new Tuple2<Double,String>(line._2,line._1);
+			}
+		}).sortByKey(false).take(5);
+		
+		
+		for(Tuple2 item: rddd){
+			System.out.println("Rank -> "+item._1 + " Name -> "+item._2);
+		}
+	}
+	
+	public static JavaRDD<PageRanksCase> ConvertPairRDDToRDD(JavaPairRDD<String,Double> pairedrdd){
 		
 		return pairedrdd.map(new Function<Tuple2<String,Double>, PageRanksCase>() {
 

@@ -30,6 +30,16 @@ public class Centrality {
 	public static ConnAdapter objAdapter = new ConnAdapter();
 	public static DataFrame graphFrame;
 	
+	
+	/*
+	 *  this means that when we find the maximum in degree in the whole graph.
+	 *  Lets say if the max in degree for a node in the graph is 100.
+	 *  Than LIMIT_DELTA = 80 means only consider nodes with indegree <= 80.
+	 *  This parameter can be tuned to suit your requirements.
+	 */
+	
+	public static final int LIMIT_DELTA = 80;
+	
 	public static String main(String metricType,String dataset, String nodeName) throws Exception{
 
 		graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + dataset + ".parquet");
@@ -99,16 +109,36 @@ public class Centrality {
 	}
 	public static String CalculateCloseness(String node) throws Exception{
 		
-		long highestIndegree = getHighestIndegree();
-		long highestoutdegree = getHighestOutDegree();
-		
-		DataFrame allSubjects = Service.sqlCtx().sql("SELECT subject, predicate, object FROM Graph where "
-				+ "predicate NOT LIKE 'a' "
-				+ "AND predicate NOT LIKE 'rdf:type'");
 
+		
+
+
+		// this give us the value of max indegree of a particular node.
+		long highestIndegree = getHighestIndegree();
+//		long highestOutdegree = getHighestOutDegree();
+		
+		
+		long inDegreeignoreLimit = (highestIndegree * LIMIT_DELTA)/ 100;
+
+		
+
+		//		long outDegreeignoreLimit = (highestOutdegree * LIMIT_DELTA)/ 100;
+
+
+		String query = "SELECT g.subject,g.object FROM Graph g INNER JOIN "
+				+ "(SELECT object FROM Graph GROUP BY object HAVING "
+				+ "COUNT(subject)<"+inDegreeignoreLimit+") ss ON ss.object = g.object";
+
+		DataFrame allSubjects = Service.sqlCtx().sql(query);
+
+		
+		
+		
 		RDFAnalyzerPageRank.PerformPageRank(allSubjects);
 		return "";
 	}
+	
+
 	public static String readResource(final String fileName, Charset charset) throws IOException {
         return Resources.toString(Resources.getResource(fileName), charset);
 	}
@@ -116,13 +146,14 @@ public class Centrality {
 	public static long getHighestIndegree(){
 		
 		DataFrame maxInDegreeFrame = Service.sqlCtx()
-				.sql("SELECT first(tbl1.object),MAX(tbl1.OutdegreeCount) FROM"
-						+ "(SELECT object,COUNT(subject) AS OutdegreeCount FROM Graph GROUP BY object)tbl1");
+				.sql("SELECT MAX(tbl1.InDegreeCount) FROM "
+						+ "(SELECT object,COUNT(subject) AS InDegreeCount FROM Graph GROUP BY object)tbl1");
 
 		Row[] rowMaxInDegree = maxInDegreeFrame.collect();
 
-		return rowMaxInDegree[0].getLong(1);
+		return rowMaxInDegree[0].getLong(0);
 	}
+
 	public static long getHighestOutDegree(){
 		
 		DataFrame maxOutDegreeFrame = Service.sqlCtx()
@@ -133,6 +164,15 @@ public class Centrality {
 		return rowMaxOutDegree[0].getLong(1);
 	}
 	
+	
+	
+	
+	
+	
+	
+	/*
+	 * BullShit
+	 */
 	public static String calculateStartNode(){
 		
 		/*
