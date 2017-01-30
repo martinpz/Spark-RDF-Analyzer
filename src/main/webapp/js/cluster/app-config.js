@@ -1,7 +1,7 @@
 var CONFIG = {
 	prot : 'http',
 	site : 'isydney.informatik.uni-freiburg.de',
-	port : '8081',
+	port : '8080',
 	rest : 'spark-rdfanalyzer2/rest/ALL'
 };
 
