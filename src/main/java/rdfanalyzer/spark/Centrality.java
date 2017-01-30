@@ -115,15 +115,9 @@ public class Centrality {
 
 		// this give us the value of max indegree of a particular node.
 		long highestIndegree = getHighestIndegree();
-//		long highestOutdegree = getHighestOutDegree();
 		
 		
 		long inDegreeignoreLimit = (highestIndegree * LIMIT_DELTA)/ 100;
-
-		
-
-		//		long outDegreeignoreLimit = (highestOutdegree * LIMIT_DELTA)/ 100;
-
 
 		String query = "SELECT g.subject,g.object FROM Graph g INNER JOIN "
 				+ "(SELECT object FROM Graph GROUP BY object HAVING "
@@ -131,9 +125,6 @@ public class Centrality {
 
 		DataFrame allSubjects = Service.sqlCtx().sql(query);
 
-		
-		
-		
 		RDFAnalyzerPageRank.PerformPageRank(allSubjects);
 		return "";
 	}

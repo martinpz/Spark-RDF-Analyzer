@@ -22,10 +22,13 @@ public class RDFAnalyzerPageRank {
 
 	public static class PageRanksCase implements Serializable{
 		
-		private String node;
+		private final String node;
 //		private Double importance; 
 		
-		public void setNode(String node) { this.node = node; }
+		public PageRanksCase(String node) {
+			this.node = node;
+		}
+		
 //		public void setImportance(Double importance) { this.importance = importance; }
 
 		public String getNode(String node) { return this.node; }
@@ -77,40 +80,39 @@ public class RDFAnalyzerPageRank {
 		JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> shuffledwithnumbers = CombinerOutGoingToIncoming(flattedPair);
 		
 		JavaPairRDD<String,Double> pairedrdd  = null;
-		int i = 0;
 		while(true)
 		{
 		// here we created the new pjs by multiplying the values.
 		pairedrdd = returnNewPjsForKeys(shuffledwithnumbers);
 
-		
-		if(getDeltaScore(pairedrdd)<=DELTA_THRESHOLD){
+//		if(getDeltaScore(pairedrdd)<=DELTA_THRESHOLD){
 			// stop
 			JavaRDD<PageRanksCase> finalData = ConvertPairRDDToRDD(pairedrdd);
-//			WriteInfoToParquet(finalData);
+			System.out.println("writing to parquet");
+			WriteInfoToParquet(finalData);
 			break;
-		}
+//		}
 
-		pairedrdd = pairedrdd.mapToPair(new PairFunction<Tuple2<String,Double>, String, Double>() {
-
-			@Override
-			public Tuple2<String, Double> call(Tuple2<String, Double> arg0) throws Exception {
-				
-				return new Tuple2<String,Double>(arg0._1,arg0._2);
-			}
-		});	
-		
-		/*
-		 *  paiedrdd =  <String,Double>
-		 */
-		pair = ReshuffleAndJoinToNewRanks(shuffledwithnumbers,pairedrdd);
-		
-
-		// key,(name,pj,1/n)
-		 doo = 	UndoMethodDidForJoin(pair);	 
-
-		 
-		 shuffledwithnumbers = performFinalCombiner(doo);
+//		pairedrdd = pairedrdd.mapToPair(new PairFunction<Tuple2<String,Double>, String, Double>() {
+//
+//			@Override
+//			public Tuple2<String, Double> call(Tuple2<String, Double> arg0) throws Exception {
+//				
+//				return new Tuple2<String,Double>(arg0._1,arg0._2);
+//			}
+//		});	
+//		
+//		/*
+//		 *  paiedrdd =  <String,Double>
+//		 */
+//		pair = ReshuffleAndJoinToNewRanks(shuffledwithnumbers,pairedrdd);
+//		
+//
+//		// key,(name,pj,1/n)
+//		 doo = 	UndoMethodDidForJoin(pair);	 
+//
+//		 
+//		 shuffledwithnumbers = performFinalCombiner(doo);
 		} // for loop
 
 //		JavaRDD<PageRanksCase> finalData = GetTopNNodes(pairedrddd);
@@ -130,6 +132,7 @@ public class RDFAnalyzerPageRank {
 	
 	
 	public static Double getDeltaScore(JavaPairRDD<String,Double> pairedrdd){
+
 		double value = 0;
 		List<Double> items = pairedrdd.values().collect();
 		Double score = items.stream().mapToDouble(Double::doubleValue).sum();
@@ -153,11 +156,13 @@ public class RDFAnalyzerPageRank {
 
 		try{
 			System.out.println("coming here");
+			System.out.println(finalData.count());
 			DataFrame finalFrame = Service.sqlCtx().createDataFrame(finalData,PageRanksCase.class);
 			System.out.println("coming here too");
 			finalFrame.write().parquet(rdfanalyzer.spark.Configuration.storage() + "sib200PageRank.parquet");
 		}
 		catch(NullPointerException e){
+			System.out.println("We are in the error");
 			System.out.println(e.getMessage());
 		}
 	}
@@ -222,10 +227,7 @@ public class RDFAnalyzerPageRank {
 
 			@Override
 			public PageRanksCase call(Tuple2<String, Double> line) throws Exception {
-				PageRanksCase pgrank  = new PageRanksCase();
-//				pgrank.setImportance(line._2);
-				pgrank.setNode(line._1());
-				return pgrank;
+				return new PageRanksCase(line._1);
 			}
 		});
 	}
