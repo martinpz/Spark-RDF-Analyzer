@@ -1,5 +1,8 @@
 // ########################## RDF Browser Text-Based ##########################
 function displayNodesTextual(centralNode, centralNodeURI, neighbors) {
+	// Count literals to generate distinct IDs.
+	var literalCount = 0;
+
 	// Remove < and > from URI.
 	var toShow = '<p><strong>Selected Node:</strong> <a href="' + centralNodeURI.slice(1, -1) + '" target="_blank">' + centralNodeURI.slice(1, -1) + '</a></p>';
 	toShow += '<table class="tableBrowser">';
@@ -26,9 +29,19 @@ function displayNodesTextual(centralNode, centralNodeURI, neighbors) {
 			neighbor += '">';
 			neighbor += props.name + '</a>';
 		} else {
-			// When there is no name, we have a literal.
-			neighbor = '<span style="font-style: italic;">';
-			neighbor += props.URI + '</span>';
+			// When there is no name, we have a literal. Reduce its length.
+			++literalCount;
+			const MAX_LEN = 100;
+
+			neighbor = '<span id="shortLiteral_' + literalCount + '" style="font-style: italic;">';
+			neighbor += props.URI;
+			neighbor += '</span>';
+
+			if (props.URI.length > MAX_LEN) {
+				neighbor += '<script>';
+				neighbor += '	$( "#shortLiteral_' + literalCount + '" ).shorten();';
+				neighbor += '</script>';
+			}
 		}
 
 		// Central node is source => write it left, otherwise right
