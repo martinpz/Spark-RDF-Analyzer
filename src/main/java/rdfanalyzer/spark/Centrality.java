@@ -125,7 +125,8 @@ public class Centrality {
 
 		DataFrame allSubjects = Service.sqlCtx().sql(query);
 
-		RDFAnalyzerPageRank.PerformPageRank(allSubjects);
+		RDFAnalyzerPageRank analyzer = new RDFAnalyzerPageRank();
+		analyzer.PerformPageRank(allSubjects);
 		return "";
 	}
 	

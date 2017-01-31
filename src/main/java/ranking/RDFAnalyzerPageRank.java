@@ -1,5 +1,7 @@
 package ranking;
 
+import org.apache.spark.sql.Encoder;
+import org.apache.spark.sql.Encoders;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,44 +20,42 @@ import rdfanalyzer.spark.Service;
 import scala.Tuple2;
 import scala.Tuple3;
 
-public class RDFAnalyzerPageRank {
+public class RDFAnalyzerPageRank implements Serializable{
 
-	public static class PageRanksCase implements Serializable{
+	public  class PageRanksCase implements Serializable{
 		
-		private final String node;
-//		private Double importance; 
+		private String node;
+		private double importance; 
 		
-		public PageRanksCase(String node) {
-			this.node = node;
-		}
 		
-//		public void setImportance(Double importance) { this.importance = importance; }
+		public void setNode(String node) { this.node = node; }
+		public void setImportance(double importance) { this.importance = importance; }
 
-		public String getNode(String node) { return this.node; }
-//		public Double getImportance(String node) { return this.importance; }
+		public String getNode() { return this.node; }
+		public double getImportance() { return this.importance; }
 	}
 	
 	
-	public static JavaPairRDD<String,Tuple2<Tuple2<String,Double>,Double>> pair;
-	public static JavaPairRDD<String, Tuple3<String, Double, Double>> doo ;
-	public static List<Tuple2<String,String>> list = new ArrayList<>();
+	public JavaPairRDD<String,Tuple2<Tuple2<String,Double>,Double>> pair;
+	public JavaPairRDD<String, Tuple3<String, Double, Double>> doo ;
+	public List<Tuple2<String,String>> list = new ArrayList<>();
 	
 	
 	/*
 	 *  If our overall rank decreases by less than this delta_threshold
 	 *  we will stop calculating pagerank.
 	 */
-	public static final int DELTA_THRESHOLD = 10;
+	public final int DELTA_THRESHOLD = 10;
 
     /*
 	 * We use this last score to find out by how much % our new score is decreased.
 	 * If it is decreased by <= 20% than we stop.
 	 */
-	public static double lastscore = 99999999.0;
+	public double lastscore = 99999999.0;
 	
 	
 	
-	public static void PerformPageRank(DataFrame records) throws Exception{
+	public void PerformPageRank(DataFrame records) throws Exception{
 
 //		createData();
 		JavaPairRDD<String,String> counters = records.select("subject","object").toJavaRDD().mapToPair(
@@ -131,7 +131,7 @@ public class RDFAnalyzerPageRank {
 	 */
 	
 	
-	public static Double getDeltaScore(JavaPairRDD<String,Double> pairedrdd){
+	public Double getDeltaScore(JavaPairRDD<String,Double> pairedrdd){
 
 		double value = 0;
 		List<Double> items = pairedrdd.values().collect();
@@ -152,14 +152,21 @@ public class RDFAnalyzerPageRank {
 	}
 	
 	// Writes the keys and their importance to parquet.
-	public static void WriteInfoToParquet(JavaRDD<PageRanksCase> finalData){
+	public void WriteInfoToParquet(JavaRDD<PageRanksCase> finalData){
 
 		try{
 			System.out.println("coming here");
-			System.out.println(finalData.count());
-			DataFrame finalFrame = Service.sqlCtx().createDataFrame(finalData,PageRanksCase.class);
-			System.out.println("coming here too");
-			finalFrame.write().parquet(rdfanalyzer.spark.Configuration.storage() + "sib200PageRank.parquet");
+//			System.out.println(finalData.count());
+//			DataFrame finalFrame = Service.sqlCtx().createDataFrame(finalData,PageRanksCase.class);
+			org.apache.spark.sql.catalyst.encoders.OuterScopes.addOuterScope(this);
+			Encoder<PageRanksCase> personEncoder = Encoders.bean(PageRanksCase.class);
+			Dataset<PageRanksCase> javaBeanDS = Service.sqlCtx().createDataset(
+			  finalData.collect(),
+			  personEncoder
+			);
+			javaBeanDS.toDF().write().parquet(rdfanalyzer.spark.Configuration.storage() + "sib200PageRank.parquet");
+//			System.out.println("coming here too"+ finalFrame.count());
+//			finalFrame.write().parquet(rdfanalyzer.spark.Configuration.storage() + "sib200PageRank.parquet");
 		}
 		catch(NullPointerException e){
 			System.out.println("We are in the error");
@@ -168,7 +175,7 @@ public class RDFAnalyzerPageRank {
 	}
 	
 	
-	public static JavaPairRDD<String, Tuple3<String, Double, Double>> UndoMethodDidForJoin(JavaPairRDD<String,Tuple2<Tuple2<String,Double>,Double>> pair){
+	public JavaPairRDD<String, Tuple3<String, Double, Double>> UndoMethodDidForJoin(JavaPairRDD<String,Tuple2<Tuple2<String,Double>,Double>> pair){
 		
 		return pair.mapToPair(new PairFunction<Tuple2<String,Tuple2<Tuple2<String,Double>,Double>>, String, Tuple3<String,Double,Double>>() {
 
@@ -182,7 +189,7 @@ public class RDFAnalyzerPageRank {
 	}
 	
 	
-	public static JavaPairRDD<String,Tuple2<Tuple2<String,Double>,Double>> ReshuffleAndJoinToNewRanks(JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> shuffledwithnumbers,JavaPairRDD<String,Double> pairedrddd){
+	public JavaPairRDD<String,Tuple2<Tuple2<String,Double>,Double>> ReshuffleAndJoinToNewRanks(JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> shuffledwithnumbers,JavaPairRDD<String,Double> pairedrddd){
 		
 		return shuffledwithnumbers.flatMapToPair(new PairFlatMapFunction<Tuple2<String,Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>>, String, Tuple2<String,Double>>() {
 
@@ -205,7 +212,7 @@ public class RDFAnalyzerPageRank {
 	}
 	
 	
-	public static void printTopNNodes(JavaPairRDD<String,Double> pairedrdd){
+	public void printTopNNodes(JavaPairRDD<String,Double> pairedrdd){
 		
 		List<Tuple2<Double,String>> rddd = pairedrdd.mapToPair(new PairFunction<Tuple2<String,Double>, Double, String>() {
 
@@ -221,18 +228,23 @@ public class RDFAnalyzerPageRank {
 		}
 	}
 	
-	public static JavaRDD<PageRanksCase> ConvertPairRDDToRDD(JavaPairRDD<String,Double> pairedrdd){
+	public JavaRDD<PageRanksCase> ConvertPairRDDToRDD(JavaPairRDD<String,Double> pairedrdd){
 		
 		return pairedrdd.map(new Function<Tuple2<String,Double>, PageRanksCase>() {
 
 			@Override
 			public PageRanksCase call(Tuple2<String, Double> line) throws Exception {
-				return new PageRanksCase(line._1);
+				
+				PageRanksCase pgrank = new PageRanksCase();
+				pgrank.setImportance(line._2);
+				pgrank.setNode(line._1);
+
+				return pgrank;
 			}
 		});
 	}
 	
-	public static JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> performFinalCombiner(JavaPairRDD<String, Tuple3<String, Double, Double>> finalCombiner){
+	public JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> performFinalCombiner(JavaPairRDD<String, Tuple3<String, Double, Double>> finalCombiner){
 		
 		Function<Tuple3<String, Double, Double>,Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>> createCombiner = new Function<Tuple3<String, Double, Double>, Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>>() {
 			
@@ -296,7 +308,7 @@ public class RDFAnalyzerPageRank {
 		return finalCombiner.combineByKey(createCombiner, merger, mergeCombiners);
 	}
 	
-	public static JavaPairRDD<String, Double> returnNewPjsForKeys(JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> shuffledwithnumbers){
+	public  JavaPairRDD<String, Double> returnNewPjsForKeys(JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> shuffledwithnumbers){
 		return shuffledwithnumbers.mapValues(new Function<Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>, Double>() {
 
 			@Override
@@ -319,7 +331,7 @@ public class RDFAnalyzerPageRank {
 	/*
 	 * Converts keys to values and array of values to keys. For Step 1 mentioned on stackoverflow question.
 	 */
-	public static JavaPairRDD<String,Tuple3<String,Double,Double>> PerformOperationReshuffle(JavaPairRDD<String,Tuple3<ArrayList<String>,Double,Double>> list){
+	public  JavaPairRDD<String,Tuple3<String,Double,Double>> PerformOperationReshuffle(JavaPairRDD<String,Tuple3<ArrayList<String>,Double,Double>> list){
 		return list.flatMapToPair(new PairFlatMapFunction<Tuple2<String,Tuple3<ArrayList<String>,Double,Double>>, String, Tuple3<String,Double,Double>>() {
 
 			@Override
@@ -344,7 +356,7 @@ public class RDFAnalyzerPageRank {
 		
 	}
 	
-	public static JavaPairRDD<String,Tuple3<ArrayList<String>,Double,Double>> CombinerOutGoingEdgesWrtKey(JavaPairRDD<String,String> counters){
+	public  JavaPairRDD<String,Tuple3<ArrayList<String>,Double,Double>> CombinerOutGoingEdgesWrtKey(JavaPairRDD<String,String> counters){
 		
 		Function<String,Tuple3<ArrayList<String>,Double,Double>> createCombiner = new Function<String, Tuple3<ArrayList<String>,Double,Double>>() {
 			
@@ -395,7 +407,7 @@ public class RDFAnalyzerPageRank {
 	}
 
 	
-	public static JavaPairRDD<String, Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> CombinerOutGoingToIncoming(JavaPairRDD<String,Tuple3<String,Double,Double>> counters){
+	public  JavaPairRDD<String, Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> CombinerOutGoingToIncoming(JavaPairRDD<String,Tuple3<String,Double,Double>> counters){
 		
 		Function<Tuple3<String,Double,Double>,Tuple3<ArrayList<String>,ArrayList<Double>, ArrayList<Double>>> createCombiner = new Function<Tuple3<String,Double,Double>, Tuple3<ArrayList<String>,ArrayList<Double>, ArrayList<Double>>>() {
 			
@@ -471,7 +483,7 @@ public class RDFAnalyzerPageRank {
 	}
 
 	
-	public static void createData(){
+	public  void createData(){
 		
 		list.add(new Tuple2<String,String>("node1","node2"));
 		list.add(new Tuple2<String,String>("node1","node3"));
