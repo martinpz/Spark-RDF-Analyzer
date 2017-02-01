@@ -28,22 +28,21 @@ function displayNodes(centralNode, centralNodeURI, neighbors) {
 	$('#browserBody').html('<div id="container" data-central-node="' + centralNode + '" data-central-node-uri="' + centralNodeURI + '"></div>');
 
 	// Determine how to display the graph.
+	enableExport(true);
+
 	switch (getBrowsingType()) {
 		case 'circular':
 			arrangeNodesCircular(centralNode, centralNodeURI, neighbors);
-			showSVGexport();
 			break;
 		case 'direction':
 			arrangeNodesByDirection(centralNode, centralNodeURI, neighbors);
-			showSVGexport();
 			break;
 		case 'random':
 			arrangeNodesRandomized(centralNode, centralNodeURI, neighbors);
-			showSVGexport();
 			break;
 		case 'textual':
+			enableExport(false);
 			displayNodesTextual(centralNode, centralNodeURI, neighbors);
-			hideSVGexport();
 			break;
 		default:
 			console.error('Undefined browsing type.');
@@ -51,21 +50,8 @@ function displayNodes(centralNode, centralNodeURI, neighbors) {
 	}
 }
 
-function showSVGexport() {
-	// Show button for SVG export. But disable in Safari, since it is not supported.
-	$('#btnExportGraphSVG').show();
-
-	if (navigator.userAgent.match(/Version\/[\d\.]+.*Safari/)) {
-		$('#btnExportGraphSVG').prop('disabled', true);
-		$('#btnExportGraphSVG').prop('title', 'SVG Export does not work in Safari.');
-	} else {
-		$('#btnExportGraphSVG').prop('disabled', false);
-		$('#btnExportGraphSVG').prop('title', 'Export the graph as a vector graphic.');
-	}
-}
-
-function hideSVGexport() {
-	$('#btnExportGraphSVG').hide();
+function enableExport(enable) {
+	$('#btnExportDropdown').prop('disabled', !enable);
 }
 
 function showLoader(centralNode) {
@@ -114,6 +100,9 @@ function returnToBrowser() {
 $(document).ready(function() {
 	$('#btnReloadGraph').click( function() {
 		reloadGraph();
+	});
+	$('#btnExportGraphPNG').click( function() {
+		exportGraphAsPNG();
 	});
 	$('#btnExportGraphSVG').click( function() {
 		exportGraphAsSVG();
