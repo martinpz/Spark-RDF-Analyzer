@@ -2,29 +2,35 @@
 const LOADER = '<div class="progress progress-striped active page-progress-bar"><div class="progress-bar" style="width: 100%;"></div></div>';
 const ANIMATION_SPEED = 'fast';
 const COLORS = {
-	default: {
-		centralNode: '255, 127, 80',
-		in: '255, 69, 0',
-		out: '0, 139, 0',
-		literal: '50, 205, 50'
+	oranges: {
+		'central' : '#feedde',
+		'in': '#fdbe85',
+		'out': '#fd8d3c',
+		'literal': '#d94701'
 	},
-	contrast: {
-		centralNode: '64, 64, 64',
-		in: '109, 189, 214',
-		out: '183, 20, 39',
-		literal: '255, 230, 88'
+	spectral: {
+		'central' : '#d7191c',
+		'in': '#fdae61',
+		'out': '#abdda4',
+		'literal': '#2b83ba'
 	},
-	mixed: {
-		centralNode: '107, 186, 167',
-		in: '17, 140, 78',
-		out: '193, 225, 166',
-		literal: '255, 144, 9'
+	YlGn: {
+		'central' : '#ffffcc',
+		'in': '#c2e699',
+		'out': '#78c679',
+		'literal': '#238443'
 	},
-	light: {
-		centralNode: '124, 219, 213',
-		in: '245, 50, 64',
-		out: '249, 190, 2',
-		literal: '2, 200, 167'
+	purples: {
+		'central' : '#f2f0f7',
+		'in': '#cbc9e2',
+		'out': '#9e9ac8',
+		'literal': '#6a51a3'
+	},
+	pastel: {
+		'central' : '#fbb4ae',
+		'in': '#b3cde3',
+		'out': '#ccebc5',
+		'literal': '#decbe4'
 	}
 };
 
@@ -41,7 +47,7 @@ function numNeighbors() {
 }
 
 function getColorScheme() {
-	return COLORS[$('#colorSchemeSelection input:checked').val()];
+	return $('#colorSchemeSelection input:checked').val();
 }
 
 function getNeighborhoodRequest(centralNodeURI) {
@@ -75,7 +81,7 @@ $(document).ready( function() {
 		colorGroup += '<label><input type="radio" name="colorScheme" value="' + name + '">';
 
 		$.each(colorsForWhat, function(forWhat, hexCode) {
-			colorGroup += '<span style="background-color: rgb(' + hexCode + ')">&nbsp; &nbsp;</span>';
+			colorGroup += '<span style="background-color: ' + hexCode + '">&nbsp; &nbsp;</span>';
 		});
 
 		colorGroup += '</label></div>';

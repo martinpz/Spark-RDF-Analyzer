@@ -28,21 +28,22 @@ function calculatePositionByDirection(currEdgeNum, totalNumNeighbors, direction)
 }
 
 function calculatePositionRandomly(currEdgeNum, totalNumNeighbors, direction) {
-	const negate = currEdgeNum % 2 == 0;
+	const quadrant = ( currEdgeNum % 4 ) + 1;
+	const xFactor = ( quadrant == 1 || quadrant == 2 ) ? 1 : -1;
+	const yFactor = ( quadrant == 1 || quadrant == 4 ) ? 1 : -1;
 	const container = {
 		width: $('#container').width() / 2,
 		height: $('#container').height() / 2
 	};
 
 	return {
-		x: ( negate ? -1 : 1 ) * Math.random() * container.width,
-		y: ( negate ? -1 : 1 ) * Math.random() * container.height
+		x: xFactor * Math.random() * container.width,
+		y: yFactor * Math.random() * container.height
 	};
 }
 
 function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calculatePosition) {
-	const OPACITY = 0.4;
-	var edgeCount = 0;
+	var nodeCount = 0, edgeCount = 0;
 	var numNeighbors = Object.keys(neighbors).length;
 	var centralNodeID = 'CENTRALNODE'; // centralNodeURI.slice(1, -1);
 	var g = {
@@ -54,11 +55,13 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
     g.nodes.push({
 		id: centralNodeID,
 		label: centralNode,
-		type: 'centralNode',
 		x: 0,
 		y: 0,
-		size: 70,
-		color: 'rgb(' + getColorScheme().centralNode + ')'
+		size: 1,
+		level: 3,
+		labelAlignment: 'bottom',
+		type: 'circle',
+		direction: 'central'
 	});
 
 	// Add all neighbor nodes to the graph instance.
@@ -71,14 +74,17 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 		
 		// Create default node and edge. Assume OUT-going connection.
 		var node = {
-			id: URI.slice(1, -1),
+			id: 'NEIGHBOR_' + nodeCount,
+			uri: URI,
+			name: props.name,
 			label: props.name,
-			type: 'neighbor',
+			type: 'square',
 			x: position.x,
 			y: position.y,
-			size: 30,
-			color: 'rgba(' + getColorScheme().out + ',  ' + OPACITY + ')',
-			hover_color: 'rgb(' + getColorScheme().out + ')'
+			size: 0.3,
+			level: 1,
+			labelAlignment: 'top',
+			direction: props.direction
 		};
 
 		var edge = {
@@ -87,26 +93,20 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			source: centralNodeID,
 			target: node.id,
 			size: 1
-			//color: 'rgba(' + getColorScheme().out + ', ' + OPACITY + ')',
-			//hover_color: 'rgb(' + getColorScheme().out + ')'
 		};
 
 		if( props.direction == 'in' ) {
 			// Change properties for IN-going connection.
 			edge.source = node.id;
 			edge.target = centralNodeID;
-			//edge.color = 'rgba(' + getColorScheme().in + ', ' + OPACITY + ')';
-			//edge.hover_color = 'rgb(' + getColorScheme().in + ')';
-
-			node.color = 'rgba(' + getColorScheme().in + ', ' + OPACITY + ')';
-			node.hover_color = 'rgb(' + getColorScheme().in + ')';
 		} else if (props.name == '') {
 			// Special handling for literals. They don't have a name, but only an URI.
 			node.id = 'LITERAL_' + edgeCount;
+			node.uri = '';
 			node.label = URI.slice(1, -1);
-			node.type = 'literal';
-			node.color = 'rgba(' + getColorScheme().literal + ', ' + OPACITY + ')';
-			node.hover_color = 'rgb(' + getColorScheme().literal + ')';
+			node.name = URI.slice(1, -1);
+			node.type = 'star';
+			node.direction = 'literal';
 
 			edge.target = node.id;
 		}
@@ -117,12 +117,14 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			g.edges.push(edge);
 		}
 
+		++nodeCount
 		++edgeCount;
 	});
 
 	instantiateGraph(g);
-	performNOverlap(5);
 	bindListeners();
+	// performNOverlap(5);
+	designGraph();
 }
 
 function instantiateGraph(g) {
@@ -164,9 +166,9 @@ function bindListeners() {
 	});
 
 	s.bind('doubleClickNode', function(e) {
-		// Don't browse when clicking a literal or the central node.
-		if ( !(e.data.node.id).startsWith('LITERAL') && !(e.data.node.id).startsWith('CENTRALNODE') ) {
-			prepareBrowser(e.data.node.label, '<' + e.data.node.id + '>');
+		// Only browse when clicking a neighbor. Not on central node or a literal.
+		if ( (e.data.node.id).startsWith('NEIGHBOR') ) {
+			prepareBrowser(e.data.node.name, e.data.node.uri);
 		}
 	});
 
@@ -184,6 +186,31 @@ function bindListeners() {
 		// TODO
 		// console.log(e.type, e.data.edge, e.data.captor);
 	});
+}
+
+function designGraph() {
+	var design = sigma.plugins.design(s, {
+		styles: {
+			nodes: {
+				label: {
+					by: 'label',
+					format: function(value) { 
+						return value.substr(0, 10);
+					}
+				},
+				color: {
+					by: 'direction',
+					scheme: getColorScheme()
+				}
+			},
+			edges: {
+				// TODO
+			}
+		},
+		palette: COLORS
+	});
+
+	design.apply();
 }
 
 function exportGraphAsSVG() {
