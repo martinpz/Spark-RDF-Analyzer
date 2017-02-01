@@ -123,7 +123,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 
 	instantiateGraph(g);
 	bindListeners();
-	// performNOverlap(5);
+	layoutGraph();
 	designGraph();
 }
 
@@ -139,14 +139,119 @@ function instantiateGraph(g) {
 	});
 }
 
-function performNOverlap(margin) {
+function layoutGraph() {
+	switch ( getLayoutAlgorithm() ) {
+		case 'forceatlas':
+			performForceAtlas();
+			break;
+		case 'forcelink':
+			performForceLink();
+			break;
+		case 'fruchterman':
+			performFruchtermanReingold();
+			break;
+		case 'noverlap':
+			performNOverlap();
+			break;
+
+		default:
+			console.log('Unsupported layout method.');
+			break;
+	}
+}
+
+function performNOverlap() {
+	/*
 	s.configNoverlap({
-		nodeMargin: margin,
+		nodeMargin: 5,
 		scaleNodes: 1.2,
 		easing: 'quadraticInOut', // animation transition function (see sigma.utils.easing for available transitions)
 		duration: 1000 // animation duration 
 	});
 	s.startNoverlap();
+	*/
+
+	// Configure the noverlap layout:
+	var noverlapListener = s.configNoverlap({
+		maxIterations: 300,
+		nodeMargin: 0.1,
+		gridSize: 50,
+		easing: 'quadraticInOut', // animation transition function
+		duration: 10000   // animation duration. Long here for the purposes of this example only
+	});
+
+	// Bind the events:
+	noverlapListener.bind('start stop interpolate', function(e) {
+		console.log('EVENT: ', e.type);
+	});
+
+	// Start the layout:
+	s.startNoverlap();
+}
+
+function performForceAtlas() {
+	// Start the ForceAtlas2 algorithm:
+	var fa = s.startForceAtlas2( {
+		worker: true
+	});
+}
+
+function performForceLink() {
+	// Configure the ForceLink algorithm:
+	var fa = sigma.layouts.configForceLink(s, {
+		worker: true,
+		barnesHutOptimize: false,
+		autoStop: true,
+		background: true,
+		easing: 'cubicInOut'
+	});
+
+	/* 
+	// Config for community:
+	var fa = sigma.layouts.configForceLink(s, {
+    worker: true,
+    autoStop: true,
+    background: true,
+    scaleRatio: 10,
+    gravity: 3,
+    easing: 'cubicInOut'
+  	});
+
+	// Config for arctic:
+	var fa = sigma.layouts.configForceLink(s, {
+    worker: true,
+    autoStop: true,
+    background: true,
+    scaleRatio: 30,
+    gravity: 3,
+    easing: 'cubicInOut'
+  	});
+	*/
+
+	// Bind the events:
+	fa.bind('start interpolate stop', function(e) {
+		console.log('EVENT: ', e.type);
+	});
+
+	// Start the ForceLink algorithm:
+	sigma.layouts.startForceLink();
+}
+
+function performFruchtermanReingold() {
+	// Configure the Fruchterman-Reingold algorithm:
+	var fr = sigma.layouts.fruchtermanReingold.configure(s, {
+		iterations: 500,
+		easing: 'quadraticInOut',
+		duration: 800
+	});
+
+	// Bind the events:
+	fr.bind('start stop interpolate', function(e) {
+		console.log('Event: ', e.type);
+	});
+
+	// Start the Fruchterman-Reingold algorithm:
+	sigma.layouts.fruchtermanReingold.start(s);
 }
 
 function bindListeners() {
@@ -211,6 +316,19 @@ function designGraph() {
 	});
 
 	design.apply();
+}
+
+function exportGraphAsPNG() {
+	console.log('renderes:', s.renderers);
+	sigma.plugins.image(s, s.renderers[0], {
+		download: true,
+		filename: 'graphExport.png',
+		size: 500,
+		margin: 50,
+		background: 'white',
+		zoomRatio: 1,
+		labels: true
+	});
 }
 
 function exportGraphAsSVG() {
