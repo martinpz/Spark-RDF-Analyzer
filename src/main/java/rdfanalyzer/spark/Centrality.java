@@ -41,9 +41,23 @@ public class Centrality {
 	public static final int LIMIT_DELTA = 80;
 	
 	public static String main(String metricType,String dataset, String nodeName) throws Exception{
-
+		
 		graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + dataset + ".parquet");
 		graphFrame.cache().registerTempTable("Graph");
+		
+		/**********************************************************************/
+		
+//		DataFrame resultsFrame = Service.sqlCtx().sql("SELECT * FROM Graph");
+//		Row[] rows = resultsFrame.collect();
+//
+//		for(int i = 0 ; i < rows.length; i++)
+//		{
+//			System.out.println("The node name  is "+rows[i].getString(0));
+//			System.out.println("The node importance is "+rows[i].getDouble(1));
+//		}
+//		return "";
+		
+		/**********************************************************************/
 
 		for(int i=0;i<graphFrame.schema().fieldNames().length;i++){
 			System.out.println("[LOG]Schema FieldName : "+graphFrame.schema().fieldNames()[i]);

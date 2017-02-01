@@ -30,6 +30,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.json.JSONObject;
 
+import ranking.ShortestPath;
+
 /**
  * This class is the REST web service which handles front end requests by
  * calling the desired module with specified parameters.
@@ -63,6 +65,7 @@ public class WebService {
 		
 		try {
 			objResponse = Centrality.main(MetricType, dataSet, node);
+//			ShortestPath path = new ShortestPath();
 		} catch (Exception e) {
 			objResponse = "Error !<br>Error Message: " + e.getMessage();
 		}

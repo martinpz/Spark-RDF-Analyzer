@@ -74,7 +74,7 @@ public class RDFAnalyzerPageRank implements Serializable{
 		JavaPairRDD<String,Tuple3<ArrayList<String>,Double,Double>> list =  CombinerOutGoingEdgesWrtKey(counters);
 		
 		// this gives us key,(name,pj,1/n), note that here, we convert keys to value and values(first flat them) to keys.
-		JavaPairRDD<String,Tuple3<String,Double,Double>> flattedPair = PerformOperationReshuffle(list);	
+		JavaPairRDD<String,Tuple3<String,Double,Double>> flattedPair = PerformOperationReshuffle(list);
 
 		// this will give us key,([names],[pj],[1/n])
 		JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> shuffledwithnumbers = CombinerOutGoingToIncoming(flattedPair);
@@ -85,34 +85,34 @@ public class RDFAnalyzerPageRank implements Serializable{
 		// here we created the new pjs by multiplying the values.
 		pairedrdd = returnNewPjsForKeys(shuffledwithnumbers);
 
-//		if(getDeltaScore(pairedrdd)<=DELTA_THRESHOLD){
+		if(getDeltaScore(pairedrdd) <= DELTA_THRESHOLD){
 			// stop
 			JavaRDD<PageRanksCase> finalData = ConvertPairRDDToRDD(pairedrdd);
 			System.out.println("writing to parquet");
 			WriteInfoToParquet(finalData);
 			break;
-//		}
+		}
 
-//		pairedrdd = pairedrdd.mapToPair(new PairFunction<Tuple2<String,Double>, String, Double>() {
-//
-//			@Override
-//			public Tuple2<String, Double> call(Tuple2<String, Double> arg0) throws Exception {
-//				
-//				return new Tuple2<String,Double>(arg0._1,arg0._2);
-//			}
-//		});	
-//		
-//		/*
-//		 *  paiedrdd =  <String,Double>
-//		 */
-//		pair = ReshuffleAndJoinToNewRanks(shuffledwithnumbers,pairedrdd);
-//		
-//
-//		// key,(name,pj,1/n)
-//		 doo = 	UndoMethodDidForJoin(pair);	 
-//
-//		 
-//		 shuffledwithnumbers = performFinalCombiner(doo);
+		pairedrdd = pairedrdd.mapToPair(new PairFunction<Tuple2<String,Double>, String, Double>() {
+
+			@Override
+			public Tuple2<String, Double> call(Tuple2<String, Double> arg0) throws Exception {
+				
+				return new Tuple2<String,Double>(arg0._1,arg0._2);
+			}
+		});	
+		
+		/*
+		 *  paiedrdd =  <String,Double>
+		 */
+		pair = ReshuffleAndJoinToNewRanks(shuffledwithnumbers,pairedrdd);
+		
+
+		// key,(name,pj,1/n)
+		 doo = 	UndoMethodDidForJoin(pair);	 
+
+		 
+		 shuffledwithnumbers = performFinalCombiner(doo);
 		} // for loop
 
 //		JavaRDD<PageRanksCase> finalData = GetTopNNodes(pairedrddd);
