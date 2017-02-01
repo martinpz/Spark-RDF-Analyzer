@@ -161,112 +161,59 @@ function layoutGraph() {
 }
 
 function performNOverlap() {
-	/*
-	s.configNoverlap({
-		nodeMargin: 5,
-		scaleNodes: 1.2,
-		easing: 'quadraticInOut', // animation transition function (see sigma.utils.easing for available transitions)
-		duration: 1000 // animation duration 
-	});
-	s.startNoverlap();
-	*/
-
-	// Configure the noverlap layout:
-	var noverlapListener = s.configNoverlap({
+	var noverlapListener = s.configNoverlap( {
 		maxIterations: 300,
 		nodeMargin: 0.1,
+		// scaleNodes: 1.2,
 		gridSize: 50,
-		easing: 'quadraticInOut', // animation transition function
-		duration: 10000   // animation duration. Long here for the purposes of this example only
-	});
+		easing: 'quadraticInOut', // animation transition function (see sigma.utils.easing for available transitions)
+		duration: 1000 // animation duration
+	} );
 
-	// Bind the events:
-	noverlapListener.bind('start stop interpolate', function(e) {
-		console.log('EVENT: ', e.type);
-	});
-
-	// Start the layout:
 	s.startNoverlap();
 }
 
 function performForceAtlas() {
-	// Start the ForceAtlas2 algorithm:
 	var fa = s.startForceAtlas2( {
 		worker: true
-	});
+	} );
 }
 
 function performForceLink() {
-	// Configure the ForceLink algorithm:
 	var fa = sigma.layouts.configForceLink(s, {
 		worker: true,
 		barnesHutOptimize: false,
 		autoStop: true,
 		background: true,
+		// scaleRatio: 10, // respectively 30 for arctic
+    	// gravity: 3,
 		easing: 'cubicInOut'
-	});
+	} );
 
-	/* 
-	// Config for community:
-	var fa = sigma.layouts.configForceLink(s, {
-    worker: true,
-    autoStop: true,
-    background: true,
-    scaleRatio: 10,
-    gravity: 3,
-    easing: 'cubicInOut'
-  	});
-
-	// Config for arctic:
-	var fa = sigma.layouts.configForceLink(s, {
-    worker: true,
-    autoStop: true,
-    background: true,
-    scaleRatio: 30,
-    gravity: 3,
-    easing: 'cubicInOut'
-  	});
-	*/
-
-	// Bind the events:
 	fa.bind('start interpolate stop', function(e) {
 		console.log('EVENT: ', e.type);
 	});
 
-	// Start the ForceLink algorithm:
 	sigma.layouts.startForceLink();
 }
 
 function performFruchtermanReingold() {
-	// Configure the Fruchterman-Reingold algorithm:
 	var fr = sigma.layouts.fruchtermanReingold.configure(s, {
 		iterations: 500,
 		easing: 'quadraticInOut',
 		duration: 800
-	});
+	} );
 
-	// Bind the events:
 	fr.bind('start stop interpolate', function(e) {
 		console.log('Event: ', e.type);
 	});
 
-	// Start the Fruchterman-Reingold algorithm:
 	sigma.layouts.fruchtermanReingold.start(s);
 }
 
 function bindListeners() {
-	s.bind('overNode', function(e) {
-		// TODO
-		// console.log(e.type, e.data.node, e.data.captor);
-	});
-
-	s.bind('outNode', function(e) {
-		// TODO
-		// console.log(e.type, e.data.node, e.data.captor);
-	});
-
 	s.bind('clickNode', function(e) {
-		// TODO
+		// TODO: Show an overlay with relevant information for that node.
 		// console.log(e.type, e.data.node, e.data.captor);
 	});
 
@@ -275,21 +222,6 @@ function bindListeners() {
 		if ( (e.data.node.id).startsWith('NEIGHBOR') ) {
 			prepareBrowser(e.data.node.name, e.data.node.uri);
 		}
-	});
-
-	s.bind('overEdge', function(e) {
-		// TODO
-		// console.log(e.type, e.data.edge, e.data.captor);
-	});
-
-	s.bind('outEdge', function(e) {
-		// TODO
-		// console.log(e.type, e.data.edge, e.data.captor);
-	});
-
-	s.bind('clickEdge', function(e) {
-		// TODO
-		// console.log(e.type, e.data.edge, e.data.captor);
 	});
 }
 
