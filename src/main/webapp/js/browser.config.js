@@ -2,29 +2,29 @@
 const LOADER = '<div class="progress progress-striped active page-progress-bar"><div class="progress-bar" style="width: 100%;"></div></div>';
 const ANIMATION_SPEED = 'fast';
 const COLORS = {
-	oranges: {
-		'central' : '#feedde',
-		'in': '#fdbe85',
-		'out': '#fd8d3c',
-		'literal': '#d94701'
-	},
-	spectral: {
-		'central' : '#d7191c',
-		'in': '#fdae61',
-		'out': '#abdda4',
-		'literal': '#2b83ba'
-	},
 	YlGn: {
 		'central' : '#ffffcc',
 		'in': '#c2e699',
 		'out': '#78c679',
 		'literal': '#238443'
 	},
+	oranges: {
+		'central' : '#feedde',
+		'in': '#fdbe85',
+		'out': '#fd8d3c',
+		'literal': '#d94701'
+	},
 	purples: {
 		'central' : '#f2f0f7',
 		'in': '#cbc9e2',
 		'out': '#9e9ac8',
 		'literal': '#6a51a3'
+	},
+	spectral: {
+		'central' : '#d7191c',
+		'in': '#fdae61',
+		'out': '#abdda4',
+		'literal': '#2b83ba'
 	},
 	pastel: {
 		'central' : '#fbb4ae',
