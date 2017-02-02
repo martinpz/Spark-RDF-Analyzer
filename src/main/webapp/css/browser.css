@@ -90,18 +90,39 @@
 }
 
 #browserBody #container #nodeDetailsContainer {
-    width: 30%;
-    height: calc(100% + 30px);
-    background-color: orange;
-    opacity: 0.7;
     position: absolute;
     left: -15px;
     top: -15px;
     z-index: 9999999;
+    width: 30%;
+    height: calc(100% + 30px);
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    display: none;
 }
 
 #browserBody #container #nodeDetails {
-    width: 100%;
-    height: 100%;
-    border: 1px solid green;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    padding: 10px;
+}
+
+#browserBody #container #nodeDetails #btnHideNodeDetails {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+
+#browserBody #container #nodeDetails #nodeDetailsHeading {
+    margin: 0;
+    margin-bottom: 15px;
+    padding: 0;
+}
+
+#browserBody #container #nodeDetails #nodeDetailsContent {
+    height: calc(100% - 45px);
+    overflow: auto;
 }

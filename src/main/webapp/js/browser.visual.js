@@ -54,7 +54,9 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 	// Add central node to the graph instance.
     g.nodes.push({
 		id: centralNodeID,
+		uri: centralNodeURI,
 		label: centralNode,
+		name: centralNode,
 		x: 0,
 		y: 0,
 		size: 1,
@@ -123,8 +125,8 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 
 	instantiateGraph(g);
 	bindListeners();
-	layoutGraph();
 	designGraph();
+	// layoutGraph();
 }
 
 function instantiateGraph(g) {
@@ -213,8 +215,24 @@ function performFruchtermanReingold() {
 
 function bindListeners() {
 	s.bind('clickNode', function(e) {
-		// TODO: Show an overlay with relevant information for that node.
-		// console.log(e.type, e.data.node, e.data.captor);
+		// Shows an overlay with relevant information for that node.
+		// The heading consists of the node type and the direction for neighbors.
+		const nodeType = e.data.node.id.split('_')[0];
+		var title = nodeType;
+		title += ( nodeType === 'NEIGHBOR' )
+			? '&nbsp;<span style="font-size: 80%;">(' + e.data.node.direction + ')</span>' 
+			: '';
+
+		// The content is made up of the name (text for a literal) and the URI.
+		var details = '<strong>' + e.data.node.name + '</strong><br><br>'
+			+ '<a href="' + e.data.node.uri.slice(1, -1) + '" target="_blank">' + e.data.node.uri.slice(1, -1) + '</a>';
+
+		const config = {
+			heading: title,
+			content: details
+		};
+
+		showNodeDetails(config);
 	});
 
 	s.bind('doubleClickNode', function(e) {
