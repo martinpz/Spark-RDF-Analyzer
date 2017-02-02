@@ -28,7 +28,7 @@ function displayNodes(centralNode, centralNodeURI, neighbors) {
 	$('#browserBody').html('<div id="container" data-central-node="' + centralNode + '" data-central-node-uri="' + centralNodeURI + '"></div>');
 
 	// Add section to show a node's details.
-	$('#container').html('<div id="nodeDetails"></div>');
+	$('#container').html('<div id="nodeDetailsContainer"><div id="nodeDetails"></div></div>');
 
 	// Determine how to display the graph.
 	enableExport(true);
