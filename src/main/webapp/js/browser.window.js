@@ -83,6 +83,7 @@ function reloadGraph() {
 
 function toggleBrowserFullscreen() {
 	$('#browser').toggleClass('fullscreen');
+	$('#btnFullscreenBrowser > span').toggleClass('glyphicon-resize-full glyphicon-resize-small');
 	updateBrowserHeight();
 }
 
