@@ -20,6 +20,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
 import ranking.RDFAnalyzerPageRank;
+import ranking.ClosenessCentrality;
 
 import org.apache.spark.sql.Dataset;
 
@@ -98,6 +99,8 @@ public class Centrality {
 		
 
 		DataFrame resultsFrame = Service.sqlCtx().sql("SELECT COUNT(subject) FROM Graph WHERE object = '"+node+"'");
+		
+		resultsFrame.select("").filter(resultsFrame.col("").isin());
 		Row[] rows = resultsFrame.collect();
 
 		result = Long.toString(rows[0].getLong(0));
@@ -124,23 +127,26 @@ public class Centrality {
 	public static String CalculateCloseness(String node) throws Exception{
 		
 
+		DataFrame resultsFrame = Service.sqlCtx().sql("SELECT * from Graph");
+		ClosenessCentrality path = new ClosenessCentrality();
+		path.calculateCloseness(resultsFrame,node);
 		
 
 
-		// this give us the value of max indegree of a particular node.
-		long highestIndegree = getHighestIndegree();
-		
-		
-		long inDegreeignoreLimit = (highestIndegree * LIMIT_DELTA)/ 100;
-
-		String query = "SELECT g.subject,g.object FROM Graph g INNER JOIN "
-				+ "(SELECT object FROM Graph GROUP BY object HAVING "
-				+ "COUNT(subject)<"+inDegreeignoreLimit+") ss ON ss.object = g.object";
-
-		DataFrame allSubjects = Service.sqlCtx().sql(query);
-
-		RDFAnalyzerPageRank analyzer = new RDFAnalyzerPageRank();
-		analyzer.PerformPageRank(allSubjects);
+//		// this give us the value of max indegree of a particular node.
+//		long highestIndegree = getHighestIndegree();
+//		
+//		
+//		long inDegreeignoreLimit = (highestIndegree * LIMIT_DELTA)/ 100;
+//
+//		String query = "SELECT g.subject,g.object FROM Graph g INNER JOIN "
+//				+ "(SELECT object FROM Graph GROUP BY object HAVING "
+//				+ "COUNT(subject)<"+inDegreeignoreLimit+") ss ON ss.object = g.object";
+//
+//		DataFrame allSubjects = Service.sqlCtx().sql(query);
+//
+//		RDFAnalyzerPageRank analyzer = new RDFAnalyzerPageRank();
+//		analyzer.PerformPageRank(allSubjects);
 		return "";
 	}
 	

@@ -1,13 +1,10 @@
 package ranking;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import rdfanalyzer.spark.Service;
 
-import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.graphx.*;
@@ -15,16 +12,10 @@ import org.apache.spark.graphx.lib.*;
 import org.apache.spark.rdd.RDD;
 import org.apache.spark.storage.StorageLevel;
 
-import scala.Function1;
-import scala.Function2;
-import scala.Function3;
-import scala.Option;
 import scala.Tuple2;
 import scala.collection.Iterator;
 import scala.collection.immutable.Map;
 import scala.collection.immutable.Seq;
-import scala.reflect.ClassTag;
-import scala.runtime.BoxedUnit;
 
 public class ShortestPath {
 	
@@ -36,19 +27,26 @@ public class ShortestPath {
 		
 		createVertices();
 		createEdges();
-
+		System.out.println("creating");
+		
+		
 
 		JavaRDD<Tuple2<Object,String>> distData = Service.sparkCtx().parallelize(vertices);
 		JavaRDD<Edge<String>> edgeData = Service.sparkCtx().parallelize(edges);
 
 		RDD<Tuple2<Object,String>> counters= JavaRDD.toRDD(distData);
 		RDD<Edge<String>> edgeCounters= JavaRDD.toRDD(edgeData);
+		System.out.println("created datasets");
 
 		List<Object> longIds = new ArrayList<>();
 		longIds.add(1L);
 		longIds.add(5L);
 
 		Seq<Object> s = scala.collection.JavaConversions.asScalaBuffer(longIds).toList().toSeq();
+
+		System.out.println("created seq object counter");
+		
+		System.out.println("created seq object");
 		
 		Graph<String, String> graph = Graph.apply(
 				counters,
@@ -58,13 +56,19 @@ public class ShortestPath {
 				StorageLevel.MEMORY_AND_DISK(),
 				scala.reflect.ClassTag$.MODULE$.apply("".getClass()),
 				scala.reflect.ClassTag$.MODULE$.apply("".getClass()));
+
+		System.out.println("number of edges in graph = "+graph.edges().count());
+		System.out.println("number of vertices in graph = "+graph.vertices().count());
 		
-		
+		 System.out.println("created the graph");
 		 Graph<scala.collection.immutable.Map<Object,Object>,String> shortestpaths = 
 				 ShortestPaths.run(graph, s,scala.reflect.ClassTag$.MODULE$.apply("".getClass()));
-		JavaRDD<Tuple2<Object,Map<Object,Object>>> vert =  shortestpaths.vertices().toJavaRDD();
 		
-		vert.foreach(x->System.out.println("First Object -> " + x._1.toString()));
+		 System.out.println("applied shortest path");
+
+		 JavaRDD<Tuple2<Object,Map<Object,Object>>> vert =  shortestpaths.vertices().toJavaRDD();
+		 System.out.println("converting short path to rdd");
+		
 		
 		vert.map(new Function<Tuple2<Object,Map<Object,Object>>, Tuple2<Object,Map<Object,Object>>>() {
 
@@ -88,10 +92,10 @@ public class ShortestPath {
 
 	private  void createVertices(){
 		vertices.add(new Tuple2<Object,String>(1L,"node1"));
-		vertices.add(new Tuple2<Object,String>(2L,"node2"));
-		vertices.add(new Tuple2<Object,String>(3L,"node3"));
-		vertices.add(new Tuple2<Object,String>(4L,"node4"));
-		vertices.add(new Tuple2<Object,String>(5L,"node5"));
+		vertices.add(new Tuple2<Object,String>(2,"node2"));
+		vertices.add(new Tuple2<Object,String>(3,"node3"));
+		vertices.add(new Tuple2<Object,String>(4,"node4"));
+		vertices.add(new Tuple2<Object,String>(5,"node5"));
 	}
 	
 	private void createEdges(){

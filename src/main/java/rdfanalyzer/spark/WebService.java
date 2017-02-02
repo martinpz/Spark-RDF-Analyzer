@@ -31,6 +31,7 @@ import javax.ws.rs.core.MediaType;
 import org.json.JSONObject;
 
 import ranking.ShortestPath;
+import ranking.ClosenessCentrality;
 
 /**
  * This class is the REST web service which handles front end requests by
@@ -59,13 +60,10 @@ public class WebService {
 	public String calculateCentrality(@PathParam("DataSet") String dataSet, @PathParam("Node") String node,
 			@PathParam("Type") String MetricType) {
 
-		String objResponse = "";
-		System.out.println("called calculateCentrality");
-		System.out.println(MetricType);
-		
+		String objResponse = "";		
 		try {
 			objResponse = Centrality.main(MetricType, dataSet, node);
-//			ShortestPath path = new ShortestPath();
+
 		} catch (Exception e) {
 			objResponse = "Error !<br>Error Message: " + e.getMessage();
 		}
