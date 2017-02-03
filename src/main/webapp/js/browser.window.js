@@ -27,9 +27,6 @@ function displayNodes(centralNode, centralNodeURI, neighbors) {
 	// Clear the container.
 	$('#browserBody').html('<div id="container" data-central-node="' + centralNode + '" data-central-node-uri="' + centralNodeURI + '"></div>');
 
-	// Add section to show a node's details.
-	$('#container').html('<div id="nodeDetailsContainer"><div id="nodeDetails"><button id="btnGoToNode" onclick="" type="button" class="btn btn-primary" aria-label="Go to this node"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span></button><button id="btnHideNodeDetails" onclick="hideNodeDetails()" type="button" class="btn btn-default" aria-label="Hide details"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button><h3 id="nodeDetailsHeading">...</h3><div id="nodeDetailsContent">...</div></div></div>');
-
 	// Determine how to display the graph.
 	enableExport(true);
 
@@ -99,23 +96,6 @@ function closeBrowser() {
 function returnToBrowser() {
 	$('#browser').show(ANIMATION_SPEED);
 	$('#entrypoint').hide(ANIMATION_SPEED);
-}
-
-function showNodeDetails(data) {
-	if (data.disableGoTo) {
-		$('#btnGoToNode').prop('disabled', true);
-	} else {
-		$('#btnGoToNode').attr('onclick', 'prepareBrowser("' + data.nodeName + '", "' + data.nodeURI + '")');
-		$('#btnGoToNode').prop('disabled', false);
-	}
-
-	$('#nodeDetailsHeading').html(data.heading);
-	$('#nodeDetailsContent').html(data.content);
-	$('#nodeDetailsContainer').show(ANIMATION_SPEED);
-}
-
-function hideNodeDetails() {
-	$('#nodeDetailsContainer').hide(ANIMATION_SPEED);
 }
 
 $(document).ready(function () {
