@@ -67,10 +67,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 	});
 
 	// Add all neighbor nodes to the graph instance.
-	$.each(neighbors, function(URI, props) {
-		// [Log] URI=<http://dbpedia.org/resource/Harry_and_the_Potters>
-		// [Log] {predicate: "artist", predicateURI: "<http://dbpedia.org/property/artist>", name: "Harry_and_the_Potters", URI: "<http://dbpedia.org/resource/Harry_and_the_Potters>", direction: "out"}
-		
+	$.each(neighbors, function(URI, props) {		
 		// Calculate position for node with given function.
 		var position = calculatePosition(edgeCount, numNeighbors, props.direction);
 		
@@ -80,6 +77,8 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			uri: URI,
 			name: props.name,
 			label: props.name,
+			predicate: props.predicate,
+			predicateURI: props.predicateURI,
 			type: 'square',
 			x: position.x,
 			y: position.y,
@@ -215,24 +214,7 @@ function performFruchtermanReingold() {
 
 function bindListeners() {
 	s.bind('clickNode', function(e) {
-		// Shows an overlay with relevant information for that node.
-		// The heading consists of the node type and the direction for neighbors.
-		const nodeType = e.data.node.id.split('_')[0];
-		var title = nodeType;
-		title += ( nodeType === 'NEIGHBOR' )
-			? '&nbsp;<span style="font-size: 80%;">(' + e.data.node.direction + ')</span>' 
-			: '';
-
-		// The content is made up of the name (text for a literal) and the URI.
-		var details = '<strong>' + e.data.node.name + '</strong><br><br>'
-			+ '<a href="' + e.data.node.uri.slice(1, -1) + '" target="_blank">' + e.data.node.uri.slice(1, -1) + '</a>';
-
-		const config = {
-			heading: title,
-			content: details
-		};
-
-		showNodeDetails(config);
+		fillNodeDetails(e.data.node);
 	});
 
 	s.bind('doubleClickNode', function(e) {
@@ -241,6 +223,37 @@ function bindListeners() {
 			prepareBrowser(e.data.node.name, e.data.node.uri);
 		}
 	});
+}
+
+function fillNodeDetails(nodeData) {
+	// Shows an overlay with relevant information for that node.
+	// The heading consists of the node type and the direction for neighbors.
+	const nodeType = nodeData.id.split('_')[0];
+	var title = nodeType;
+	title += ( nodeType === 'NEIGHBOR' )
+		? '&nbsp;<span style="font-size: 80%;">(' + nodeData.direction + ')</span>' 
+		: '';
+
+	// The content is made up of the name (text for a literal), the connection predicate and the URI.
+	var details = '';
+	details += (nodeType === 'CENTRALNODE')
+		? ''
+		: '<strong>Predicate:&nbsp;</strong><a href="' + nodeData.predicateURI.slice(1, -1) + '" target="_blank">' + nodeData.predicate + '</a><br>';
+	details += (nodeType === 'LITERAL')
+		? nodeData.name
+		: '<strong>Name:&nbsp;</strong><a href="' + nodeData.uri.slice(1, -1) + '" target="_blank">' + nodeData.name + '</a>';
+
+	const disableGoToBtn = (nodeType === 'NEIGHBOR') ? false : true;
+
+	const config = {
+		disableGoTo: disableGoToBtn,
+		nodeName: nodeData.name,
+		nodeURI: nodeData.uri,
+		heading: title,
+		content: details
+	};
+
+	showNodeDetails(config);
 }
 
 function designGraph() {

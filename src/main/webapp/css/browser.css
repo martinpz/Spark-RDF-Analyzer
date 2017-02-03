@@ -94,6 +94,7 @@
     left: -15px;
     top: -15px;
     z-index: 9999999;
+    min-width: 300px;
     width: 30%;
     height: calc(100% + 30px);
     background-color: rgba(0, 0, 0, 0.9);
@@ -108,6 +109,12 @@
     top: 0;
     bottom: 0;
     padding: 10px;
+}
+
+#browserBody #container #nodeDetails #btnGoToNode {
+    position: absolute;
+    right: 55px;
+    top: 10px;
 }
 
 #browserBody #container #nodeDetails #btnHideNodeDetails {

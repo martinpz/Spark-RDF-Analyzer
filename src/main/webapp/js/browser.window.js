@@ -12,7 +12,7 @@ function prepareBrowser(centralNode, centralNodeURI) {
 	showLoader(centralNode);
 	updateBrowsingHistory(centralNode, centralNodeURI);
 
-	xhttp.onreadystatechange = function() {
+	xhttp.onreadystatechange = function () {
 		if (xhttp.readyState == 4 && xhttp.status == 200) {
 			updateBrowserHeight();
 			displayNodes(centralNode, centralNodeURI, JSON.parse(xhttp.responseText));
@@ -28,7 +28,7 @@ function displayNodes(centralNode, centralNodeURI, neighbors) {
 	$('#browserBody').html('<div id="container" data-central-node="' + centralNode + '" data-central-node-uri="' + centralNodeURI + '"></div>');
 
 	// Add section to show a node's details.
-	$('#container').html('<div id="nodeDetailsContainer"><div id="nodeDetails"><button id="btnHideNodeDetails" onclick="hideNodeDetails()" type="button" class="btn btn-default" aria-label="Hide details"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button><h3 id="nodeDetailsHeading">...</h3><div id="nodeDetailsContent">...</div></div></div>');
+	$('#container').html('<div id="nodeDetailsContainer"><div id="nodeDetails"><button id="btnGoToNode" onclick="" type="button" class="btn btn-primary" aria-label="Go to this node"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span></button><button id="btnHideNodeDetails" onclick="hideNodeDetails()" type="button" class="btn btn-default" aria-label="Hide details"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button><h3 id="nodeDetailsHeading">...</h3><div id="nodeDetailsContent">...</div></div></div>');
 
 	// Determine how to display the graph.
 	enableExport(true);
@@ -68,9 +68,9 @@ function updateBrowserHeight() {
 	var bottomSpace = 40;
 
 	// For a fullscreen browser, we only have to respect the header height.
-	var heightDiff = $('#browser').hasClass('fullscreen')
-		? headerHeight
-		: headerTop + headerHeight + bottomSpace;
+	var heightDiff = $('#browser').hasClass('fullscreen') ?
+		headerHeight :
+		headerTop + headerHeight + bottomSpace;
 
 	$('#browserBody').css('height', 'calc(100vh - ' + heightDiff + 'px)');
 }
@@ -102,30 +102,37 @@ function returnToBrowser() {
 }
 
 function showNodeDetails(data) {
+	if (data.disableGoTo) {
+		$('#btnGoToNode').prop('disabled', true);
+	} else {
+		$('#btnGoToNode').attr('onclick', 'prepareBrowser("' + data.nodeName + '", "' + data.nodeURI + '")');
+		$('#btnGoToNode').prop('disabled', false);
+	}
+
 	$('#nodeDetailsHeading').html(data.heading);
 	$('#nodeDetailsContent').html(data.content);
-	$('#nodeDetailsContainer').show( ANIMATION_SPEED );
+	$('#nodeDetailsContainer').show(ANIMATION_SPEED);
 }
 
 function hideNodeDetails() {
 	console.log("Heyo");
-	$('#nodeDetailsContainer').hide( ANIMATION_SPEED );
+	$('#nodeDetailsContainer').hide(ANIMATION_SPEED);
 }
 
-$(document).ready(function() {
-	$('#btnReloadGraph').click( function() {
+$(document).ready(function () {
+	$('#btnReloadGraph').click(function () {
 		reloadGraph();
 	});
-	$('#btnExportGraphPNG').click( function() {
+	$('#btnExportGraphPNG').click(function () {
 		exportGraphAsPNG();
 	});
-	$('#btnExportGraphSVG').click( function() {
+	$('#btnExportGraphSVG').click(function () {
 		exportGraphAsSVG();
 	});
-	$('#btnFullscreenBrowser').click( function() {
+	$('#btnFullscreenBrowser').click(function () {
 		toggleBrowserFullscreen();
 	});
-	$('#btnCloseBrowser').click( function() {
+	$('#btnCloseBrowser').click(function () {
 		closeBrowser();
 	});
 });
