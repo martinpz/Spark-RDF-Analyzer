@@ -115,7 +115,6 @@ function showNodeDetails(data) {
 }
 
 function hideNodeDetails() {
-	console.log("Heyo");
 	$('#nodeDetailsContainer').hide(ANIMATION_SPEED);
 }
 
