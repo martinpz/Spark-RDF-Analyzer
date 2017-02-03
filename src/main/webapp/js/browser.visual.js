@@ -243,10 +243,8 @@ function fillNodeDetails(nodeData) {
 		? nodeData.name
 		: '<strong>Name:&nbsp;</strong><a href="' + nodeData.uri.slice(1, -1) + '" target="_blank">' + nodeData.name + '</a>';
 
-	const disableGoToBtn = (nodeType === 'NEIGHBOR') ? false : true;
-
 	const config = {
-		disableGoTo: disableGoToBtn,
+		disableGoTo: (nodeType === 'NEIGHBOR') ? false : true,
 		nodeName: nodeData.name,
 		nodeURI: nodeData.uri,
 		heading: title,
