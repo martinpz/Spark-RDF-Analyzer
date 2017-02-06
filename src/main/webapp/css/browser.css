@@ -116,11 +116,12 @@
 
 .sigma-tooltip-header #tooltipActionBtns {
     float: right;
+    margin-left: 20px;
 }
 
 .sigma-tooltip-body {
     padding: 10px;
-    max-height: calc(350px - 45px);
+    max-height: calc(350px - 55px);
     overflow: auto;
 }
 
