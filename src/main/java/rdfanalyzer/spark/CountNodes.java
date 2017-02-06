@@ -16,7 +16,9 @@
 
 package rdfanalyzer.spark;
 
-import org.apache.spark.sql.DataFrame;
+import java.util.List;
+
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
 /**
@@ -27,17 +29,17 @@ public class CountNodes {
 		String result = "";
 
 		// Read graph from parquet
-		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + args[0] + ".parquet");
-		graphFrame.cache().registerTempTable("Graph");
+		Dataset<Row> graphFrame = Service.spark().read().parquet(Configuration.storage() + args[0] + ".parquet");
+		graphFrame.cache().createOrReplaceTempView("Graph");
 
 		// Run SQL over loaded Graph.
-		DataFrame resultsFrame = Service.sqlCtx()
+		Dataset<Row> resultsFrame = Service.spark()
 				.sql("SELECT COUNT(DISTINCT MyTable1.subject) FROM (SELECT subject FROM Graph"
 						+ " UNION ALL SELECT object FROM Graph" + " ) MyTable1");
 
 		// Get the results and format them in desired format.
-		Row[] rows = resultsFrame.collect();
-		result = Long.toString(rows[0].getLong(0));
+		List<Row> rows = resultsFrame.collectAsList();
+		result = Long.toString(rows.get(0).getLong(0));
 
 		return "<h1>" + result + "</h1>";
 	}

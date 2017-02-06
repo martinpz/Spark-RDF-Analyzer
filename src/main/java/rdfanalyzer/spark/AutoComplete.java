@@ -16,7 +16,9 @@
 
 package rdfanalyzer.spark;
 
-import org.apache.spark.sql.DataFrame;
+import java.util.List;
+
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
 /**
@@ -28,52 +30,50 @@ public class AutoComplete {
 		userInput = userInput.toLowerCase();
 
 		// Read graph from parquet
-		DataFrame schemaRDF = Service.sqlCtx().parquetFile(Configuration.storage() + graphName + ".parquet");
-		schemaRDF.cache().registerTempTable("Graph");
+		Dataset<Row> schemaRDF = Service.spark().read().parquet(Configuration.storage() + graphName + ".parquet");
+		schemaRDF.cache().createOrReplaceTempView("Graph");
 
 		// Predicate OR node Autocomplete.
 		if (Type.equals("Predicate")) {
 			// Get list of predicates
 			// SQL can be run over RDDs that have been registered as tables.
-			DataFrame predicatesListFrame = Service.sqlCtx()
+			Dataset<Row> predicatesListFrame = Service.spark()
 					.sql("SELECT predicate as predicate FROM Graph GROUP BY predicate");
-			predicatesListFrame.cache().registerTempTable("Predicates");
+			predicatesListFrame.cache().createOrReplaceTempView("Predicates");
 
 			// Search for matching predicates
-			DataFrame firstRound = Service.sqlCtx()
+			Dataset<Row> firstRound = Service.spark()
 					.sql("SELECT predicate AS match, regexp_extract(predicate, '([^/]+$)') AS matchExtracted1, regexp_extract(predicate, '([^#]+$)') AS matchExtracted2 FROM Predicates WHERE LOWER(predicate) LIKE '%"
 							+ userInput + "%'");
-			firstRound.registerTempTable("firstRound");
+			firstRound.createOrReplaceTempView("firstRound");
 
-			DataFrame secondRound = Service.sqlCtx().sql("SELECT match " + " FROM firstRound "
+			Dataset<Row> secondRound = Service.spark().sql("SELECT match " + " FROM firstRound "
 					+ " WHERE matchExtracted1 = '" + userInput + ">' OR matchExtracted2 = '" + userInput + ">'");
 
-			DataFrame thirdRound = Service.sqlCtx()
+			Dataset<Row> thirdRound = Service.spark()
 					.sql("SELECT DISTINCT match, matchExtracted FROM "
 							+ "(SELECT match, matchExtracted1 AS matchExtracted" + " FROM firstRound "
 							+ " WHERE LOWER(matchExtracted1) LIKE '" + userInput + "%' " + " UNION ALL "
 							+ " SELECT match, matchExtracted2 AS matchExtracted" + " FROM firstRound	 "
 							+ " WHERE LOWER(matchExtracted2) LIKE '" + userInput + "%') MyTable " + " LIMIT 20");
 
-			// The results of SQL queries are DataFrames and support all the
-			// normal RDD operations. Save result to file
 			// Perform search in multiple rounds.
-			Row[] rows = secondRound.collect();
+			List<Row> rows = secondRound.collectAsList();
 
-			if (rows.length > 0) {
-				String shortURI = RDFgraph.shortenURI(rows[0].getString(0));
-				String fullURI = "<xmp style=\"display : inline\">" + rows[0].getString(0) + "</xmp>";
+			if (rows.size() > 0) {
+				String shortURI = RDFgraph.shortenURI(rows.get(0).getString(0));
+				String fullURI = "<xmp style=\"display : inline\">" + rows.get(0).getString(0) + "</xmp>";
 				String fullText = "<b>" + shortURI + " :</b> " + fullURI;
-				String fullValue = shortURI + ":" + rows[0].getString(0);
+				String fullValue = shortURI + ":" + rows.get(0).getString(0);
 				result += "<div class=\"radio\"><label><input type=\"radio\" name=\"optradio\" value=\"" + fullValue
 						+ "\">" + fullText + "</label></div>";
 			}
 
-			Row[] rows2 = thirdRound.collect();
+			List<Row> rows2 = thirdRound.collectAsList();
 
 			for (Row r : rows2) {
-				if (rows.length > 0) {
-					if (!r.getString(0).equals(rows[0].getString(0))) {
+				if (rows.size() > 0) {
+					if (!r.getString(0).equals(rows.get(0).getString(0))) {
 						String shortURI = RDFgraph.shortenURI(r.getString(0));
 						String fullURI = "<xmp style=\"display : inline\">" + r.getString(0) + "</xmp>";
 						String fullText = "<b>" + shortURI + " :</b> " + fullURI;
@@ -91,46 +91,46 @@ public class AutoComplete {
 				}
 			}
 		} else {
-			DataFrame firstRound = Service.sqlCtx()
+			Dataset<Row> firstRound = Service.spark()
 					.sql("SELECT subject AS match, regexp_extract(subject, '([^/]+$)', 0) AS matchExtracted1, regexp_extract(subject, '([^#]+$)', 0) AS matchExtracted2  FROM Graph WHERE LOWER(subject) LIKE '%"
 							+ userInput + "%' UNION ALL "
 							+ "SELECT object AS match, regexp_extract(object, '([^/]+$)', 0) AS matchExtracted1, regexp_extract(object, '([^#]+$)', 0) AS matchExtracted2 FROM Graph WHERE LOWER(object) LIKE '%"
 							+ userInput + "%' AND object NOT LIKE '\"%'");
-			firstRound.registerTempTable("firstRound");
+			firstRound.createOrReplaceTempView("firstRound");
 
-			DataFrame secondRound = Service.sqlCtx().sql("SELECT match " + " FROM firstRound "
+			Dataset<Row> secondRound = Service.spark().sql("SELECT match " + " FROM firstRound "
 					+ " WHERE matchExtracted1 = '" + userInput + ">' OR matchExtracted2 = '" + userInput + ">'");
 
-			DataFrame thirdRound = Service.sqlCtx()
+			Dataset<Row> thirdRound = Service.spark()
 					.sql("SELECT DISTINCT match, matchExtracted FROM "
 							+ "(SELECT match, matchExtracted1 AS matchExtracted" + " FROM firstRound "
 							+ " WHERE LOWER(matchExtracted1) LIKE '" + userInput + "%' " + " UNION ALL "
 							+ " SELECT match, matchExtracted2 AS matchExtracted" + " FROM firstRound	 "
 							+ " WHERE LOWER(matchExtracted2) LIKE '" + userInput + "%') MyTable ");
-			thirdRound.registerTempTable("thirdRound");
+			thirdRound.createOrReplaceTempView("thirdRound");
 
-			schemaRDF = Service.sqlCtx().parquetFile(Configuration.storage() + graphName + "Ranking.parquet");
-			schemaRDF.cache().registerTempTable("Ranking");
+			schemaRDF = Service.spark().read().parquet(Configuration.storage() + graphName + "Ranking.parquet");
+			schemaRDF.cache().createOrReplaceTempView("Ranking");
 
-			DataFrame fourthRound = Service.sqlCtx().sql("SELECT thirdRound.match FROM " + " thirdRound, Ranking "
+			Dataset<Row> fourthRound = Service.spark().sql("SELECT thirdRound.match FROM " + " thirdRound, Ranking "
 					+ " WHERE thirdRound.match = Ranking.subject " + " ORDER BY Ranking.nr DESC " + " LIMIT 20");
 
-			Row[] rows = secondRound.collect();
+			List<Row> rows = secondRound.collectAsList();
 
-			if (rows.length > 0) {
-				String shortURI = RDFgraph.shortenURI(rows[0].getString(0));
-				String fullURI = "<xmp style=\"display : inline\">" + rows[0].getString(0) + "</xmp>";
+			if (rows.size() > 0) {
+				String shortURI = RDFgraph.shortenURI(rows.get(0).getString(0));
+				String fullURI = "<xmp style=\"display : inline\">" + rows.get(0).getString(0) + "</xmp>";
 				String fullText = "<b>" + shortURI + " :</b> " + fullURI;
-				String fullValue = shortURI + ":" + rows[0].getString(0);
+				String fullValue = shortURI + ":" + rows.get(0).getString(0);
 				result += "<div class=\"radio\"><label><input type=\"radio\" name=\"optradio\" value=\"" + fullValue
 						+ "\">" + fullText + "</label></div>";
 			}
 
-			Row[] rows2 = fourthRound.collect();
+			List<Row> rows2 = fourthRound.collectAsList();
 
 			for (Row r : rows2) {
-				if (rows.length > 0) {
-					if (!r.getString(0).equals(rows[0].getString(0))) {
+				if (rows.size() > 0) {
+					if (!r.getString(0).equals(rows.get(0).getString(0))) {
 						String shortURI = RDFgraph.shortenURI(r.getString(0));
 						String fullURI = "<xmp style=\"display : inline\">" + r.getString(0) + "</xmp>";
 						String fullText = "<b>" + shortURI + " :</b> " + fullURI;
