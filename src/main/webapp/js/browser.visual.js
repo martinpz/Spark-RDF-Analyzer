@@ -35,8 +35,12 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 		type: 'circle',
 		data: {
 			direction: 'central',
+			color: 'central',
 			name: centralNode,
-			uri: centralNodeURI
+			uri: centralNodeURI,
+			link: centralNodeURI.slice(1, -1),
+			predicate: '',
+			predicateLink: '#'
 		}
 	});
 
@@ -58,6 +62,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			data: {
 				type: 'NEIGHBOR',
 				direction: '(' + props.direction + ')',
+				color: props.direction,
 				name: props.name,
 				uri: URI,
 				link: URI.slice(1, -1),
@@ -78,6 +83,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			// Change properties for IN-going connection.
 			edge.source = node.id;
 			edge.target = centralNodeID;
+			node.data.color = 'in';
 		} else if (props.name == '') {
 			// Special handling for literals. They don't have a name, but only an URI.
 			node.id = 'LITERAL_' + edgeCount;
@@ -85,6 +91,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			node.type = 'star';
 			node.data.type = 'LITERAL';
 			node.data.direction = '';
+			node.data.color = 'literal';
 			node.data.name = URI;
 			node.data.uri = '';
 			node.data.link = '#';
@@ -193,7 +200,7 @@ function designGraph() {
 					}
 				},
 				color: {
-					by: 'direction',
+					by: 'data.color',
 					scheme: getColorScheme()
 				}
 			},
@@ -204,7 +211,7 @@ function designGraph() {
 		palette: COLORS
 	});
 
-	design.apply();
+	design.apply('nodes');
 }
 
 // ==================== Layout ==================== //
