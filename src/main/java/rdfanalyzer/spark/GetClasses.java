@@ -16,7 +16,9 @@
 
 package rdfanalyzer.spark;
 
-import org.apache.spark.sql.DataFrame;
+import java.util.List;
+
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
 /**
@@ -27,16 +29,16 @@ public class GetClasses {
 		String result = "";
 
 		// Read graph from parquet
-		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + args[0] + ".parquet");
-		graphFrame.cache().registerTempTable("Graph");
+		Dataset<Row> graphFrame = Service.spark().read().parquet(Configuration.storage() + args[0] + ".parquet");
+		graphFrame.cache().createOrReplaceTempView("Graph");
 
 		// Run SQL over loaded Graph.
-		DataFrame resultsFrame = Service.sqlCtx().sql(
+		Dataset<Row> resultsFrame = Service.spark().sql(
 				"SELECT DISTINCT object FROM Graph WHERE predicate='<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>'");
 
 		// Format output results. Based if output is table or chart it is
 		// returned into different formats.
-		Row[] resultRows = resultsFrame.collect();
+		List<Row> resultRows = resultsFrame.collectAsList();
 
 		if (args[1].equals("Normal")) {
 			result = "<table class=\"table table-striped\">";

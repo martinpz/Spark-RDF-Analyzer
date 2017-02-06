@@ -83,6 +83,7 @@ public class Configuration {
 					sparkConf.set(key, val);
 				}
 			}
+			logger.info("... [DONE] Reading properties");
 
 			return sparkConf;
 		}

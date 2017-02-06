@@ -34,7 +34,7 @@ public class RDFgraph implements Serializable {
 	}
 
 	public void setSubject(String subject) {
-		this.subject = subject;
+		this.subject = removeHarmfulCharacters(subject);
 	}
 
 	public String getPredicate() {
@@ -42,7 +42,7 @@ public class RDFgraph implements Serializable {
 	}
 
 	public void setPredicate(String predicate) {
-		this.predicate = predicate;
+		this.predicate = removeHarmfulCharacters(predicate);
 	}
 
 	public String getObject() {
@@ -50,7 +50,11 @@ public class RDFgraph implements Serializable {
 	}
 
 	public void setObject(String object) {
-		this.object = object;
+		this.object = removeHarmfulCharacters(object);
+	}
+
+	private String removeHarmfulCharacters(String s) {
+		return s.replaceAll("\"|'|`|´", "");
 	}
 
 	/**

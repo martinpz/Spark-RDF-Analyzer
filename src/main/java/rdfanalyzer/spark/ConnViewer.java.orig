@@ -16,10 +16,15 @@
 
 package rdfanalyzer.spark;
 
+<<<<<<< HEAD
+
+import org.apache.spark.sql.DataFrame;
+=======
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.spark.sql.Dataset;
+>>>>>>> 79828dd49826191c5d1feb5e2c88d4cb98e1bea4
 import org.apache.spark.sql.Row;
 
 /**
@@ -168,7 +173,13 @@ public class ConnViewer {
 
 			Dataset<Row> predicatesFrame = Service.spark()
 					.sql("SELECT subject, predicate, object FROM Graph WHERE " + Condition);
+<<<<<<< HEAD
+
+			predicatesFrame.registerTempTable("Graph2");
+			
+=======
 			predicatesFrame.createOrReplaceTempView("Graph2");
+>>>>>>> 79828dd49826191c5d1feb5e2c88d4cb98e1bea4
 
 			return "Graph2";
 		} else {

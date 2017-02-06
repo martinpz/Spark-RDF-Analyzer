@@ -16,7 +16,9 @@
 
 package rdfanalyzer.spark;
 
-import org.apache.spark.sql.DataFrame;
+import java.util.List;
+
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
 /**
@@ -26,17 +28,17 @@ public class ClassDistribution {
 	public static String main(String[] args) throws Exception {
 		String result = "";
 		// Read graph from parquet
-		DataFrame schemaRDF = Service.sqlCtx().parquetFile(Configuration.storage() + args[0] + ".parquet");
-		schemaRDF.cache().registerTempTable("Graph");
+		Dataset<Row> schemaRDF = Service.spark().read().parquet(Configuration.storage() + args[0] + ".parquet");
+		schemaRDF.cache().createOrReplaceTempView("Graph");
 
 		// SQL can be run over RDDs that have been registered as tables.
-		DataFrame predicatesFrame = Service.sqlCtx()
+		Dataset<Row> predicatesFrame = Service.spark()
 				.sql("SELECT object, COUNT(object) FROM Graph WHERE predicate='<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>'"
 						+ " GROUP BY object");
 
 		// Format output results. Based if output is table or chart it is
 		// returned into different formats.
-		Row[] resultRows = predicatesFrame.collect();
+		List<Row> resultRows = predicatesFrame.collectAsList();
 
 		if (args[1].equals("Table")) {
 			result = "<table class=\"table table-striped\">";
