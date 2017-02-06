@@ -61,8 +61,13 @@
 }
 
 #browserBody {
+    position: relative;
     color: black;
     overflow: auto;
+}
+
+#browserBody.visual {
+    overflow: visible;
 }
 
 #browserBody table td {
@@ -84,7 +89,7 @@
 }
 
 #browserBody #container {
-    position: relative;
+    position: absolute;
     width: 100%;
     height: 100%;
 }

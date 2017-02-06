@@ -27,8 +27,9 @@ function displayNodes(centralNode, centralNodeURI, neighbors) {
 	// Clear the container.
 	$('#browserBody').html('<div id="container" data-central-node="' + centralNode + '" data-central-node-uri="' + centralNodeURI + '"></div>');
 
-	// Enable the export for visual representations.
+	// Enable the export for visual representations and expand the browser body.
 	enableExport(true);
+	$('#browserBody').addClass('visual');
 
 	// Determine how to display the graph.
 	switch (getBrowsingType()) {
@@ -43,6 +44,7 @@ function displayNodes(centralNode, centralNodeURI, neighbors) {
 			break;
 		case 'textual':
 			enableExport(false);
+			$('#browserBody').removeClass('visual');
 			displayNodesTextual(centralNode, centralNodeURI, neighbors);
 			break;
 		default:

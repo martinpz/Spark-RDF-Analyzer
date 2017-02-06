@@ -123,10 +123,9 @@ function instantiateTooltips() {
 	const TOOLTIP_CONFIG = {
 		node: {
 			show: 'clickNode',
-			// hide: 'clickNode',
 			cssClass: 'sigma-tooltip',
 			position: 'top',
-			//autoadjust: true,
+			autoadjust: true,
 			template: '<div class="arrow"></div>' +
 				' <div class="sigma-tooltip-header">{{id}}</div>' +
 				'  <div class="sigma-tooltip-body">' +
@@ -139,17 +138,12 @@ function instantiateTooltips() {
 				'    </table>' +
 				'  </div>',
 			renderer: function (node, template) {
-				// Returns an HTML string:
 				return Mustache.render(template, node);
-
-				// Returns a DOM Element:
-				//var el = document.createElement('div');
-				//return el.innerHTML = Mustache.render(template, node);
 			}
 		}
 	};
 
-	// Instanciate the tooltips plugin with a Mustache renderer for node tooltips:
+	// Instantiate the tooltips plugin with a Mustache renderer for node tooltips.
 	var tooltips = sigma.plugins.tooltips(s, s.renderers[0], TOOLTIP_CONFIG);
 }
 
