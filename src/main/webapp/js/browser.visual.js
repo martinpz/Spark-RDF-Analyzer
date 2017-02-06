@@ -17,7 +17,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 	var nodeCount = 0,
 		edgeCount = 0;
 	var numNeighbors = Object.keys(neighbors).length;
-	var centralNodeID = 'CENTRALNODE'; // centralNodeURI.slice(1, -1);
+	var centralNodeID = 'CENTRALNODE';
 	var g = {
 		nodes: [],
 		edges: []
@@ -79,10 +79,10 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 		} else if (props.name == '') {
 			// Special handling for literals. They don't have a name, but only an URI.
 			node.id = 'LITERAL_' + edgeCount;
-			node.label = URI.slice(1, -1);
+			node.label = URI;
 			node.type = 'star';
 			node.data.direction = 'literal';
-			node.data.name = URI.slice(1, -1);
+			node.data.name = URI;
 			node.data.uri = '';
 
 			edge.target = node.id;
@@ -167,37 +167,6 @@ function bindListeners() {
 		}
 	});
 }
-
-/*
-function fillNodeDetails(nodeData) {
-	// Shows an overlay with relevant information for that node.
-	// The heading consists of the node type and the direction for neighbors.
-	const nodeType = nodeData.id.split('_')[0];
-	var title = nodeType;
-	title += (nodeType === 'NEIGHBOR') ?
-		'&nbsp;<span style="font-size: 80%;">(' + nodeData.direction + ')</span>' :
-		'';
-
-	// The content is made up of the name (text for a literal), the connection predicate and the URI.
-	var details = '';
-	details += (nodeType === 'CENTRALNODE') ?
-		'' :
-		'<strong>Predicate:&nbsp;</strong><a href="' + nodeData.predicateURI.slice(1, -1) + '" target="_blank">' + nodeData.predicate + '</a><br>';
-	details += (nodeType === 'LITERAL') ?
-		nodeData.name :
-		'<strong>Name:&nbsp;</strong><a href="' + nodeData.uri.slice(1, -1) + '" target="_blank">' + nodeData.name + '</a>';
-
-	const config = {
-		disableGoTo: (nodeType === 'NEIGHBOR') ? false : true,
-		nodeName: nodeData.name,
-		nodeURI: nodeData.uri,
-		heading: title,
-		content: details
-	};
-
-	showNodeDetails(config);
-}
-*/
 
 // ==================== Design ==================== //
 

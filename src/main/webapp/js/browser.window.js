@@ -27,9 +27,10 @@ function displayNodes(centralNode, centralNodeURI, neighbors) {
 	// Clear the container.
 	$('#browserBody').html('<div id="container" data-central-node="' + centralNode + '" data-central-node-uri="' + centralNodeURI + '"></div>');
 
-	// Determine how to display the graph.
+	// Enable the export for visual representations.
 	enableExport(true);
 
+	// Determine how to display the graph.
 	switch (getBrowsingType()) {
 		case 'circular':
 			arrangeNodesCircular(centralNode, centralNodeURI, neighbors);
