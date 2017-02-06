@@ -56,11 +56,13 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			level: 1,
 			labelAlignment: 'top',
 			data: {
-				direction: props.direction,
+				type: 'NEIGHBOR',
+				direction: '(' + props.direction + ')',
 				name: props.name,
 				uri: URI,
+				link: URI.slice(1, -1),
 				predicate: props.predicate,
-				predicateURI: props.predicateURI
+				predicateLink: props.predicateURI.slice(1, -1)
 			}
 		};
 
@@ -81,9 +83,11 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			node.id = 'LITERAL_' + edgeCount;
 			node.label = URI;
 			node.type = 'star';
-			node.data.direction = 'literal';
+			node.data.type = 'LITERAL';
+			node.data.direction = '';
 			node.data.name = URI;
 			node.data.uri = '';
+			node.data.link = '#';
 
 			edge.target = node.id;
 		}
@@ -119,24 +123,36 @@ function instantiateGraph(g) {
 
 // ==================== Tooltips ==================== //
 
+var tooltips;
+
 function instantiateTooltips() {
 	const TOOLTIP_CONFIG = {
 		node: {
-			show: 'clickNode',
+			show: 'rightClickNode',
 			cssClass: 'sigma-tooltip',
 			position: 'top',
 			autoadjust: true,
 			template: '<div class="arrow"></div>' +
-				' <div class="sigma-tooltip-header">{{id}}</div>' +
-				'  <div class="sigma-tooltip-body">' +
-				'    <table>' +
-				'      <tr><th>Name</th> <td>{{data.name}}</td></tr>' +
-				'      <tr><th>Uri</th> <td>{{data.uri}}</td></tr>' +
-				'      <tr><th>Gender</th> <td>{{data.direction}}</td></tr>' +
-				'      <tr><th>Age</th> <td>{{data.predicate}}</td></tr>' +
-				'      <tr><th>City</th> <td>{{data.predicateURI}}</td></tr>' +
-				'    </table>' +
-				'  </div>',
+				'	<div class="sigma-tooltip-header">' +
+				'		{{data.type}}&nbsp;' +
+				'		<span style="font-size: 80%;">' +
+				'			{{data.direction}}' +
+				'		</span>' +
+				'		<div id="tooltipActionBtns" class="btn-group" role="group" aria-label="Actions">' +
+				'			<button id="btnGoToNode" type="button" onclick="prepareBrowser(\'{{data.name}}\', \'{{data.uri}}\')" class="btn btn-primary" aria-label="Go to node" title="Navigate to this node.">' +
+				'				<span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span>' +
+				'			</button>' +
+				'			<button id="btnCloseTooltip" type="button" onclick="closeTooltips()" class="btn btn-default" aria-label="Close tooltip" title="Close this tooltip.">' +
+				'				<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>' +
+				'			</button>' +
+				'		</div>' +
+				'	</div>' +
+				'	<div class="sigma-tooltip-body">' +
+				'		{{data.name}}' +
+				'		<br><br>' +
+				'		Predicate: <a href="{{data.predicateLink}}" target="_blank">{{data.predicate}}</a><br>' +
+				'		URI: <a href="{{data.link}}" target="_blank">{{data.uri}}</a>' +
+				'	</div>',
 			renderer: function (node, template) {
 				return Mustache.render(template, node);
 			}
@@ -144,16 +160,18 @@ function instantiateTooltips() {
 	};
 
 	// Instantiate the tooltips plugin with a Mustache renderer for node tooltips.
-	var tooltips = sigma.plugins.tooltips(s, s.renderers[0], TOOLTIP_CONFIG);
+	tooltips = sigma.plugins.tooltips(s, s.renderers[0], TOOLTIP_CONFIG);
+}
+
+function closeTooltips() {
+	if (tooltips) {
+		tooltips.close();
+	}
 }
 
 // ==================== Listeners ==================== //
 
 function bindListeners() {
-	s.bind('clickNode', function (e) {
-		// fillNodeDetails(e.data.node);
-	});
-
 	s.bind('doubleClickNode', function (e) {
 		// Only browse when clicking a neighbor. Not on central node or a literal.
 		if ((e.data.node.id).startsWith('NEIGHBOR')) {
