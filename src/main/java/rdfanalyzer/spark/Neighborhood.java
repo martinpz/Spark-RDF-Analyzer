@@ -19,7 +19,7 @@ package rdfanalyzer.spark;
 import java.util.List;
 
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.json.JSONObject;
 
@@ -71,10 +71,10 @@ public class Neighborhood {
 	 * @return A List of JSON represented neighbors.
 	 */
 	private static List<String> queryNeighbors(String graph, String centralNode, int num) {
-		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + graph + ".parquet");
-		graphFrame.cache().registerTempTable("Graph");
+		Dataset<Row> graphFrame = Service.spark().read().parquet(Configuration.storage() + graph + ".parquet");
+		graphFrame.cache().createOrReplaceTempView("Graph");
 
-		DataFrame resultsFrame = Service.sqlCtx().sql(getSQLQuery(graph, centralNode, num));
+		Dataset<Row> resultsFrame = Service.spark().sql(getSQLQuery(graph, centralNode, num));
 
 		@SuppressWarnings("serial")
 		List<String> neighbors = resultsFrame.javaRDD().map(new Function<Row, String>() {

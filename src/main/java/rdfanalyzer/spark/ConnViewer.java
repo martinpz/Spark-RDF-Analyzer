@@ -16,7 +16,10 @@
 
 package rdfanalyzer.spark;
 
-import org.apache.spark.sql.DataFrame;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
 /**
@@ -106,20 +109,22 @@ public class ConnViewer {
 	 * @param tableName
 	 */
 	public static void createTable(String Query, String tableName) {
-		DataFrame predicatesFrame = Service.sqlCtx().sql(Query);
-		predicatesFrame.registerTempTable(tableName);
+		Dataset<Row> predicatesFrame = Service.spark().sql(Query);
+		predicatesFrame.createOrReplaceTempView(tableName);
 
 		if (ConnViewerHelper.outputTables.contains(tableName)) {
-			Row[] rows = predicatesFrame.collect();
+			List<Row> rows = predicatesFrame.collectAsList();
 
-			if ((Counter + rows.length) <= 30) {
+			if ((Counter + rows.size()) <= 30) {
 				objAdapter.UpdateResults(rows, tableName);
 			} else {
-				Row[] rows2 = new Row[30 - Counter];
+				// Row[] rows2 = new Row[30 - Counter];
+				List<Row> rows2 = new ArrayList<Row>(30 - Counter);
 				int j = 0;
 
 				for (int i = Counter; i < 30; i++) {
-					rows2[j] = rows[j];
+					// rows2[j] = rows.get(j);
+					rows2.set(j, rows.get(j));
 					j++;
 				}
 
@@ -158,18 +163,18 @@ public class ConnViewer {
 			Condition = Condition.substring(0, Condition.length() - 3);
 
 			// Read graph from parquet
-			DataFrame schemaRDF = Service.sqlCtx().parquetFile(Configuration.storage() + graphName + ".parquet");
-			schemaRDF.cache().registerTempTable("Graph");
+			Dataset<Row> schemaRDF = Service.spark().read().parquet(Configuration.storage() + graphName + ".parquet");
+			schemaRDF.cache().createOrReplaceTempView("Graph");
 
-			DataFrame predicatesFrame = Service.sqlCtx()
+			Dataset<Row> predicatesFrame = Service.spark()
 					.sql("SELECT subject, predicate, object FROM Graph WHERE " + Condition);
-			predicatesFrame.registerTempTable("Graph2");
+			predicatesFrame.createOrReplaceTempView("Graph2");
 
 			return "Graph2";
 		} else {
 			// Read graph from parquet
-			DataFrame schemaRDF = Service.sqlCtx().parquetFile(Configuration.storage() + graphName + ".parquet");
-			schemaRDF.cache().registerTempTable("Graph");
+			Dataset<Row> schemaRDF = Service.spark().read().parquet(Configuration.storage() + graphName + ".parquet");
+			schemaRDF.cache().createOrReplaceTempView("Graph");
 
 			return "Graph";
 		}

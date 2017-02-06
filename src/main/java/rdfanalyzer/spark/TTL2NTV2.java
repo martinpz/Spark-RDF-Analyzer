@@ -17,11 +17,12 @@
 package rdfanalyzer.spark;
 
 import java.util.Hashtable;
+import java.util.List;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.broadcast.Broadcast;
-import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
 /**
@@ -32,6 +33,7 @@ public class TTL2NTV2 {
 	public static Hashtable<String, String> prefixHashtable = new Hashtable<String, String>();
 	static Broadcast<Hashtable<String, String>> broadcastPrefixes;
 
+	@SuppressWarnings("serial")
 	public static JavaRDD<RDFgraph> main(String Input, String Name) throws Exception {
 		// Read Prefixes.
 		JavaRDD<RDFgraph> RDF1 = Service.sparkCtx().textFile(Input + "/*", Configuration.numPartitions())
@@ -54,12 +56,12 @@ public class TTL2NTV2 {
 					}
 				});
 
-		DataFrame schemaRDF1 = Service.sqlCtx().createDataFrame(RDF1, RDFgraph.class);
-		schemaRDF1.registerTempTable("Prefixes");
+		Dataset<Row> schemaRDF1 = Service.spark().createDataFrame(RDF1, RDFgraph.class);
+		schemaRDF1.createOrReplaceTempView("Prefixes");
 
-		DataFrame prefixesFrame = Service.sqlCtx()
+		Dataset<Row> prefixesFrame = Service.spark()
 				.sql("SELECT subject,predicate,object FROM Prefixes Where subject NOT LIKE 'E'");
-		Row[] prefixes = prefixesFrame.collect();
+		List<Row> prefixes = prefixesFrame.collectAsList();
 
 		// Put prefixes to a hashList.
 		for (Row r : prefixes) {

@@ -15,7 +15,9 @@
  */
 package rdfanalyzer.spark;
 
-import org.apache.spark.sql.DataFrame;
+import java.util.List;
+
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
 /**
@@ -26,21 +28,22 @@ public class CountEdges {
 		String result = "";
 
 		// Read graph from parquet
-		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + args[0] + ".parquet");
-		graphFrame.cache().registerTempTable("Graph");
+		Dataset<Row> graphFrame = Service.spark().read().parquet(Configuration.storage() + args[0] + ".parquet");
+		graphFrame.cache().createOrReplaceTempView("Graph");
 
 		// Run SQL over loaded Graph.
-		DataFrame resultsFrame = Service.sqlCtx().sql("SELECT Count(*) FROM Graph");
+		Dataset<Row> resultsFrame = Service.spark().sql("SELECT Count(*) FROM Graph");
 
 		// Read Ranking table from parquet (Not needed in this computation but
 		// to cache it for later)
-		DataFrame rankingFrame = Service.sqlCtx().parquetFile(Configuration.storage() + args[0] + "Ranking.parquet");
-		rankingFrame.cache().registerTempTable("Ranking");
+		Dataset<Row> rankingFrame = Service.spark().read()
+				.parquet(Configuration.storage() + args[0] + "Ranking.parquet");
+		rankingFrame.cache().createOrReplaceTempView("Ranking");
 
 		// Get the results and format them in desired format.
-		Row[] rows = resultsFrame.collect();
+		List<Row> rows = resultsFrame.collectAsList();
 
-		result = Long.toString(rows[0].getLong(0));
+		result = Long.toString(rows.get(0).getLong(0));
 		return "<h1>" + result + "</h1>";
 	}
 }

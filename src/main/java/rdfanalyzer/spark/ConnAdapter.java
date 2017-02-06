@@ -16,6 +16,8 @@
 
 package rdfanalyzer.spark;
 
+import java.util.List;
+
 import org.apache.spark.sql.Row;
 
 /**
@@ -68,7 +70,7 @@ public class ConnAdapter {
 	 * @param rows
 	 * @param type
 	 */
-	public void UpdateResults(Row[] rows, String type) {
+	public void UpdateResults(List<Row> rows, String type) {
 		if (type.equals("tbl01") || type.equals("tbl02")) {
 			for (Row r : rows) {
 				ConnViewer.Counter++;
