@@ -98,18 +98,19 @@
 /* ==================== RDF Browser Tooltips ==================== */
 
 .sigma-tooltip {
-    max-width: 240px;
-    max-height: 280px;
-    background-color: rgb(249, 247, 237);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-    border-radius: 6px;
+    max-width: 550px;
+    max-height: 350px;
+    background-color: rgba(0, 0, 0, 0.9);
+    /* rgb(249, 247, 237);*/
+    box-shadow: 0 2px 6px rgba(35, 82, 124, 0.8);
+    border-radius: 8px;
+    color: white;
 }
 
 .sigma-tooltip-header {
     font-variant: small-caps;
     font-size: 120%;
-    color: #437356;
-    border-bottom: 1px solid #aac789;
+    border-bottom: 5px solid rgba(35, 82, 124, 0.8);
     padding: 10px;
 }
 
@@ -119,16 +120,8 @@
 
 .sigma-tooltip-body {
     padding: 10px;
-}
-
-.sigma-tooltip-body th {
-    color: #999;
-    text-align: left;
-}
-
-.sigma-tooltip-footer {
-    padding: 10px;
-    border-top: 1px solid #aac789;
+    max-height: calc(350px - 45px);
+    overflow: auto;
 }
 
 .sigma-tooltip>.arrow {
@@ -149,7 +142,7 @@
     left: 50%;
     bottom: -10px;
     margin-left: -10px;
-    border-top-color: rgb(249, 247, 237);
+    border-top-color: rgba(0, 0, 0, 0.9);
     border-bottom-width: 0;
 }
 
@@ -161,7 +154,7 @@
     left: 50%;
     top: -10px;
     margin-left: -10px;
-    border-bottom-color: rgb(249, 247, 237);
+    border-bottom-color: rgba(0, 0, 0, 0.9);
     border-top-width: 0;
 }
 
@@ -173,7 +166,7 @@
     top: 50%;
     right: -10px;
     margin-top: -10px;
-    border-left-color: rgb(249, 247, 237);
+    border-left-color: rgba(0, 0, 0, 0.9);
     border-right-width: 0;
 }
 
@@ -185,55 +178,6 @@
     top: 50%;
     left: -10px;
     margin-top: -10px;
-    border-right-color: rgb(249, 247, 237);
+    border-right-color: rgba(0, 0, 0, 0.9);
     border-left-width: 0;
 }
-
-
-
-/*
-#browserBody #container #nodeDetailsContainer {
-    position: absolute;
-    left: -15px;
-    top: -15px;
-    z-index: 9999999;
-    min-width: 300px;
-    width: 30%;
-    height: calc(100% + 30px);
-    background-color: rgba(0, 0, 0, 0.9);
-    color: white;
-    display: none;
-}
-
-#browserBody #container #nodeDetails {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    padding: 10px;
-}
-
-#browserBody #container #nodeDetails #btnGoToNode {
-    position: absolute;
-    right: 55px;
-    top: 10px;
-}
-
-#browserBody #container #nodeDetails #btnHideNodeDetails {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-}
-
-#browserBody #container #nodeDetails #nodeDetailsHeading {
-    margin: 0;
-    margin-bottom: 15px;
-    padding: 0;
-}
-
-#browserBody #container #nodeDetails #nodeDetailsContent {
-    height: calc(100% - 45px);
-    overflow: auto;
-}
-*/

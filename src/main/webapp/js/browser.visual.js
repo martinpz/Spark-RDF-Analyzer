@@ -135,7 +135,7 @@ function instantiateTooltips() {
 			template: '<div class="arrow"></div>' +
 				'	<div class="sigma-tooltip-header">' +
 				'		{{data.type}}&nbsp;' +
-				'		<span style="font-size: 80%;">' +
+				'		<span style="font-size: 90%;">' +
 				'			{{data.direction}}' +
 				'		</span>' +
 				'		<div id="tooltipActionBtns" class="btn-group" role="group" aria-label="Actions">' +
@@ -150,8 +150,8 @@ function instantiateTooltips() {
 				'	<div class="sigma-tooltip-body">' +
 				'		{{data.name}}' +
 				'		<br><br>' +
-				'		Predicate: <a href="{{data.predicateLink}}" target="_blank">{{data.predicate}}</a><br>' +
-				'		URI: <a href="{{data.link}}" target="_blank">{{data.uri}}</a>' +
+				'		<span style="white-space: nowrap;">Predicate: <a href="{{data.predicateLink}}" target="_blank">{{data.predicate}}</a></span><br>' +
+				'		<span style="white-space: nowrap;">URI: <a href="{{data.link}}" target="_blank">{{data.uri}}</a></span>' +
 				'	</div>',
 			renderer: function (node, template) {
 				return Mustache.render(template, node);
