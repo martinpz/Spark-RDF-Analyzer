@@ -2,10 +2,10 @@
 const LOADER = '<div class="progress progress-striped active page-progress-bar"><div class="progress-bar" style="width: 100%;"></div></div>';
 const ANIMATION_SPEED = 'fast';
 const LAYOUT_ALGORITHMS = { 
-	none: 'None',
 	noverlap: 'NOverlap',
 	forcelink: 'ForceLink',
-	fruchterman: 'Fruchterman-Reingold'
+	fruchterman: 'Fruchterman-Reingold',
+	none: 'None'
 };
 const COLORS = {
 	pastel: {

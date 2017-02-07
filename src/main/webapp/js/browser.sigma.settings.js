@@ -86,14 +86,13 @@ const SIGMA_GRAPH_SETTINGS = {
 };
 
 const LAYOUT_NOVERLAP = {
-    nodeMargin: 5.0,
+    nodeMargin: 15.0,
     scaleNodes: 1.0,
     gridSize: 50,
     permittedExpansion: 1.1,
     speed: 2,
     maxIterations: 500,
-    easing: 'cubicInOut', // animation transition function (see sigma.utils.easing for available transitions)
-    duration: 2000 // animation duration
+    easing: 'cubicInOut' // animation transition function (see sigma.utils.easing for available transitions)
 };
 
 const LAYOUT_FORCE_LINK = {
@@ -121,11 +120,10 @@ const LAYOUT_FORCE_LINK = {
 const LAYOUT_FRUCHTERMAN_REINGOLD = {
     autoArea: true,
     area: 1,
-    gravity: 1,
+    gravity: -0.5,
     speed: 0.1,
     iterations: 1000,
-    easing: 'quadraticInOut',
-    duration: 2000
+    easing: 'cubicInOut'
 };
 
 const EXPORT_PNG = {
