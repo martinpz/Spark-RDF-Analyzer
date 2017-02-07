@@ -98,22 +98,22 @@ const LAYOUT_NOVERLAP = {
 const LAYOUT_FORCE_LINK = {
     linLogMode: false, // def=false true = alternative energy model with linear repulsion force and logarithmic attraction force.
     outboundAttractionDistribution: false, // def=false
-    autoadjustSizes: true, // def=false
+    autoadjustSizes: false, // def=false
     scaleRatio: 1, // scalingRatio def=1
-    stringGravityMode: false, // def=false
-    gravity: 1, // def=1
+    strongGravityMode: false, // def=false
+    gravity: -0.5, // def=1
     barnesHutOptimize: false, // def=false should we use the algorithm's Barnes-Hut to improve repulsion's scalability? This is useful for large graph but harmful to small ones.
     barnesHutTheta: 0.5, // def=0.5
     slowDown: 1, // def=1
-    startingIterations: 1, // def=1 number of iterations to be run before the first render.
-    iterationsPerRender: 1, // def=1 number of iterations to be run before each render.
-    maxIterations: 300, // def=1000 set a limit if autoStop: true
-    avgDistanceThreshold: 0.01, // def=0.01 this is the normal stopping condition of autoStop: true. When the average displacements of nodes is below this threshold, the layout stops.
+    startingIterations: 10, // def=1 number of iterations to be run before the first render.
+    iterationsPerRender: 10, // def=1 number of iterations to be run before each render.
+    maxIterations: 1000, // def=1000 set a limit if autoStop: true
+    avgDistanceThreshold: 0, // def=0.01 this is the normal stopping condition of autoStop: true. When the average displacements of nodes is below this threshold, the layout stops.
     autoStop: true, // def=false
     worker: true, // def=true should the layout use a web worker?
-    background: true, // def=false run the layout on background, apply the new nodes position on stop.
+    background: false, // def=false run the layout on background, apply the new nodes position on stop.
     easing: 'cubicInOut',
-    randomize: 'local', // def='' randomize the initial x and y coordinates of the nodes. Available values: globally || local
+    randomize: '', // def='' randomize the initial x and y coordinates of the nodes. Available values: globally || local
     randomizeFactor: 1 // def=1 multiplicator of the Math.random() function if the randomize setting is used.
 };
 
