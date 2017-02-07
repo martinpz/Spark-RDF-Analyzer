@@ -28,8 +28,9 @@ function displayNodes(centralNode, centralNodeURI, neighbors) {
 	$('#browserBody').html('<div id="container" data-central-node="' + centralNode + '" data-central-node-uri="' + centralNodeURI + '"></div>');
 
 	// Enable the export for visual representations and expand the browser body.
-	enableExport(true);
+	enableVisualActions(true);
 	$('#browserBody').addClass('visual');
+	updateColorKeys();
 
 	// Determine how to display the graph.
 	switch (getBrowsingType()) {
@@ -43,7 +44,7 @@ function displayNodes(centralNode, centralNodeURI, neighbors) {
 			arrangeNodesRandomized(centralNode, centralNodeURI, neighbors);
 			break;
 		case 'textual':
-			enableExport(false);
+			enableVisualActions(false);
 			$('#browserBody').removeClass('visual');
 			displayNodesTextual(centralNode, centralNodeURI, neighbors);
 			break;
@@ -53,8 +54,17 @@ function displayNodes(centralNode, centralNodeURI, neighbors) {
 	}
 }
 
-function enableExport(enable) {
+function enableVisualActions(enable) {
 	$('#btnExportDropdown').prop('disabled', !enable);
+	$('#btnShowKey').prop('disabled', !enable);
+}
+
+function updateColorKeys() {
+	const colorScheme = getColorScheme();
+	$('#keyForUsedColors li span.central').css('background-color', COLORS[colorScheme].central);
+	$('#keyForUsedColors li span.in').css('background-color', COLORS[colorScheme].in);
+	$('#keyForUsedColors li span.out').css('background-color', COLORS[colorScheme].out);
+	$('#keyForUsedColors li span.literal').css('background-color', COLORS[colorScheme].literal);
 }
 
 function showLoader(centralNode) {

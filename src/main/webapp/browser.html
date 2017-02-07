@@ -185,9 +185,17 @@
 		<div id="browser" class="panel panel-default">
 			<div id="browserHeader" class="panel-heading">
 				<div id="actionBtns" class="btn-group" role="group" aria-label="Actions">
-					<button id="btnReloadGraph" type="button" class="btn btn-default" aria-label="Reload the current graph">
-						<span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Reload Graph
-					</button>
+					<div class="btn-group" role="group">
+						<button id="btnShowKey" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>
+							<span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Key <span class="caret"></span>
+						</button>
+						<ul id="keyForUsedColors" class="dropdown-menu">
+							<li><span class="glyphicon glyphicon-screenshot"></span><span class="colorIndicator central"></span> Central Node</li>
+							<li><span class="glyphicon glyphicon-circle-arrow-left"></span><span class="colorIndicator in"></span> Incoming Node</li>
+							<li><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="colorIndicator out"></span> Outgoing Node</li>
+							<li><span class="glyphicon glyphicon-star"></span><span class="colorIndicator literal"></span> Literal</li>
+						</ul>
+					</div>
 					<div class="btn-group" role="group">
 						<button id="btnExportDropdown" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>
 							<span class="glyphicon glyphicon-export" aria-hidden="true"></span> Export Graph <span class="caret"></span>
@@ -197,6 +205,9 @@
 							<li><a id="btnExportGraphSVG" href="#">Export as SVG</a></li>
 						</ul>
 					</div>
+					<button id="btnReloadGraph" type="button" class="btn btn-default" aria-label="Reload the current graph">
+						<span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Reload Graph
+					</button>
 					<button id="btnFullscreenBrowser" type="button" class="btn btn-default" aria-label="View browser in full-screen">
 						<span class="glyphicon glyphicon-resize-full" aria-hidden="true"></span> Full-screen
 					</button>

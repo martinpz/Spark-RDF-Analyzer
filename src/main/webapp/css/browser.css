@@ -48,10 +48,28 @@
 
 #browser #browserHeader h3 {
     margin-top: 0;
+    float: left;
 }
 
 #browser #browserHeader #actionBtns {
     float: right;
+}
+
+#browser #keyForUsedColors {
+    padding: 15px;
+    width: 170px;
+}
+
+#browser #keyForUsedColors .colorIndicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+#browsingHistory {
+    clear: both;
 }
 
 #browsingHistory #list {
