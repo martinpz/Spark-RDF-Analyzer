@@ -181,7 +181,7 @@ function closeTooltips() {
 // ==================== Listeners ==================== //
 
 function bindListeners() {
-	s.bind('doubleClickNode', function (e) {
+	s.bind('clickNode', function (e) {
 		// Only browse when clicking a neighbor. Not on central node or a literal.
 		if ((e.data.node.id).startsWith('NEIGHBOR')) {
 			prepareBrowser(e.data.node.data.name, e.data.node.data.uri);
