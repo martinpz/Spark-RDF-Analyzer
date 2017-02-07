@@ -27,7 +27,7 @@
             lines,
             baseX,
             baseY,
-            borderSize = settings('nodeBorderSize'),
+            borderSize = settings('borderSize'),
             alignment = settings('labelAlignment'),
             fontStyle = settings('hoverFontStyle') || settings('fontStyle'),
             prefix = settings('prefix') || '',
@@ -57,25 +57,22 @@
         lines = getLines(realLabel, maxLineLength);
         drawHoverBorder(alignment, context, fontSize, node, lines, maxLineLength);
 
-        /*
         // Node border:
-        if (borderSize > 0) {
-            context.beginPath();
-            context.fillStyle = settings('nodeBorderColor') === 'node' ?
-                (node.color || settings('defaultNodeColor')) :
-                settings('defaultNodeBorderColor');
-            context.arc(
-                node[prefix + 'x'],
-                node[prefix + 'y'],
-                size + borderSize,
-                0,
-                Math.PI * 2,
-                true
-            );
-            context.closePath();
-            context.fill();
-        }
-        */
+        var nodeH = node[prefix + 'size'] * 0.8;
+        var nodeW = node[prefix + 'size'] * 2.5;
+        
+        context.beginPath();
+        context.fillStyle = settings('nodeBorderColor') === 'node' ?
+            (node.color || settings('defaultNodeColor')) :
+            settings('defaultNodeBorderColor');
+        context.rect(
+            node[prefix + 'x'] - (nodeW / 2) - borderSize,
+            node[prefix + 'y'] - (nodeH / 2) - borderSize,
+            nodeW + ( 2 * borderSize ),
+            nodeH + ( 2 * borderSize )
+        );
+        context.closePath();
+        context.fill();
 
         // Node:
         var nodeRenderer = sigma.canvas.nodes[node.type] || sigma.canvas.nodes.def;

@@ -27,14 +27,13 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 	g.nodes.push({
 		id: centralNodeID,
 		label: centralNode,
-		x: 0,
-		y: 0,
+		x: 0, //-($('#container').width() / 2),
+		y: 0, //-($('#container').height() / 2),
 		size: 1,
-		level: 3,
-		labelAlignment: 'bottom',
 		type: 'rect',
 		data: {
-			direction: 'central',
+			type: 'CENTRALNODE',
+			direction: '',
 			color: 'central',
 			name: centralNode,
 			uri: centralNodeURI,
@@ -44,6 +43,8 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			disableGoTo: 'disabled'
 		}
 	});
+
+	console.log('CENTRALNodePos: ', -($('#container').width() / 2), -($('#container').height() / 2));
 
 	// Add all neighbor nodes to the graph instance.
 	$.each(neighbors, function (URI, props) {
@@ -58,8 +59,6 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			x: position.x,
 			y: position.y,
 			size: 1,
-			level: 1,
-			labelAlignment: 'top',
 			data: {
 				type: 'NEIGHBOR',
 				direction: '(' + props.direction + ')',
@@ -89,7 +88,6 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			// Special handling for literals. They don't have a name, but only an URI.
 			node.id = 'LITERAL_' + edgeCount;
 			node.label = URI;
-			// node.type = 'star';
 			node.data.type = 'LITERAL';
 			node.data.direction = '';
 			node.data.color = 'literal';
@@ -101,6 +99,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			edge.target = node.id;
 		}
 
+		console.log('NodePos', node.x, node.y);
 		g.nodes.push(node);
 
 		if (withEdges) {
@@ -115,7 +114,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 	instantiateTooltips();
 	bindListeners();
 	designGraph();
-	// layoutGraph();
+	layoutGraph();
 }
 
 function instantiateGraph(g) {
@@ -235,22 +234,23 @@ function calculatePositionByDirection(currEdgeNum, totalNumNeighbors, direction)
 function calculatePositionRandomly(currEdgeNum, totalNumNeighbors, direction) {
 	const quadrant = (currEdgeNum % 4) + 1;
 	const xFactor = (quadrant == 1 || quadrant == 2) ? 1 : -1;
-	const yFactor = (quadrant == 1 || quadrant == 4) ? 1 : -1;
+	const yFactor = (quadrant == 2 || quadrant == 3) ? 1 : -1;
+	const outerMargin = 50;
 	const container = {
-		width: $('#container').width() / 2,
-		height: $('#container').height() / 2
+		width: $('#container').width() / 2 - outerMargin,
+		height: $('#container').height() / 2 - outerMargin
 	};
 
 	return {
-		x: xFactor * Math.random() * container.width,
-		y: yFactor * Math.random() * container.height
+		x: xFactor * container.width * Math.random(), // (container.width + (xFactor * Math.random() * container.width)),
+		y: yFactor * container.height * Math.random() // (container.height + (yFactor * Math.random() * container.height))
 	};
 }
 
 function layoutGraph() {
 	switch (getLayoutAlgorithm()) {
-		case 'forceatlas':
-			performForceAtlas();
+		case 'noverlap':
+			performNOverlap();
 			break;
 		case 'forcelink':
 			performForceLink();
@@ -258,64 +258,62 @@ function layoutGraph() {
 		case 'fruchterman':
 			performFruchtermanReingold();
 			break;
-		case 'noverlap':
-			performNOverlap();
-			break;
 
 		default:
-			console.log('Unsupported layout method.');
+			// Do not layout the graph.
 			break;
 	}
 }
 
 function performNOverlap() {
-	var noverlapListener = s.configNoverlap({
-		maxIterations: 300,
-		nodeMargin: 0.1,
-		// scaleNodes: 1.2,
+	var no = s.configNoverlap({
+		nodeMargin: 5.0,
+		scaleNodes: 1.0,
 		gridSize: 50,
-		easing: 'quadraticInOut', // animation transition function (see sigma.utils.easing for available transitions)
-		duration: 1000 // animation duration
+		permittedExpansion: 1.1,
+		speed: 2,
+		maxIterations: 500,
+		easing: 'cubicInOut', // animation transition function (see sigma.utils.easing for available transitions)
+		duration: 2000 // animation duration
 	});
-
 	s.startNoverlap();
 }
 
-function performForceAtlas() {
-	var fa = s.startForceAtlas2({
-		worker: true
-	});
-}
-
 function performForceLink() {
-	var fa = sigma.layouts.configForceLink(s, {
-		worker: true,
-		barnesHutOptimize: false,
-		autoStop: true,
-		background: true,
-		// scaleRatio: 10, // respectively 30 for arctic
-		// gravity: 3,
-		easing: 'cubicInOut'
+	var fl = sigma.layouts.configForceLink(s, {
+		linLogMode: false, // def=false true = alternative energy model with linear repulsion force and logarithmic attraction force.
+		outboundAttractionDistribution: false, // def=false
+		autoadjustSizes: true, // def=false
+		scaleRatio: 1, // scalingRatio def=1
+		stringGravityMode: false, // def=false
+		gravity: 1, // def=1
+		barnesHutOptimize: false, // def=false should we use the algorithm's Barnes-Hut to improve repulsion's scalability? This is useful for large graph but harmful to small ones.
+		barnesHutTheta: 0.5, // def=0.5
+		slowDown: 1, // def=1
+		startingIterations: 1, // def=1 number of iterations to be run before the first render.
+		iterationsPerRender: 1, // def=1 number of iterations to be run before each render.
+		maxIterations: 300, // def=1000 set a limit if autoStop: true
+		avgDistanceThreshold: 0.01, // def=0.01 this is the normal stopping condition of autoStop: true. When the average displacements of nodes is below this threshold, the layout stops.
+		autoStop: true, // def=false
+		worker: true, // def=true should the layout use a web worker?
+		background: true, // def=false run the layout on background, apply the new nodes position on stop.
+		easing: 'cubicInOut',
+		randomize: 'local', // def='' randomize the initial x and y coordinates of the nodes. Available values: globally || local
+		randomizeFactor:1 // def=1 multiplicator of the Math.random() function if the randomize setting is used.
 	});
-
-	fa.bind('start interpolate stop', function (e) {
-		console.log('EVENT: ', e.type);
-	});
-
 	sigma.layouts.startForceLink();
 }
 
 function performFruchtermanReingold() {
 	var fr = sigma.layouts.fruchtermanReingold.configure(s, {
-		iterations: 500,
+		autoArea: true,
+		area: 1,
+		gravity: 1,
+		speed: 0.1,
+		iterations: 1000,
 		easing: 'quadraticInOut',
-		duration: 800
+		duration: 2000
 	});
-
-	fr.bind('start stop interpolate', function (e) {
-		console.log('Event: ', e.type);
-	});
-
 	sigma.layouts.fruchtermanReingold.start(s);
 }
 

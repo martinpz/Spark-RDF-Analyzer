@@ -2,12 +2,18 @@
 const LOADER = '<div class="progress progress-striped active page-progress-bar"><div class="progress-bar" style="width: 100%;"></div></div>';
 const ANIMATION_SPEED = 'fast';
 const LAYOUT_ALGORITHMS = { 
+	none: 'None',
 	noverlap: 'NOverlap',
-	forceatlas: 'ForceAtlas2',
 	forcelink: 'ForceLink',
 	fruchterman: 'Fruchterman-Reingold'
 };
 const COLORS = {
+	pastel: {
+		'central' : '#fbb4ae',
+		'in': '#b3cde3',
+		'out': '#ccebc5',
+		'literal': '#decbe4'
+	},
 	YlGn: {
 		'central' : '#ffffcc',
 		'in': '#c2e699',
@@ -31,12 +37,6 @@ const COLORS = {
 		'in': '#fdae61',
 		'out': '#abdda4',
 		'literal': '#2b83ba'
-	},
-	pastel: {
-		'central' : '#fbb4ae',
-		'in': '#b3cde3',
-		'out': '#ccebc5',
-		'literal': '#decbe4'
 	}
 };
 
