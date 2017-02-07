@@ -8,11 +8,16 @@ const SIGMA_GRAPH_SETTINGS = {
     // Labels:
     font: 'Helvetica',
     defaultLabelColor: '#2e2c2d',
-    defaultLabelSize: 12,
-    labelThreshold: 5,
+    defaultLabelSize: 10,
+    labelThreshold: 0, // 5
     defaultEdgeLabelSize: 12,
     edgeLabelThreshold: 7,
-    labelHoverShadow: '',
+    labelHoverBGColor: 'node',
+    labelHoverShadow: 'node',
+    labelSize: 'proportional',
+    labelSizeRatio: 0.20,
+    maxNodeLabelLineLength: 23,
+    labelAlignment: 'center', // center vs. inside
 
     // Edges:
     edgeColor: 'default',
@@ -20,16 +25,17 @@ const SIGMA_GRAPH_SETTINGS = {
 
     // Nodes:
     defaultNodeColor: '#333333',
+    nodeBorderSize: 2,
 
     // Hovered nodes:
     hoverFontStyle: '',
     borderSize: 2,
     outerBorderSize: 2,
     nodeBorderColor: 'default',
-    defaultNodeBorderColor: '#ffffff',
+    defaultNodeBorderColor: '#666',
     defaultNodeOuterBorderColor: '#f65565',
 
-    // Actve nodes and edges:
+    // Active nodes and edges:
     activeFontStyle: 'bold',
     nodeActiveColor: 'node',
     defaultNodeActiveColor: '#333333',

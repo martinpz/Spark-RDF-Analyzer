@@ -32,7 +32,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 		size: 1,
 		level: 3,
 		labelAlignment: 'bottom',
-		type: 'circle',
+		type: 'rect',
 		data: {
 			direction: 'central',
 			color: 'central',
@@ -54,10 +54,10 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 		var node = {
 			id: 'NEIGHBOR_' + nodeCount,
 			label: props.name,
-			type: 'square',
+			type: 'rect',
 			x: position.x,
 			y: position.y,
-			size: 0.3,
+			size: 1,
 			level: 1,
 			labelAlignment: 'top',
 			data: {
@@ -89,7 +89,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			// Special handling for literals. They don't have a name, but only an URI.
 			node.id = 'LITERAL_' + edgeCount;
 			node.label = URI;
-			node.type = 'star';
+			// node.type = 'star';
 			node.data.type = 'LITERAL';
 			node.data.direction = '';
 			node.data.color = 'literal';
@@ -181,7 +181,7 @@ function closeTooltips() {
 // ==================== Listeners ==================== //
 
 function bindListeners() {
-	s.bind('clickNode', function (e) {
+	s.bind('doubleClickNode', function (e) {
 		// Only browse when clicking a neighbor. Not on central node or a literal.
 		if ((e.data.node.id).startsWith('NEIGHBOR')) {
 			prepareBrowser(e.data.node.data.name, e.data.node.data.uri);
@@ -198,7 +198,7 @@ function designGraph() {
 				label: {
 					by: 'label',
 					format: function (value) {
-						return value.substr(0, 10);
+						return value.substr(0, 22);
 					}
 				},
 				color: {
