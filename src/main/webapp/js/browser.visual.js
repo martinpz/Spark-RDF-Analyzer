@@ -44,8 +44,6 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 		}
 	});
 
-	console.log('CENTRALNodePos: ', -($('#container').width() / 2), -($('#container').height() / 2));
-
 	// Add all neighbor nodes to the graph instance.
 	$.each(neighbors, function (URI, props) {
 		// Calculate position for node with given function.
@@ -99,7 +97,6 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			edge.target = node.id;
 		}
 
-		console.log('NodePos', node.x, node.y);
 		g.nodes.push(node);
 
 		if (withEdges) {
@@ -242,8 +239,8 @@ function calculatePositionRandomly(currEdgeNum, totalNumNeighbors, direction) {
 	};
 
 	return {
-		x: xFactor * container.width * Math.random(), // (container.width + (xFactor * Math.random() * container.width)),
-		y: yFactor * container.height * Math.random() // (container.height + (yFactor * Math.random() * container.height))
+		x: xFactor * container.width * Math.random(),
+		y: yFactor * container.height * Math.random()
 	};
 }
 
