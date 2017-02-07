@@ -30,7 +30,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.json.JSONObject;
 
-import ranking.ShortestPath;
+import ranking.oldTests;
 import ranking.ClosenessCentrality;
 
 /**
@@ -243,9 +243,9 @@ public class WebService {
 	@GET
 	@Path("/getGraphs")
 	public String getMsg12() {
+		System.out.println("Muazzam");
 		String[] args = {};
 		String objResponse = "";
-
 		try {
 			objResponse = GetGraphs.main(args);
 		} catch (Exception e) {
