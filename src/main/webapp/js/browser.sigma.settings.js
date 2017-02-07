@@ -10,8 +10,8 @@ const SIGMA_GRAPH_SETTINGS = {
     defaultLabelColor: '#2e2c2d',
     defaultLabelSize: 10,
     labelThreshold: 0,
-    defaultEdgeLabelSize: 12,
-    edgeLabelThreshold: 7,
+    defaultEdgeLabelSize: 10,
+    edgeLabelThreshold: 0,
     labelHoverBGColor: 'node',
     labelHoverShadow: 'node',
     labelSize: 'proportional',
@@ -66,7 +66,7 @@ const SIGMA_GRAPH_SETTINGS = {
      * GLOBAL SETTINGS:
      * ****************
      */
-    autoRescale: ['nodeSize', 'edgeSize'],
+    autoRescale: true,
     doubleClickEnabled: true,
     enableEdgeHovering: true,
     edgeHoverPrecision: 10,
@@ -83,4 +83,65 @@ const SIGMA_GRAPH_SETTINGS = {
      * ********************
      */
     animationsTime: 800
+};
+
+const LAYOUT_NOVERLAP = {
+    nodeMargin: 5.0,
+    scaleNodes: 1.0,
+    gridSize: 50,
+    permittedExpansion: 1.1,
+    speed: 2,
+    maxIterations: 500,
+    easing: 'cubicInOut', // animation transition function (see sigma.utils.easing for available transitions)
+    duration: 2000 // animation duration
+};
+
+const LAYOUT_FORCE_LINK = {
+    linLogMode: false, // def=false true = alternative energy model with linear repulsion force and logarithmic attraction force.
+    outboundAttractionDistribution: false, // def=false
+    autoadjustSizes: true, // def=false
+    scaleRatio: 1, // scalingRatio def=1
+    stringGravityMode: false, // def=false
+    gravity: 1, // def=1
+    barnesHutOptimize: false, // def=false should we use the algorithm's Barnes-Hut to improve repulsion's scalability? This is useful for large graph but harmful to small ones.
+    barnesHutTheta: 0.5, // def=0.5
+    slowDown: 1, // def=1
+    startingIterations: 1, // def=1 number of iterations to be run before the first render.
+    iterationsPerRender: 1, // def=1 number of iterations to be run before each render.
+    maxIterations: 300, // def=1000 set a limit if autoStop: true
+    avgDistanceThreshold: 0.01, // def=0.01 this is the normal stopping condition of autoStop: true. When the average displacements of nodes is below this threshold, the layout stops.
+    autoStop: true, // def=false
+    worker: true, // def=true should the layout use a web worker?
+    background: true, // def=false run the layout on background, apply the new nodes position on stop.
+    easing: 'cubicInOut',
+    randomize: 'local', // def='' randomize the initial x and y coordinates of the nodes. Available values: globally || local
+    randomizeFactor: 1 // def=1 multiplicator of the Math.random() function if the randomize setting is used.
+};
+
+const LAYOUT_FRUCHTERMAN_REINGOLD = {
+    autoArea: true,
+    area: 1,
+    gravity: 1,
+    speed: 0.1,
+    iterations: 1000,
+    easing: 'quadraticInOut',
+    duration: 2000
+};
+
+const EXPORT_PNG = {
+    download: true,
+    filename: 'graphExport.png',
+    size: 500,
+    margin: 50,
+    background: 'white',
+    zoomRatio: 1,
+    labels: true
+};
+
+const EXPORT_SVG = {
+    download: true,
+    filename: 'graphExport.svg',
+    size: 1000,
+    labels: true,
+    data: true
 };
