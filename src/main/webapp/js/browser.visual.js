@@ -40,7 +40,8 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			uri: centralNodeURI,
 			link: centralNodeURI.slice(1, -1),
 			predicate: '',
-			predicateLink: '#'
+			predicateLink: '#',
+			disableGoTo: 'disabled'
 		}
 	});
 
@@ -95,6 +96,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			node.data.name = URI;
 			node.data.uri = '';
 			node.data.link = '#';
+			node.data.disableGoTo = 'disabled';
 
 			edge.target = node.id;
 		}
@@ -146,7 +148,7 @@ function instantiateTooltips() {
 				'			{{data.direction}}' +
 				'		</span>' +
 				'		<div id="tooltipActionBtns" class="btn-group" role="group" aria-label="Actions">' +
-				'			<button id="btnGoToNode" type="button" onclick="prepareBrowser(\'{{data.name}}\', \'{{data.uri}}\')" class="btn btn-primary" aria-label="Go to node" title="Navigate to this node.">' +
+				'			<button id="btnGoToNode" type="button" onclick="prepareBrowser(\'{{data.name}}\', \'{{data.uri}}\')" class="btn btn-primary" aria-label="Go to node" title="Navigate to this node." {{data.disableGoTo}}>' +
 				'				<span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span>' +
 				'			</button>' +
 				'			<button id="btnCloseTooltip" type="button" onclick="closeTooltips()" class="btn btn-default" aria-label="Close tooltip" title="Close this tooltip.">' +
