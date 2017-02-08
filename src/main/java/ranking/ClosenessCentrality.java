@@ -36,7 +36,7 @@ public class ClosenessCentrality implements Serializable {
 	List<String> nextQueryArray = new ArrayList<>();
 	
 	private int sum = 0;
-	private final int HOPS = 4; 
+	private final int HOPS = 3; 
 	
 	public static ConnAdapter objAdapter = new ConnAdapter();
 	public static Dataset<Row> graphFrame,allSubjectsDF;
@@ -76,10 +76,10 @@ public class ClosenessCentrality implements Serializable {
 		}
 		
 		double closeness = ((double)1/(double)sum);
-//		System.out.println("the sum is = "+ sum);
-//		System.out.printf("dexp: %f\n", round(closeness,15));
+		System.out.println("the sum is = "+ sum);
+		System.out.printf("dexp: %f\n", round(closeness,15));
 		return new ClosenessBean(node,closeness);
-	}
+		}	
 	
 	/*
 	 * This method will return us the values which are not contained in visited list.

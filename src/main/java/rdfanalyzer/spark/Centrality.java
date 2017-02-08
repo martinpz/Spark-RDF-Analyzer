@@ -1,13 +1,16 @@
 package rdfanalyzer.spark;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
@@ -29,7 +32,7 @@ private final static Logger logger = Logger.getLogger(Centrality.class);
 
 public static ConnAdapter objAdapter = new ConnAdapter();
 public static Dataset<Row> graphFrame;
-public static List<ClosenessBean> closenessbean = new ArrayList<ClosenessBean>();
+public static List<ClosenessBean> closenessbean;
 
 public static final String closenessParquetPath = rdfanalyzer.spark.Configuration.storage() + "closeness.parquet";
 /*
@@ -73,9 +76,19 @@ System.out.println("[LOGS] Present in metric type 3");
 return CalculateBetweenness(nodeName);
 }
 else if(metricType.equals("4")){
-	
+	closenessbean  = new ArrayList<ClosenessBean>();
 	List<String> list = new ArrayList<String>();
 	list.add(nodeName);
+	
+	Dataset<Row> resultsFrame = Service.spark().sqlContext().sql("SELECT subject,object FROM Graph WHERE subject='" + nodeName + "' LIMIT 5");
+	
+	List<String> neighbours = getListFromDatasetRows(resultsFrame);
+	for (String string : neighbours) {
+		list.add(string);
+	}
+	
+	System.out.println("List Size: " + list.size());
+	
 System.out.println("[LOGS] Present in metric type 4");
 return CalculateCloseness(list);
 }
@@ -114,24 +127,41 @@ return "betweenness";
 public static String CalculateCloseness(List<String> node) throws Exception{
 
 	 List<String> tobeQueried = node;
-	 Dataset<Row> existingData = null;
 
-	 
+	 // All The records of parquet.
+	 Dataset<Row> existingParquetData = null;
+
+	 // The records which already exists in parquet sent through arg of this function.
+	 Dataset<Row> existingcurrentNodesData = null;
+
+
 	 File f = new File(closenessParquetPath);
+	 
+	 System.out.println("query 1");
 
 	 if(f.exists()){
+		 System.out.println("file exists reading...");
 		 
 		 // Read existing closeness data from Parquet
-		 existingData = Service.spark().read().parquet(closenessParquetPath); 
-
-		 System.out.println("ExistingData Size = "+existingData.count());
+		 existingParquetData = Service.spark().read().parquet(closenessParquetPath);		 // 1 record
+		 existingcurrentNodesData = Service.spark().read().parquet(closenessParquetPath);	 
 		 
+		 
+
+		 
+		 System.out.println("query 222");
+
 		 // Getting All the nodes from Parquet Table which are present in the queried list passed as an arg to this function.
-		 Dataset<Row> existingNodesCloseness = existingData.select(existingData.col("closeness"),existingData.col("node")).where(existingData.col("node").isin(node.stream().toArray(String[]::new)));	
+		 existingcurrentNodesData.select(existingcurrentNodesData.col("closeness"),existingcurrentNodesData.col("node"))
+				 .where(existingcurrentNodesData.col("node").isin(node.stream().toArray(String[]::new))).show();	// 1 record
 
+		 
+		 
 		 // Convert the parquet dataset nodesName col into List<String>
-		 List<String> existingNodes = getListFromDatasetRows(existingNodesCloseness);
+		 List<String> existingNodes = getListFromDatasetRows(existingcurrentNodesData);
+		 System.out.println("query 2");
 
+		 System.out.println("Passed nodes "+ node.size());
 		 /*
 		  *  Subtract the existingNodes from the ones which are queried, since the existing ones are already available
 		  *  through parquet.
@@ -142,26 +172,48 @@ public static String CalculateCloseness(List<String> node) throws Exception{
  
  
 	 Dataset<Row> resultsFrame = Service.spark().sqlContext().sql("SELECT * from Graph");
+	 System.out.println("query 3");
+
+	 resultsFrame.cache();
+	 System.out.println("query 4");
+	 
 	 ClosenessCentrality path = new ClosenessCentrality();
+	 System.out.println("query 5");
 	
 	 for(String anode:tobeQueried){
 		 closenessbean.add(path.calculateCloseness(resultsFrame,anode));
 	 }
+	 System.out.println("query 6");
 	 
 	 Dataset<Row> newDataset = Service.spark().createDataFrame(closenessbean,ClosenessBean.class);
+
 	 
-	 if(f.exists()){
-		 newDataset = existingData.union(newDataset);
+	 System.out.println("Parquet data");
+	 if(existingcurrentNodesData != null){
+		 existingcurrentNodesData.show();
 	 }
 	 
-	 System.out.println("Count of data being saved in parquet = "+newDataset.count());
+	 System.out.println("Before");
+	 newDataset.show();
+
+	 if(f.exists()){
+		 newDataset = existingParquetData.union(newDataset);
+		 System.out.println("query 7");
+	 }
+
+	 System.out.println("After");
+	 newDataset.show();
+
+	 System.out.println("To Be Queried size = "+tobeQueried.size());
 	 
-	 
-	 
-	 
-	 System.out.println("deleted = "+Files.deleteIfExists(f.toPath()));
+
+//	 deleteDirectory(f);
+
+	 System.out.println("saving file");
 	 newDataset.write().parquet(closenessParquetPath);
 
+	 
+	 
  // Dataset<Row> vertFrame = Service.spark().sqlContext().sql("select *,row_number() OVER(ORDER BY(SELECT 0)) as id from Graph");
 
 //Dataset<Row> vertFrame = Service.spark().sqlContext().sql(""
@@ -237,20 +289,37 @@ public static String CalculateCloseness(List<String> node) throws Exception{
 return "";
 }
 
+private static void deleteDirectory(File f){
+	if(f.exists())
+	 {
+			 System.out.println("File exists and is a directory");
+			 try
+			 {
+				 FileUtils.deleteDirectory(f);
+				 System.out.println("Directory deleted");
+			 } catch (IOException | SecurityException e) {
+		         System.out.println("Error is: " + e.getMessage());
+		     }
+	 }	
+}
 
 
 
+private static List<String> getUniqueValues(List<String> bList, List<String> aList){
 
-private static List<String> getUniqueValues(List<String> objects, List<String> alreadyVisited){
+	List<String> union = new ArrayList<String>(aList);
+	union.addAll(bList);
+	
+	System.out.println("Union list = "+union.size());
 
-	List<String> union = new ArrayList<String>(alreadyVisited);
-	union.addAll(objects);
-
-	List<String> intersection = new ArrayList<String>(alreadyVisited);
-	intersection.retainAll(objects);
+	List<String> intersection = new ArrayList<String>(aList);
+	intersection.retainAll(bList);
+	intersection.addAll(aList);
+	System.out.println("Intersec list = "+intersection.size());
 
 	List<String> symmetricDifference = new ArrayList<String>(union);
 	symmetricDifference.removeAll(intersection);
+	System.out.println("SymmetricDiff list = "+symmetricDifference.size());
 
 	return symmetricDifference;
 }
