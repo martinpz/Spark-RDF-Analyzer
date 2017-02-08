@@ -30,8 +30,6 @@ import javax.ws.rs.core.MediaType;
 
 import org.json.JSONObject;
 
-import ranking.oldTests;
-import ranking.ClosenessCentrality;
 
 /**
  * This class is the REST web service which handles front end requests by

@@ -22,18 +22,6 @@ import scala.Tuple3;
 
 public class RDFAnalyzerPageRank implements Serializable{
 
-	public  class PageRanksCase implements Serializable{
-		
-		private String node;
-		private double importance; 
-		
-		
-		public void setNode(String node) { this.node = node; }
-		public void setImportance(double importance) { this.importance = importance; }
-
-		public String getNode() { return this.node; }
-		public double getImportance() { return this.importance; }
-	}
 	
 	
 	public JavaPairRDD<String,Tuple2<Tuple2<String,Double>,Double>> pair;
@@ -136,11 +124,7 @@ public class RDFAnalyzerPageRank implements Serializable{
 		double value = 0;
 		List<Double> items = pairedrdd.values().collect();
 		Double score = items.stream().mapToDouble(Double::doubleValue).sum();
-		
-//		for(int i=0;i<items.size();i++){
-//			System.out.println("The starting score is:" + items.get(i));
-//		}
-		
+
 		double decrease = lastscore - score;
 		double percentageDecrease = (decrease/lastscore) * 100;
 		
@@ -156,8 +140,6 @@ public class RDFAnalyzerPageRank implements Serializable{
 
 		try{
 			System.out.println("coming here");
-//			System.out.println(finalData.count());
-//			DataFrame finalFrame = Service.sqlCtx().createDataFrame(finalData,PageRanksCase.class);
 			org.apache.spark.sql.catalyst.encoders.OuterScopes.addOuterScope(this);
 			Encoder<PageRanksCase> personEncoder = Encoders.bean(PageRanksCase.class);
 			Dataset<PageRanksCase> javaBeanDS = Service.sqlCtx().createDataset(
@@ -165,8 +147,6 @@ public class RDFAnalyzerPageRank implements Serializable{
 			  personEncoder
 			);
 			javaBeanDS.toDF().write().parquet(rdfanalyzer.spark.Configuration.storage() + "sib200PageRank.parquet");
-//			System.out.println("coming here too"+ finalFrame.count());
-//			finalFrame.write().parquet(rdfanalyzer.spark.Configuration.storage() + "sib200PageRank.parquet");
 		}
 		catch(NullPointerException e){
 			System.out.println("We are in the error");
