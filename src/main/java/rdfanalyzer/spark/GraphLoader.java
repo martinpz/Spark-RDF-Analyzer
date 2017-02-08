@@ -18,8 +18,7 @@ package rdfanalyzer.spark;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
+import org.apache.spark.sql.DataFrame;
 
 /**
  * This class loads the graph stored in HDFS. If the graph is already in nTriple
@@ -27,7 +26,6 @@ import org.apache.spark.sql.Row;
  * turtle to nTriple and then saved to parquet.
  */
 public class GraphLoader {
-	@SuppressWarnings("serial")
 	public static String main(String Input, String Name, Boolean nTriple) throws Exception {
 		JavaRDD<RDFgraph> RDF;
 
@@ -58,7 +56,7 @@ public class GraphLoader {
 		}
 
 		// Apply a schema to an RDD of Java Beans and register it as a table.
-		Dataset<Row> schemaRDF = Service.spark().createDataFrame(RDF, RDFgraph.class);
+		DataFrame schemaRDF = Service.sqlCtx().createDataFrame(RDF, RDFgraph.class);
 		schemaRDF.write().parquet(Configuration.storage() + Name + ".parquet");
 
 		String[] rankingArguments = { Name };

@@ -16,8 +16,7 @@
 
 package rdfanalyzer.spark;
 
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
+import org.apache.spark.sql.DataFrame;
 
 /**
  * This class calculates node ranking for a given graph & saves it to parquet.
@@ -27,11 +26,11 @@ public class CalculateRanking {
 		String result = "";
 
 		// Read graph from parquet
-		Dataset<Row> graphFrame = Service.spark().read().parquet(Configuration.storage() + args[0] + ".parquet");
-		graphFrame.cache().createOrReplaceTempView("Graph");
+		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + args[0] + ".parquet");
+		graphFrame.cache().registerTempTable("Graph");
 
 		// Run SQL over loaded Graph.
-		Dataset<Row> resultsFrame = Service.spark().sql("SELECT subject, COUNT(*) as nr FROM Graph GROUP BY subject");
+		DataFrame resultsFrame = Service.sqlCtx().sql("SELECT subject, COUNT(*) as nr FROM Graph GROUP BY subject");
 		result = Long.toString(resultsFrame.count());
 
 		// Write results to parquet.

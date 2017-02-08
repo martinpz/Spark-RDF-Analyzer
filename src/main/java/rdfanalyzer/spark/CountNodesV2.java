@@ -16,9 +16,7 @@
 
 package rdfanalyzer.spark;
 
-import java.util.List;
-
-import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
 /**
@@ -27,25 +25,25 @@ import org.apache.spark.sql.Row;
 public class CountNodesV2 {
 	public static String main(String[] args) throws Exception {
 		// Read graph from parquet
-		Dataset<Row> graphFrame = Service.spark().read().parquet(Configuration.storage() + args[0] + ".parquet");
-		graphFrame.cache().createOrReplaceTempView("Graph");
+		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + args[0] + ".parquet");
+		graphFrame.cache().registerTempTable("Graph");
 
 		// Run SQL over loaded Graph.
-		Dataset<Row> resultsFrame = Service.spark()
+		DataFrame resultsFrame = Service.sqlCtx()
 				.sql("SELECT COUNT(DISTINCT MyTable1.subject) FROM (SELECT subject FROM Graph"
 						+ " UNION ALL SELECT object FROM Graph WHERE object NOT LIKE '\"%' " + " ) MyTable1");
 
 		// Get the literals.
-		List<Row> rows = resultsFrame.collectAsList();
-		String Literals = Long.toString(rows.get(0).getLong(0));
+		Row[] rows = resultsFrame.collect();
+		String Literals = Long.toString(rows[0].getLong(0));
 
 		// Run SQL over loaded Graph.
-		resultsFrame = Service.spark().sql("SELECT COUNT(object) FROM Graph WHERE object LIKE '\"%'");
+		resultsFrame = Service.sqlCtx().sql("SELECT COUNT(object) FROM Graph WHERE object LIKE '\"%'");
 
 		// Get the Objects, calculate SUM and format results desired format.
-		rows = resultsFrame.collectAsList();
+		rows = resultsFrame.collect();
 
-		String Objects = Long.toString(rows.get(0).getLong(0));
+		String Objects = Long.toString(rows[0].getLong(0));
 		String Sum = Integer.toString(Integer.parseInt(Literals) + Integer.parseInt(Objects));
 
 		return "<h3><span class=\"glyphicon glyphicon-file\" aria-hidden=\"true\"></span>&nbsp;Objects: " + Objects

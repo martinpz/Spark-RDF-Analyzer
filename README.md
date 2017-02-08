@@ -40,15 +40,13 @@ The directory structure on you local system should look similar to the following
 ```
 
 - By executing the following command, you can run the Tomcat container.<br>
-This will overwrite the default Tomcat user config and mount the local directory `/my/path/to/data` into the container, accessible at `/home/data`.<br>
-<strong>IMPORTANT:</strong> You will have to increase the memory for Java by passing the JAVA_OPTS to the container. 
+This will overwrite the default Tomcat user config and mount the local directory `/my/path/to/data` into the container, accessible at `/home/data`.
 
 ```bash
 docker run \
 	-dit \
 	--name tomcat \
 	-p 8080:8080 \
-	-e JAVA_OPTS='-Xmx1g' \
 	-v /my/path/to/tomcat-users.xml:/usr/local/tomcat/conf/tomcat-users.xml \
 	-v /my/path/to/data:/home/data \
 	tomcat:jre8 \
