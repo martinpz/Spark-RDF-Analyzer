@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
 /**
@@ -37,14 +37,14 @@ public class CollapsedGraph {
 		String result = "";
 
 		// SQL can be run over RDDs that have been registered as tables.
-		Dataset<Row> predicatesFrame = Service.spark()
+		DataFrame predicatesFrame = Service.sqlCtx()
 				.sql("SELECT t2o AS s, t1p AS p, t4o AS o, Count(*) AS nr FROM (SELECT t1.subject AS t1s, t2.object AS t2o, t1.predicate AS t1p, t1.object AS t1o FROM Graph t1, Graph t2"
 						+ " WHERE (t2.predicate = '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>') AND t1.subject = t2.subject) MyTable1, "
 						+ "(SELECT t3.object AS t3o, t3.subject AS t3s, t3.predicate AS t3p, t4.object AS t4o FROM Graph t3, Graph t4"
 						+ " WHERE (t4.predicate = '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>') AND t3.object = t4.subject) MyTable2"
 						+ " WHERE t1s=t3s AND t1p=t3p AND t1o=t3o GROUP BY t2o, t1p, t4o ORDER BY t1p");
 
-		List<Row> resultRows = predicatesFrame.collectAsList();
+		Row[] resultRows = predicatesFrame.collect();
 
 		// Merge Edgefinder data and format output results. Based on if output
 		// is table or chart it is returned into different formats.

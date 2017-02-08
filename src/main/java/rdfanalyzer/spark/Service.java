@@ -17,7 +17,7 @@
 package rdfanalyzer.spark;
 
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.SQLContext;
 
 /**
  * This class holds all required services for performing computations within the
@@ -37,7 +37,7 @@ public class Service {
 		 * the ClassLoader will implicitly synchronize this initialization.
 		 */
 		static final JavaSparkContext SPARK_CTX = new JavaSparkContext(Configuration.sparkConf());
-		static final SparkSession SPARK_SESSION = new SparkSession(SPARK_CTX.sc());
+		static final SQLContext SQL_CTX = new SQLContext(SPARK_CTX);
 	}
 
 	private Service() {
@@ -48,16 +48,15 @@ public class Service {
 		return Instance.SPARK_CTX;
 	}
 
-	public static SparkSession spark() {
-		return Instance.SPARK_SESSION;
+	public static SQLContext sqlCtx() {
+		return Instance.SQL_CTX;
 	}
 
 	/**
 	 * Stops all services.
 	 */
 	public static void shutdown() {
-		Instance.SPARK_SESSION.stop();
-		Instance.SPARK_SESSION.close();
+		Instance.SQL_CTX.clearCache();
 		Instance.SPARK_CTX.cancelAllJobs();
 		Instance.SPARK_CTX.stop();
 	}

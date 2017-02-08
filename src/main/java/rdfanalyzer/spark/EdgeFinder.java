@@ -17,10 +17,9 @@
 package rdfanalyzer.spark;
 
 import java.util.Arrays;
-import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
 /**
@@ -28,17 +27,17 @@ import org.apache.spark.sql.Row;
  * Chord or Table.
  */
 public class EdgeFinder {
-	public static List<Row> cachedRows;
+	public static Row[] cachedRows;
 
 	public static String main(String[] args) throws Exception {
 		String result = "";
 
 		// Read graph from parquet
-		Dataset<Row> graphFrame = Service.spark().read().parquet(Configuration.storage() + args[0] + ".parquet");
-		graphFrame.cache().createOrReplaceTempView("Graph");
+		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + args[0] + ".parquet");
+		graphFrame.cache().registerTempTable("Graph");
 
 		// Run SQL over loaded Graph.
-		Dataset<Row> resultsFrame = Service.spark()
+		DataFrame resultsFrame = Service.sqlCtx()
 				.sql("SELECT t2o AS s, t1p AS p, t4o AS o, Count(*) AS nr FROM (SELECT t1.subject AS t1s, t2.object AS t2o, t1.predicate AS t1p, t1.object AS t1o FROM Graph t1, Graph t2"
 						+ " WHERE (t2.predicate = '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>') AND t1.subject = t2.subject) MyTable1, "
 						+ "(SELECT t3.object AS t3o, t3.subject AS t3s, t3.predicate AS t3p, t4.object AS t4o FROM Graph t3, Graph t4"
@@ -46,7 +45,7 @@ public class EdgeFinder {
 						+ " WHERE t1s=t3s AND t1p=t3p AND t1o=t3o GROUP BY t2o, t1p, t4o");
 
 		// Format output based on if output is table or chart
-		List<Row> resultRows = resultsFrame.collectAsList();
+		Row[] resultRows = resultsFrame.collect();
 
 		if (args[1].equals("Table")) {
 			result = "<table class=\"table table-striped\">";

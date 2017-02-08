@@ -16,9 +16,7 @@
 
 package rdfanalyzer.spark;
 
-import java.util.List;
-
-import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 
 /**
@@ -29,21 +27,21 @@ public class OutDegree {
 		String result = "";
 
 		// Read graph from parquet
-		Dataset<Row> graphFrame = Service.spark().read().parquet(Configuration.storage() + args[0] + ".parquet");
-		graphFrame.cache().createOrReplaceTempView("Graph");
+		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + args[0] + ".parquet");
+		graphFrame.cache().registerTempTable("Graph");
 
 		// Run SQL over loaded Graph.
-		Dataset<Row> resultsFrame = Service.spark()
+		DataFrame resultsFrame = Service.sqlCtx()
 				.sql("SELECT " + args[1] + "(degree) FROM (SELECT subject, COUNT(predicate) AS degree FROM Graph"
 						+ " GROUP BY subject) MyTable1");
 
 		// Format output results. Based if input is AVG, MIN or MAX.
-		List<Row> rows = resultsFrame.collectAsList();
+		Row[] rows = resultsFrame.collect();
 
 		if (args[1].equals("MIN") || args[1].equals("MAX")) {
-			result = Long.toString(rows.get(0).getLong(0));
+			result = Long.toString(rows[0].getLong(0));
 		} else {
-			result = Double.toString(rows.get(0).getDouble(0));
+			result = Double.toString(rows[0].getDouble(0));
 			result = result.substring(0, 4);
 		}
 
