@@ -10,7 +10,9 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
+import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
+import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
@@ -53,7 +55,7 @@ public class RDFAnalyzerPageRank implements Serializable{
 	
 	
 	
-	public void PerformPageRank(Dataset<Row> records) throws Exception{
+	public void PerformPageRank(DataFrame records) throws Exception{
 
 //		createData();
 		JavaPairRDD<String,String> counters = records.select("subject","object").toJavaRDD().mapToPair(
@@ -158,7 +160,7 @@ public class RDFAnalyzerPageRank implements Serializable{
 //			DataFrame finalFrame = Service.sqlCtx().createDataFrame(finalData,PageRanksCase.class);
 			org.apache.spark.sql.catalyst.encoders.OuterScopes.addOuterScope(this);
 			Encoder<PageRanksCase> personEncoder = Encoders.bean(PageRanksCase.class);
-			Dataset<PageRanksCase> javaBeanDS = Service.spark().sqlContext().createDataset(
+			Dataset<PageRanksCase> javaBeanDS = Service.sqlCtx().createDataset(
 			  finalData.collect(),
 			  personEncoder
 			);
@@ -188,25 +190,24 @@ public class RDFAnalyzerPageRank implements Serializable{
 	
 	
 	public JavaPairRDD<String,Tuple2<Tuple2<String,Double>,Double>> ReshuffleAndJoinToNewRanks(JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> shuffledwithnumbers,JavaPairRDD<String,Double> pairedrddd){
-		return null;
-//		return shuffledwithnumbers.flatMapToPair(new PairFlatMapFunction<Tuple2<String,Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>>, String, Tuple2<String,Double>>() {
-//
-//			@Override
-//			public Iterable<Tuple2<String, Tuple2<String,Double>>> call(
-//					Tuple2<String, Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> arg0)
-//					throws Exception {
-//				
-//				
-//				List<Tuple2<String, Tuple2<String,Double>>> results = new ArrayList<>();
-//				
-//				for(int i=0;i<arg0._2._1().size();i++){
-//					
-//					results.add(new Tuple2<String,Tuple2<String,Double>>(arg0._2._1().get(i),new Tuple2(arg0._1,arg0._2._3().get(i))));
-//				}
-//				
-//				return results;
-//			}
-//		}).join(pairedrddd);
+		return shuffledwithnumbers.flatMapToPair(new PairFlatMapFunction<Tuple2<String,Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>>, String, Tuple2<String,Double>>() {
+
+			@Override
+			public Iterable<Tuple2<String, Tuple2<String,Double>>> call(
+					Tuple2<String, Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> arg0)
+					throws Exception {
+				
+				
+				List<Tuple2<String, Tuple2<String,Double>>> results = new ArrayList<>();
+				
+				for(int i=0;i<arg0._2._1().size();i++){
+					
+					results.add(new Tuple2<String,Tuple2<String,Double>>(arg0._2._1().get(i),new Tuple2(arg0._1,arg0._2._3().get(i))));
+				}
+				
+				return results;
+			}
+		}).join(pairedrddd);
 	}
 	
 	
@@ -330,28 +331,27 @@ public class RDFAnalyzerPageRank implements Serializable{
 	 * Converts keys to values and array of values to keys. For Step 1 mentioned on stackoverflow question.
 	 */
 	public  JavaPairRDD<String,Tuple3<String,Double,Double>> PerformOperationReshuffle(JavaPairRDD<String,Tuple3<ArrayList<String>,Double,Double>> list){
-		return null;
-//		return list.flatMapToPair(new PairFlatMapFunction<Tuple2<String,Tuple3<ArrayList<String>,Double,Double>>, String, Tuple3<String,Double,Double>>() {
-//
-//			@Override
-//			public Iterable<Tuple2<String, Tuple3<String,Double,Double>>> call(Tuple2<String, Tuple3<ArrayList<String>, Double, Double>> flattedData)
-//					throws Exception {
-//
-//				List<Tuple2<String, Tuple3<String,Double,Double>>> results = new ArrayList<>();
-//				
-//				
-//				/*
-//				 * flattedData._1 = values
-//				 * flattedData._2._1() = keys
-//				 * flattedData._2._2() = pj
-//				 * flattedData._2._3() = 1/n
-//				 */
-//				for(String item:flattedData._2._1()){
-//					results.add(new Tuple2<String,Tuple3<String,Double,Double>>(item,new Tuple3(flattedData._1,flattedData._2._2(),flattedData._2._3())));
-//				}
-//				return results;
-//			}
-//		});
+		return list.flatMapToPair(new PairFlatMapFunction<Tuple2<String,Tuple3<ArrayList<String>,Double,Double>>, String, Tuple3<String,Double,Double>>() {
+
+			@Override
+			public Iterable<Tuple2<String, Tuple3<String,Double,Double>>> call(Tuple2<String, Tuple3<ArrayList<String>, Double, Double>> flattedData)
+					throws Exception {
+
+				List<Tuple2<String, Tuple3<String,Double,Double>>> results = new ArrayList<>();
+				
+				
+				/*
+				 * flattedData._1 = values
+				 * flattedData._2._1() = keys
+				 * flattedData._2._2() = pj
+				 * flattedData._2._3() = 1/n
+				 */
+				for(String item:flattedData._2._1()){
+					results.add(new Tuple2<String,Tuple3<String,Double,Double>>(item,new Tuple3(flattedData._1,flattedData._2._2(),flattedData._2._3())));
+				}
+				return results;
+			}
+		});
 		
 	}
 	

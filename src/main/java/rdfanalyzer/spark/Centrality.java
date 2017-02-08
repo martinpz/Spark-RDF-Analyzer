@@ -3,27 +3,22 @@ package rdfanalyzer.spark;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.catalyst.expressions.MonotonicallyIncreasingID;
 
 import com.google.common.io.Resources;
 
 import ranking.ClosenessBean;
 import ranking.ClosenessCentrality;
 import ranking.RDFAnalyzerPageRank.PageRanksCase;
-import ranking.oldTests;
+//import ranking.oldTests;
 import scala.Tuple2;
 
 
@@ -31,7 +26,7 @@ public class Centrality {
 private final static Logger logger = Logger.getLogger(Centrality.class);
 
 public static ConnAdapter objAdapter = new ConnAdapter();
-public static Dataset<Row> graphFrame;
+public static DataFrame graphFrame;
 public static List<ClosenessBean> closenessbean;
 
 public static final String closenessParquetPath = rdfanalyzer.spark.Configuration.storage() + "closeness.parquet";
@@ -43,8 +38,8 @@ public static final String closenessParquetPath = rdfanalyzer.spark.Configuratio
 */
 public static final int LIMIT_DELTA = 80;
 public static String main(String metricType,String dataset, String nodeName) throws Exception{
-graphFrame = Service.spark().sqlContext().parquetFile(Configuration.storage() + dataset + ".parquet");
-graphFrame.cache().createOrReplaceTempView("Graph");
+graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + dataset + ".parquet");
+graphFrame.cache().registerTempTable("Graph");
 /**********************************************************************/
 // DataFrame resultsFrame = Service.sqlCtx().sql("SELECT * FROM Graph");
 // Row[] rows = resultsFrame.collect();
@@ -80,7 +75,7 @@ else if(metricType.equals("4")){
 	List<String> list = new ArrayList<String>();
 	list.add(nodeName);
 	
-	Dataset<Row> resultsFrame = Service.spark().sqlContext().sql("SELECT subject,object FROM Graph WHERE subject='" + nodeName + "' LIMIT 5");
+	DataFrame resultsFrame = Service.sqlCtx().sql("SELECT subject,object FROM Graph WHERE subject='" + nodeName + "' LIMIT 5");
 	
 	List<String> neighbours = getListFromDatasetRows(resultsFrame);
 	for (String string : neighbours) {
@@ -103,7 +98,7 @@ public static String CalculateInDegree(String node){
 String result = "";
 // Run SQL over loaded Graph.
 
-Dataset<Row> resultsFrame = Service.spark().sqlContext().sql("SELECT COUNT(subject) FROM Graph WHERE object = '"+node+"'");
+DataFrame resultsFrame = Service.sqlCtx().sql("SELECT COUNT(subject) FROM Graph WHERE object = '"+node+"'");
 resultsFrame.select("").filter(resultsFrame.col("").isin());
 List<Row> rows = resultsFrame.collectAsList();
 
@@ -114,7 +109,7 @@ return result;
 public static String CalculateOutDegree(String node){
 String result = "";
 
-Dataset<Row> resultsFrame = Service.spark().sqlContext().sql("SELECT COUNT(object) from Graph where subject='"+node+"'");
+DataFrame resultsFrame = Service.sqlCtx().sql("SELECT COUNT(object) from Graph where subject='"+node+"'");
 List<Row> rows = resultsFrame.collectAsList();
 
 result = Long.toString(rows.get(0).getLong(0));
@@ -129,10 +124,10 @@ public static String CalculateCloseness(List<String> node) throws Exception{
 	 List<String> tobeQueried = node;
 
 	 // All The records of parquet.
-	 Dataset<Row> existingParquetData = null;
+	 DataFrame existingParquetData = null;
 
 	 // The records which already exists in parquet sent through arg of this function.
-	 Dataset<Row> existingcurrentNodesData = null;
+	 DataFrame existingcurrentNodesData = null;
 
 
 	 File f = new File(closenessParquetPath);
@@ -143,8 +138,8 @@ public static String CalculateCloseness(List<String> node) throws Exception{
 		 System.out.println("file exists reading...");
 		 
 		 // Read existing closeness data from Parquet
-		 existingParquetData = Service.spark().read().parquet(closenessParquetPath);		 // 1 record
-		 existingcurrentNodesData = Service.spark().read().parquet(closenessParquetPath);	 
+		 existingParquetData = Service.sqlCtx().read().parquet(closenessParquetPath);		 // 1 record
+		 existingcurrentNodesData = Service.sqlCtx().read().parquet(closenessParquetPath);	 
 		 
 		 
 
@@ -171,7 +166,7 @@ public static String CalculateCloseness(List<String> node) throws Exception{
  
  
  
-	 Dataset<Row> resultsFrame = Service.spark().sqlContext().sql("SELECT * from Graph");
+	 DataFrame resultsFrame = Service.sqlCtx().sql("SELECT * from Graph");
 	 System.out.println("query 3");
 
 	 resultsFrame.cache();
@@ -181,11 +176,11 @@ public static String CalculateCloseness(List<String> node) throws Exception{
 	 System.out.println("query 5");
 	
 	 for(String anode:tobeQueried){
-		 closenessbean.add(path.calculateCloseness(resultsFrame,anode));
+//		 closenessbean.add(path.calculateCloseness(resultsFrame,anode));
 	 }
 	 System.out.println("query 6");
 	 
-	 Dataset<Row> newDataset = Service.spark().createDataFrame(closenessbean,ClosenessBean.class);
+	 DataFrame newDataset = Service.sqlCtx().createDataFrame(closenessbean,ClosenessBean.class);
 
 	 
 	 System.out.println("Parquet data");
@@ -197,7 +192,7 @@ public static String CalculateCloseness(List<String> node) throws Exception{
 	 newDataset.show();
 
 	 if(f.exists()){
-		 newDataset = existingParquetData.union(newDataset);
+//		 newDataset = existingParquetData.union(newDataset);
 		 System.out.println("query 7");
 	 }
 
@@ -214,9 +209,9 @@ public static String CalculateCloseness(List<String> node) throws Exception{
 
 	 
 	 
- // Dataset<Row> vertFrame = Service.spark().sqlContext().sql("select *,row_number() OVER(ORDER BY(SELECT 0)) as id from Graph");
+ // DataFrame vertFrame = Service.sqlCtx().sql("select *,row_number() OVER(ORDER BY(SELECT 0)) as id from Graph");
 
-//Dataset<Row> vertFrame = Service.spark().sqlContext().sql(""
+//DataFrame vertFrame = Service.sqlCtx().sql(""
 //+ "SELECT DISTINCT row_number() OVER(ORDER BY(SELECT 0)) as id,a.nodes  FROM "
 //+ "(SELECT subject as nodes from Graph"
 //+ " UNION ALL"
@@ -224,13 +219,13 @@ public static String CalculateCloseness(List<String> node) throws Exception{
 
 //	String nodee = node;
 //	System.out.println("query 0 success");
-//	Dataset<Row> hop1Nodes = Service.spark().sqlContext().sql("SELECT subject,object FROM Graph WHERE subject='"+nodee+"' AND object!='"+nodee+"'");
+//	DataFrame hop1Nodes = Service.sqlCtx().sql("SELECT subject,object FROM Graph WHERE subject='"+nodee+"' AND object!='"+nodee+"'");
 //	System.out.println("query 1 success");
 //
 //	List<String> hop1Objects = getListFromDatasetRows(hop1Nodes);
 //	
 //
-//	Dataset<Row> hop2Nodes = graphFrame.select(graphFrame.col("subject"),graphFrame.col("object"))
+//	DataFrame hop2Nodes = graphFrame.select(graphFrame.col("subject"),graphFrame.col("object"))
 //			.where(graphFrame.col("subject").isin(hop1Objects.stream().toArray(String[]::new))
 //					.and(graphFrame.col("object").notEqual(hop1Nodes.col("object"))
 //							.and(graphFrame.col("object").notEqual(nodee))));
@@ -239,7 +234,7 @@ public static String CalculateCloseness(List<String> node) throws Exception{
 //	List<String> hop2Objects = getListFromDatasetRows(hop2Nodes);
 //	System.out.println("query 4 success");
 //	
-//	Dataset<Row> hop3Nodes = graphFrame.select(graphFrame.col("subject"),graphFrame.col("object"))
+//	DataFrame hop3Nodes = graphFrame.select(graphFrame.col("subject"),graphFrame.col("object"))
 //					.where(graphFrame.col("subject").isin(hop2Objects.stream().toArray(String[]::new))
 //					.and(graphFrame.col("object").notEqual(hop2Nodes.col("object")))
 //					.and(graphFrame.col("object").notEqual(hop1Nodes.col("object")))
@@ -258,18 +253,18 @@ public static String CalculateCloseness(List<String> node) throws Exception{
 //vertFrame.write().parquet(rdfanalyzer.spark.Configuration.storage() + "UniqueNodes.parquet");
 //vertFrame.createOrReplaceTempView("UniqueNodes");
 
-//	Dataset<Row> vertFrame = Service.spark().read().parquet(rdfanalyzer.spark.Configuration.storage() + "UniqueNodes.parquet");
+//	DataFrame vertFrame = Service.spark().read().parquet(rdfanalyzer.spark.Configuration.storage() + "UniqueNodes.parquet");
 //	vertFrame.show();
 //	vertFrame.createOrReplaceTempView("UniqueNodes");
 //
-//Dataset<Row> relationsFrame = Service.spark().sqlContext().sql(""
+//DataFrame relationsFrame = Service.sqlCtx().sql(""
 //+ "SELECT unSub.id as subId,unObj.id as objId,predicate FROM Graph g "
 //+ "INNER JOIN UniqueNodes unSub ON unSub.nodes=g.subject "
 //+ "INNER JOIN UniqueNodes unObj ON unObj.nodes=g.object");
 //relationsFrame.write().parquet(rdfanalyzer.spark.Configuration.storage() + "relations.parquet");
 //relationsFrame.show();
 
-// Dataset<Row> relationsFrame = Service.spark().sqlContext().sql("SELECT subject,predicate,object from Graph");
+// DataFrame relationsFrame = Service.sqlCtx().sql("SELECT subject,predicate,object from Graph");
 
 
 // // this give us the value of max indegree of a particular node.
@@ -326,7 +321,7 @@ private static List<String> getUniqueValues(List<String> bList, List<String> aLi
 
 
 
-public static List<String> getListFromDatasetRows(Dataset<Row> rows){
+public static List<String> getListFromDatasetRows(DataFrame rows){
 	return rows.toJavaRDD().map(new Function<Row, String>() {
 
 		@Override
@@ -349,7 +344,7 @@ public static String readResource(final String fileName, Charset charset) throws
         return Resources.toString(Resources.getResource(fileName), charset);
 }
 public static long getHighestIndegree(){
-Dataset<Row> maxInDegreeFrame = Service.spark().sqlContext()
+DataFrame maxInDegreeFrame = Service.sqlCtx()
 .sql("SELECT MAX(tbl1.InDegreeCount) FROM "
 + "(SELECT object,COUNT(subject) AS InDegreeCount FROM Graph GROUP BY object)tbl1");
 
@@ -359,7 +354,7 @@ return rowMaxInDegree.get(0).getLong(0);
 }
 
 public static long getHighestOutDegree(){
-Dataset<Row> maxOutDegreeFrame = Service.spark().sqlContext()
+DataFrame maxOutDegreeFrame = Service.sqlCtx()
 .sql("SELECT first(tbl1.subject),MAX(tbl1.OutdegreeCount) FROM"
 + "(SELECT subject,COUNT(object) AS OutdegreeCount FROM Graph GROUP BY subject)tbl1");
 
@@ -377,7 +372,7 @@ public static String calculateStartNode(){
 * values
 */
 // node with highest out-degree
-Dataset<Row> maxOutDegreeFrame = Service.spark().sqlContext()
+DataFrame maxOutDegreeFrame = Service.sqlCtx()
 .sql("SELECT first(tbl1.subject),MAX(tbl1.OutdegreeCount) FROM"
 + "(SELECT subject,COUNT(object) AS OutdegreeCount FROM Graph GROUP BY subject)tbl1");
 
@@ -387,8 +382,7 @@ List<Row> rowMaxOutDegree = maxOutDegreeFrame.collectAsList();
 String maxInDegreeOfOutDegree = CalculateInDegree(rowMaxOutDegree.get(0).getString(0));
 
 // node with highest in-degree
-Dataset<Row> maxInDegreeFrame = Service.spark().sqlContext()
-.sql("SELECT first(tbl1.object),MAX(tbl1.OutdegreeCount) FROM"
+DataFrame maxInDegreeFrame = Service.sqlCtx().sql("SELECT first(tbl1.object),MAX(tbl1.OutdegreeCount) FROM"
 + "(SELECT object,COUNT(subject) AS OutdegreeCount FROM Graph GROUP BY object)tbl1");
 
 List<Row> rowMaxInDegree = maxInDegreeFrame.collectAsList();

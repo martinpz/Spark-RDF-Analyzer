@@ -62,9 +62,18 @@
 			<id>cloudera</id>
 			<url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
 		</repository>
+		<repository>
+		    <id>SparkPackagesRepo</id>
+		    <url>http://dl.bintray.com/spark-packages/maven</url>
+		</repository>
 	</repositories>
 
 	<dependencies>
+		  <dependency>
+		    <groupId>graphframes</groupId>
+		    <artifactId>graphframes</artifactId>
+		    <version>0.3.0-spark1.6-s_2.11</version>
+		  </dependency>
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-client</artifactId>

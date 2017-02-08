@@ -10,6 +10,7 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
+import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
@@ -39,7 +40,7 @@ public class ClosenessCentrality implements Serializable {
 	private final int HOPS = 3; 
 	
 	public static ConnAdapter objAdapter = new ConnAdapter();
-	public static Dataset<Row> graphFrame,allSubjectsDF;
+	public static DataFrame graphFrame,allSubjectsDF;
 
 	private JavaPairRDD<String,String> objectsOfSubjects;
 	
@@ -48,7 +49,7 @@ public class ClosenessCentrality implements Serializable {
 	
 	
 	
-	public ClosenessBean calculateCloseness(Dataset<Row> record,String node) throws Exception{
+	public ClosenessBean calculateCloseness(DataFrame record,String node) throws Exception{
 		
 		
 		
@@ -102,7 +103,7 @@ public class ClosenessCentrality implements Serializable {
 
 
 	// Get objects of unique subjects
-	private JavaPairRDD<String,String> getObjectsOfSubjects(Dataset<Row> records) throws Exception{
+	private JavaPairRDD<String,String> getObjectsOfSubjects(DataFrame records) throws Exception{
 
 		return records.
 				filter(records.col("subject").isin(nextQueryArray.stream().toArray())).toJavaRDD().mapToPair(
@@ -158,7 +159,7 @@ public class ClosenessCentrality implements Serializable {
 	 * get the 3 hops closeness of the neighbour of it. While in the above function we 
 	 * also added the node from which we are starting.
 	 */
-	private void calculateClosenessArray(Dataset<Row> record,String node,boolean firstTime) throws Exception{
+	private void calculateClosenessArray(DataFrame record,String node,boolean firstTime) throws Exception{
 
 		listToQuery = new ArrayList<>();
 		
@@ -188,7 +189,7 @@ public class ClosenessCentrality implements Serializable {
 	}
 	
 	
-	private JavaPairRDD<String,String> getObjectsOfSubjects(List<String> subjects,Dataset<Row> records){
+	private JavaPairRDD<String,String> getObjectsOfSubjects(List<String> subjects,DataFrame records){
 		return records.
 				filter(records.col("subject").isin(subjects.stream().toArray())).toJavaRDD().mapToPair(
 		new PairFunction<Row,String,String>(){
