@@ -5,7 +5,9 @@ import java.util.List;
 
 import rdfanalyzer.spark.Service;
 
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.function.Function;
 import org.apache.spark.graphx.Edge;
 import org.apache.spark.graphx.Graph;
 import org.apache.spark.rdd.RDD;
@@ -13,14 +15,17 @@ import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.storage.StorageLevel;
+import org.graphframes.GraphFrame;
+import org.graphframes.lib.PageRank;
 
 import scala.Tuple2;
+import scala.collection.JavaConversions;
+import scala.collection.Seq;
 import scala.collection.immutable.Map;
-import scala.collection.immutable.Seq;
 
 public class oldTests {
 	
-	public List<Tuple2<Object,String>> vertices = new ArrayList<>();
+	public List<Tuple2<String,String>> vertices = new ArrayList<>();
 	public List<Edge<String>> edges = new ArrayList<>();
 
 	public class User {
@@ -124,13 +129,12 @@ public class oldTests {
 		    DataFrame edgDF = Service.sqlCtx().createDataFrame(rList, Relation.class);
 
 		    //Create a GraphFrame
-//		    GraphFrame gFrame = new GraphFrame(verDF, edgDF);
-		    
-	
-		    
+		    GraphFrame gFrame = new GraphFrame(verDF, edgDF);
+		    		    
 		    //Get in-degree of each vertex.
 		    //Count the number of "follow" connections in the graph.
-//		    long count = gFrame.edges().filter("relationship = 'follow'").count();
+		    long count = gFrame.edges().filter("relationship = 'follow'").count();
+		    System.out.println("Count is: " + count);
 		    //Run PageRank algorithm, and show results.
 //		    PageRank pRank = gFrame.pageRank().resetProbability(0.01).tol(0.5);
 //		    pRank.run().vertices().select("id", "pagerank").show();
@@ -138,9 +142,48 @@ public class oldTests {
 //		    org.graphframes.lib.ShortestPaths path = new org.graphframes.lib.ShortestPaths(gFrame);
 		    ArrayList<Object> obj = new ArrayList<>();
 		    obj.add("c");
-		    obj.add("b");
+		    
+		    Seq<Object> sobj = scala.collection.JavaConverters.asScalaIteratorConverter(obj.iterator()).asScala().toSeq();
 //		    path.landmarks(obj);
 //		    path.run().show();
+		    
+		    gFrame.shortestPaths().landmarks(sobj).run().show();
+		    
+		    System.out.println("Done");
+		    
+		   // Breadth-first search (BFS) finds the shortest path(s) from one vertex (or a set of vertices) to
+		   // another vertex (or a set of vertices).
+		    
+		    
+//		    JavaPairRDD<String,String> initialData = JavaPairRDD.fromJavaRDD(Service.sparkCtx().parallelize(vertices));
+//		    initialData.map(new Function<Tuple2<String,String>, Tuple2<String,String>>() {
+//
+//				@Override
+//				public Tuple2<String, String> call(Tuple2<String, String> arg0) throws Exception {
+//					// TODO Auto-generated method stub
+//					return null;
+//				}
+//			});
+//		    
+//		    // Search from Alice for people of age > 34
+//		    DataFrame paths = gFrame.bfs().fromExpr("name = 'Alice'").run();
+//		    paths.show();
+//		    
+//		    System.out.println("First BFS Query Done");
+
+		    // Specify edge filters or max path lengths.
+/*		    DataFrame paths1 = gFrame.bfs().fromExpr("name = 'Alice'").toExpr("age < 34")
+		    .edgeFilter("relationship != 'friend'")
+		    .maxPathLength(3)
+		    .run(); 
+		    paths1.show();*/
+		    
+//		    DataFrame paths1 = gFrame.bfs().fromExpr("name = 'Alice'").toExpr("age < 34")
+//				    .maxPathLength(2)
+//				    .run(); 
+//				    paths1.show();
+//		    
+//		    System.out.println("Second BFS Query Done");
 		    
 	}
 	
@@ -148,43 +191,43 @@ public class oldTests {
 	
 	public void ShortestPaths(){
 		
-		
-		createVertices();
-		createEdges();
-		System.out.println("creating");
-		
-		JavaRDD<Tuple2<Object,String>> distData = Service.sparkCtx().parallelize(vertices);
-		JavaRDD<Edge<String>> edgeData = Service.sparkCtx().parallelize(edges);
-
-		RDD<Tuple2<Object,String>> counters= JavaRDD.toRDD(distData);
-		RDD<Edge<String>> edgeCounters= JavaRDD.toRDD(edgeData);
-		System.out.println("created datasets");
-
-		List<Object> longIds = new ArrayList<>();
-		longIds.add(1L);
-		longIds.add(5L);
-
-		Seq<Object> s = scala.collection.JavaConversions.asScalaBuffer(longIds).toList().toSeq();
-
-		System.out.println("created seq object counter");
-		
-		System.out.println("created seq object");
-		
-		Graph<String, String> graph = Graph.apply(
-				counters,
-				edgeCounters, 
-				"",
-				StorageLevel.MEMORY_AND_DISK(),
-				StorageLevel.MEMORY_AND_DISK(),
-				scala.reflect.ClassTag$.MODULE$.apply("".getClass()),
-				scala.reflect.ClassTag$.MODULE$.apply("".getClass()));
-		
-
-		System.out.println("number of edges in graph = "+graph.edges().count());
-
-		System.out.println("number of vertices in graph = "+graph.vertices().count());
-		
-		 System.out.println("created the graph");
+//		
+//		createVertices();
+//		createEdges();
+//		System.out.println("creating");
+//		
+//		JavaRDD<Tuple2<Object,String>> distData = Service.sparkCtx().parallelize(vertices);
+//		JavaRDD<Edge<String>> edgeData = Service.sparkCtx().parallelize(edges);
+//
+//		RDD<Tuple2<Object,String>> counters= JavaRDD.toRDD(distData);
+//		RDD<Edge<String>> edgeCounters= JavaRDD.toRDD(edgeData);
+//		System.out.println("created datasets");
+//
+//		List<Object> longIds = new ArrayList<>();
+//		longIds.add(1L);
+//		longIds.add(5L);
+//
+//		Seq<Object> s = scala.collection.JavaConversions.asScalaBuffer(longIds).toList().toSeq();
+//
+//		System.out.println("created seq object counter");
+//		
+//		System.out.println("created seq object");
+//		
+//		Graph<String, String> graph = Graph.apply(
+//				counters,
+//				edgeCounters, 
+//				"",
+//				StorageLevel.MEMORY_AND_DISK(),
+//				StorageLevel.MEMORY_AND_DISK(),
+//				scala.reflect.ClassTag$.MODULE$.apply("".getClass()),
+//				scala.reflect.ClassTag$.MODULE$.apply("".getClass()));
+//		
+//
+//		System.out.println("number of edges in graph = "+graph.edges().count());
+//
+//		System.out.println("number of vertices in graph = "+graph.vertices().count());
+//		
+//		 System.out.println("created the graph");
 //		 Graph<scala.collection.immutable.Map<Object,Object>,String> shortestpaths = 
 //				 ShortestPaths.run(graph, s,scala.reflect.ClassTag$.MODULE$.apply("".getClass()));
 //		
@@ -215,11 +258,16 @@ public class oldTests {
 	}
 
 	private  void createVertices(){
-		vertices.add(new Tuple2<Object,String>(1L,"node1"));
-		vertices.add(new Tuple2<Object,String>(2,"node2"));
-		vertices.add(new Tuple2<Object,String>(3,"node3"));
-		vertices.add(new Tuple2<Object,String>(4,"node4"));
-		vertices.add(new Tuple2<Object,String>(5,"node5"));
+		vertices.add(new Tuple2<String,String>("node1","node3"));
+		vertices.add(new Tuple2<String,String>("node1","node2"));
+		vertices.add(new Tuple2<String,String>("node2","node6"));
+		vertices.add(new Tuple2<String,String>("node2","node5"));
+		vertices.add(new Tuple2<String,String>("node2","node4"));
+		vertices.add(new Tuple2<String,String>("node2","node7"));
+
+		vertices.add(new Tuple2<String,String>("node4","node3"));
+		vertices.add(new Tuple2<String,String>("node5","node8"));
+		vertices.add(new Tuple2<String,String>("node5","node1"));
 	}
 	
 	private void createEdges(){

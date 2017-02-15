@@ -139,8 +139,8 @@ public class RDFAnalyzerPageRank implements Serializable{
 	public void WriteInfoToParquet(JavaRDD<PageRanksCase> finalData){
 
 		try{
-			System.out.println("coming here");
 			org.apache.spark.sql.catalyst.encoders.OuterScopes.addOuterScope(this);
+
 			Encoder<PageRanksCase> personEncoder = Encoders.bean(PageRanksCase.class);
 			Dataset<PageRanksCase> javaBeanDS = Service.sqlCtx().createDataset(
 			  finalData.collect(),
@@ -169,7 +169,11 @@ public class RDFAnalyzerPageRank implements Serializable{
 	}
 	
 	
-	public JavaPairRDD<String,Tuple2<Tuple2<String,Double>,Double>> ReshuffleAndJoinToNewRanks(JavaPairRDD<String,Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> shuffledwithnumbers,JavaPairRDD<String,Double> pairedrddd){
+	public JavaPairRDD<String,Tuple2<Tuple2<String,Double>,Double>> ReshuffleAndJoinToNewRanks(
+			JavaPairRDD<String,
+						Tuple3<ArrayList<String>, ArrayList<Double>, ArrayList<Double>>> shuffledwithnumbers,
+						JavaPairRDD<String,Double> pairedrddd){
+
 		return shuffledwithnumbers.flatMapToPair(new PairFlatMapFunction<Tuple2<String,Tuple3<ArrayList<String>,ArrayList<Double>,ArrayList<Double>>>, String, Tuple2<String,Double>>() {
 
 			@Override

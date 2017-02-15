@@ -16,7 +16,9 @@ import com.google.common.io.Resources;
 
 import ranking.ClosenessBean;
 import ranking.ClosenessCentrality;
+import ranking.RDFAnalyzerPageRank;
 import ranking.oldTests;
+import ranking.oldTests2;
 //import ranking.oldTests;
 
 public class Centrality {
@@ -105,10 +107,14 @@ public class Centrality {
 	}
 
 	public static String CalculateCloseness(String nodeName)  throws Exception{
-		oldTests test = new oldTests();
-		test.ShortestPaths();
+		oldTests2 test = new oldTests2();
+		test.test(null);
 		
+//		DataFrame resultFrame = Service.sqlCtx()
+//				.sql("SELECT subject,object FROM Graph WHERE subject='" + nodeName + "' LIMIT 5");
 		
+//		RDFAnalyzerPageRank rank  = new RDFAnalyzerPageRank();
+//		rank.PerformPageRank(resultFrame);
 		return "";
 	}
 	public static String CalculateClosenessByHop(String nodeName) throws Exception {
@@ -156,10 +162,10 @@ public class Centrality {
 
 			// Getting All the nodes from Parquet Table which are present in the
 			// queried list passed as an arg to this function.
-			existingcurrentNodesData
-					.select(existingcurrentNodesData.col("closeness"), existingcurrentNodesData.col("node"))
-					.where(existingcurrentNodesData.col("node").isin(node.stream().toArray(String[]::new))).show(); // 1
-																													// record
+//			existingcurrentNodesData
+//					.select(existingcurrentNodesData.col("closeness"), existingcurrentNodesData.col("node"))
+//					.where(existingcurrentNodesData.col("node").isin(node.stream().toArray(String[]::new))).show(); // 1
+//																													// record
 
 			// Convert the parquet dataset nodesName col into List<String>
 			List<String> existingNodes = getListFromDatasetRows(existingcurrentNodesData);
