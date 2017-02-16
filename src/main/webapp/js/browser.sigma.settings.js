@@ -86,7 +86,7 @@ const SIGMA_GRAPH_SETTINGS = {
 };
 
 const LAYOUT_NOVERLAP = {
-    nodeMargin: 15.0,
+    nodeMargin: 150.0,
     scaleNodes: 1.0,
     gridSize: 50,
     permittedExpansion: 1.1,
@@ -101,14 +101,14 @@ const LAYOUT_FORCE_LINK = {
     autoadjustSizes: false, // def=false
     scaleRatio: 1, // scalingRatio def=1
     strongGravityMode: false, // def=false
-    gravity: -0.5, // def=1
+    gravity: 1, // def=1
     barnesHutOptimize: false, // def=false should we use the algorithm's Barnes-Hut to improve repulsion's scalability? This is useful for large graph but harmful to small ones.
     barnesHutTheta: 0.5, // def=0.5
     slowDown: 1, // def=1
-    startingIterations: 10, // def=1 number of iterations to be run before the first render.
-    iterationsPerRender: 10, // def=1 number of iterations to be run before each render.
+    startingIterations: 1, // def=1 number of iterations to be run before the first render.
+    iterationsPerRender: 1, // def=1 number of iterations to be run before each render.
     maxIterations: 1000, // def=1000 set a limit if autoStop: true
-    avgDistanceThreshold: 0, // def=0.01 this is the normal stopping condition of autoStop: true. When the average displacements of nodes is below this threshold, the layout stops.
+    avgDistanceThreshold: 0.01, // def=0.01 this is the normal stopping condition of autoStop: true. When the average displacements of nodes is below this threshold, the layout stops.
     autoStop: true, // def=false
     worker: true, // def=true should the layout use a web worker?
     background: false, // def=false run the layout on background, apply the new nodes position on stop.
