@@ -221,6 +221,7 @@ public class RDFAnalyzerPageRank implements Serializable{
 				PageRanksCase pgrank = new PageRanksCase();
 				pgrank.setImportance(line._2);
 				pgrank.setNode(line._1);
+				
 
 				return pgrank;
 			}

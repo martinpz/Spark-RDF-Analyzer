@@ -7,12 +7,16 @@ import java.util.List;
 import rdfanalyzer.spark.Service;
 
 import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.graphx.Edge;
 import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Encoder;
+import org.apache.spark.sql.Encoders;
 
 import scala.Tuple2;
 import scala.Tuple3;
@@ -46,6 +50,7 @@ public class oldTests2 implements Serializable{
 		createVertices();
 		
 		JavaPairRDD<String,String> distData = Service.sparkCtx().parallelizePairs(vertices);
+		JavaPairRDD<String,String> uniqueData = Service.sparkCtx().parallelizePairs(vertices);
 
 		
 		JavaPairRDD<String, Tuple4<List<String>,Integer,Integer, Integer>> adjacencyMatrix = reduceToAdjacencyMatrix(distData);
@@ -62,34 +67,68 @@ public class oldTests2 implements Serializable{
 //					Tuple2<String, Tuple4<List<String>,Integer,Integer, Integer>> line) throws Exception {
 //					
 //				System.out.println("lakhdilanat");
-//				applyBFSForNode(line._1,adjacencyMatrix);
-//				
+//				applyBFSForNode("node2", adjacencyMatrix).foreach(x->System.out.println("bol"+x));;
 //				
 //				return line;
 //			}
-//		}).foreach(x -> System.out.println(x));;	
+//		
+//		});	
+		
+		applyBFSForNode("node2", adjacencyMatrix).foreach(x->System.out.println("lol"+x));;
+		
+		
 		JavaPairRDD<String, Tuple3<List<String>, List<Integer>, List<Integer>>> result =null;
-		int i = 0;
-		for(Tuple2<String,String> v:vertices){
+		for(int i=1;i<=6;i++){
 			
-			if(i == 0){
-				result = applyBFSForNode("node1", adjacencyMatrix);
+			if(i == 1){
+				result = applyBFSForNode("node"+i, adjacencyMatrix);
 			}
 			else{
 				
-				result = result.union(applyBFSForNode("node2", adjacencyMatrix));
+				result = result.union(applyBFSForNode("node"+i, adjacencyMatrix));
 			}
-			
-			if(i==1){
-				break;
-			}
-			i++;
 		}
 		
-		result.foreach(x->System.out.println("panchi"+x));
-	}	
+		JavaRDD<APSPCase> apspRDD = ConvertPairRDDToCaseRDD(result);
+		WriteInfoToParquet(apspRDD);
+	}
+	
+	public void WriteInfoToParquet(JavaRDD<APSPCase> finalData){
+
+		try{
+			org.apache.spark.sql.catalyst.encoders.OuterScopes.addOuterScope(this);
+
+			Encoder<APSPCase> encoder = Encoders.bean(APSPCase.class);
+			Dataset<APSPCase> javaBeanDS = Service.sqlCtx().createDataset(
+			  finalData.collect(),
+			  encoder
+			);
+			javaBeanDS.toDF().write().parquet(rdfanalyzer.spark.Configuration.storage() + "sib200APSP.parquet");
+		}
+		catch(NullPointerException e){
+			System.out.println("We are in the error");
+			System.out.println(e.getMessage());
+		}
+	}
 	
 	
+	public JavaRDD<APSPCase> ConvertPairRDDToCaseRDD(JavaPairRDD<String, Tuple3<List<String>, List<Integer>, List<Integer>>> result){
+		return result.map(new Function<Tuple2<String,Tuple3<List<String>, List<Integer>, List<Integer>>>, APSPCase>() {
+
+			@Override
+			public APSPCase call(Tuple2<String,Tuple3<List<String>, List<Integer>, List<Integer>>> line) throws Exception {
+				
+				APSPCase apspcase = new APSPCase();
+				apspcase.setNodeDistances(line._2._2());
+				apspcase.setNodeShortestPaths(line._2._3());
+				apspcase.setDestinationNodes(line._2._1());
+				
+				return apspcase;
+			}
+		});
+
+	}
+
 	
 	private boolean breakloop(JavaPairRDD<String, Tuple4<List<String>,Integer,Integer, Integer>> adjacencyMatrix){
 		
