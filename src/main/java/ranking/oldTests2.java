@@ -68,11 +68,25 @@ public class oldTests2 implements Serializable{
 //				return line;
 //			}
 //		}).foreach(x -> System.out.println(x));;	
-		
+		JavaPairRDD<String, Tuple3<List<String>, List<Integer>, List<Integer>>> result =null;
+		int i = 0;
 		for(Tuple2<String,String> v:vertices){
-			applyBFSForNode(v._1, adjacencyMatrix);
-			break;
+			
+			if(i == 0){
+				result = applyBFSForNode("node1", adjacencyMatrix);
+			}
+			else{
+				
+				result = result.union(applyBFSForNode("node2", adjacencyMatrix));
+			}
+			
+			if(i==1){
+				break;
+			}
+			i++;
 		}
+		
+		result.foreach(x->System.out.println("panchi"+x));
 	}	
 	
 	
@@ -103,7 +117,7 @@ public class oldTests2 implements Serializable{
 	 * Convert <Key,[Neighbors]> To <key, Tuple4 < [Neighbors] , Distance, Color, ShortestPaths >
 	 */
 	
-	private void applyBFSForNode(final String sourceNode, JavaPairRDD<String, Tuple4<List<String>,Integer,Integer, Integer>> adjacencyMatrixx){
+	private JavaPairRDD<String, Tuple3<List<String>, List<Integer>, List<Integer>>> applyBFSForNode(final String sourceNode, JavaPairRDD<String, Tuple4<List<String>,Integer,Integer, Integer>> adjacencyMatrixx){
 
 		/*
 		 *  We won't have any grey nodes in the initial dataset hence we'll never go inside the if condition defined below.
@@ -141,7 +155,7 @@ public class oldTests2 implements Serializable{
 		
 		/*
 		 * Now we've got the final distances of source node to all other nodes.
-		 * Hence we can perform the final step. Which is to conver the data from tabular from
+		 * Hence we can perform the final step. Which is to convert the data from tabular from
 		 * to reduce the data wrt the source node such that we have the following format.
 		 * 
 		 * sourceNode, [otherNodes], [distancestoOtherNodes] , [ ShortestPathsBetweenThoseNodes]
@@ -149,7 +163,7 @@ public class oldTests2 implements Serializable{
 		 */
 			
 			
-		finalReduce(finalMap(adjacencyMatrixx, sourceNode));
+		return finalReduce(finalMap(adjacencyMatrixx, sourceNode));
 		
 		
 		
@@ -245,9 +259,10 @@ public class oldTests2 implements Serializable{
 					}
 
 		};
-		finalMappedData.combineByKey(createCombiner, merger, mergeCombiners).foreach(x->System.out.println(x));;
-//		return finalMappedData.combineByKey(createCombiner, merger, mergeCombiners);
-		return null;
+
+		return finalMappedData.combineByKey(createCombiner, merger, mergeCombiners);
+//		finalMappedData.combineByKey(createCombiner, merger, mergeCombiners).foreach(x->System.out.println(x));;
+//		return null;
 	}
 	
 	private JavaPairRDD<String, Tuple4<List<String>, Integer, Integer, Integer>> PerformBFSReduceOperation(JavaPairRDD<String,Tuple4<List<String>,Integer,Integer,Integer>> mappedValues,final int iteration){
