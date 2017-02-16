@@ -14,7 +14,6 @@ import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.graphx.Edge;
 import org.apache.spark.sql.DataFrame;
 
-import breeze.linalg.sum;
 import scala.Tuple2;
 import scala.Tuple3;
 import scala.Tuple4;
@@ -26,7 +25,6 @@ public class oldTests2 implements Serializable{
 	
 	public static boolean firstTime = true;
 	
-	public JavaPairRDD<String,Tuple4<List<String>,Integer,Integer,Integer>> breakloopChecker ;
 	public JavaPairRDD<String,Tuple4<List<String>,Integer,Integer,Integer>> mappedValues ;
 
 	public int sumOfCOlorColumn = 0;
@@ -52,7 +50,6 @@ public class oldTests2 implements Serializable{
 		
 		JavaPairRDD<String, Tuple4<List<String>,Integer,Integer, Integer>> adjacencyMatrix = reduceToAdjacencyMatrix(distData);
 
-		System.out.println("Count hai baby" + distData.count());
 		
 		
 //		adjacencyMatrix.mapToPair(new PairFunction<Tuple2<String,
@@ -74,6 +71,7 @@ public class oldTests2 implements Serializable{
 		
 		for(Tuple2<String,String> v:vertices){
 			applyBFSForNode(v._1, adjacencyMatrix);
+			break;
 		}
 	}	
 	
@@ -119,40 +117,147 @@ public class oldTests2 implements Serializable{
 		 *  itemCount * 2. And once we reduce we will check if we get this value from our reducer than we'll break.
 		 */
 
-		
-//		while(true){
-			
+		int i=0;
 
-			// break if all vertices are black.
-//			if(breakPoint == currentPoint){
-//				break;
-//			}
-			
-			
+		while(true){
+			System.out.println("Iteration"+i);
 			mappedValues = PerformBFSMapOperation(sourceNode,adjacencyMatrixx);
+			System.out.println("IterationMapped"+i);
 
-			adjacencyMatrixx = PerformBFSReduceOperation(mappedValues);
+			adjacencyMatrixx = PerformBFSReduceOperation(mappedValues,i);
+			System.out.println("IterationMappedReduced"+i);
 			
-//			breakloopChecker = adjacencyMatrixx;
 			
-//			breakloop(breakloopChecker);
 			
-			adjacencyMatrixx.foreach(x->System.out.println(x));
-			System.out.println("Made it to the iteration end");
-//		}
+			if(breakloop(adjacencyMatrixx)){
+				System.out.println("IterationBreakloopinside"+i);
+				break;
+			}
+			System.out.println("IterationBreakloopoutside"+i);
+			i++;
+		}
+		
+		adjacencyMatrixx.cache();
+		
+		/*
+		 * Now we've got the final distances of source node to all other nodes.
+		 * Hence we can perform the final step. Which is to conver the data from tabular from
+		 * to reduce the data wrt the source node such that we have the following format.
+		 * 
+		 * sourceNode, [otherNodes], [distancestoOtherNodes] , [ ShortestPathsBetweenThoseNodes]
+		 * 
+		 */
+			
+			
+		finalReduce(finalMap(adjacencyMatrixx, sourceNode));
 		
 		
 		
 	}
 	
-	private JavaPairRDD<String, Tuple4<List<String>, Integer, Integer, Integer>> PerformBFSReduceOperation(JavaPairRDD<String,Tuple4<List<String>,Integer,Integer,Integer>> mappedValues){
+	
+	/*
+	 *  This converts the finalResult into sourceNode, DestNode, Distance, NPaths
+	 */
+	private JavaPairRDD<String, Tuple3<String, Integer, Integer>> finalMap(JavaPairRDD<String, Tuple4<List<String>, Integer, Integer, Integer>> finalresult,final String sourceNode){
+
+		return finalresult.mapToPair(new PairFunction<Tuple2<String,Tuple4<List<String>,Integer,Integer,Integer>>, String, Tuple3<String,Integer,Integer>>() {
+
+			@Override
+			public Tuple2<String, Tuple3<String, Integer, Integer>> call(
+					Tuple2<String, Tuple4<List<String>, Integer, Integer, Integer>> line) throws Exception {
+				
+				Tuple3<String,Integer,Integer> item = new Tuple3<String,Integer,Integer>(line._1,line._2._2(),line._2._4());
+
+				return new Tuple2<String,Tuple3<String, Integer, Integer>>(sourceNode,item);
+			}
+		});
+	}
+	
+	private JavaPairRDD<String, Tuple3<List<String>, List<Integer>, List<Integer>>> finalReduce(JavaPairRDD<String, Tuple3<String, Integer, Integer>> finalMappedData){
+		
+		
+		Function<Tuple3<String, Integer, Integer>,Tuple3<List<String>,List<Integer>,List<Integer>>> createCombiner = new Function<Tuple3<String,Integer,Integer>, Tuple3<List<String>,List<Integer>,List<Integer>>>() {
+			
+			@Override
+			public Tuple3<List<String>, List<Integer>, List<Integer>> call(Tuple3<String, Integer, Integer> arg0)
+					throws Exception {
+				
+				List<String> dstNode = new ArrayList<String>();
+				List<Integer> dstNodeDist = new ArrayList<Integer>();
+				List<Integer> dstNodePaths = new ArrayList<Integer>();
+				
+				dstNode.add(arg0._1());
+				dstNodeDist.add(arg0._2());
+				dstNodePaths.add(arg0._3());
+				
+				return new Tuple3<List<String>, List<Integer>, List<Integer>>(dstNode,dstNodeDist,dstNodePaths);
+			}
+		};
+		Function2<Tuple3<List<String>,List<Integer>,List<Integer>>,
+		Tuple3<String, Integer, Integer>,
+		Tuple3<List<String>,List<Integer>,List<Integer>>> merger = new Function2<Tuple3<List<String>,List<Integer>,List<Integer>>,
+				Tuple3<String, Integer, Integer>,
+				Tuple3<List<String>,List<Integer>,List<Integer>>>() {
+			
+			// this is called when we face the key next time. So we add an item to the arraylist of that key.
+
+			@Override
+			public Tuple3<List<String>, List<Integer>, List<Integer>> call(
+					Tuple3<List<String>, List<Integer>, List<Integer>> arg0, Tuple3<String, Integer, Integer> arg1)
+					throws Exception {
+
+				
+				List<String> dstNode = arg0._1();
+				List<Integer> dstNodeDist = arg0._2();
+				List<Integer> dstNodePaths = arg0._3();
+
+				dstNode.add(arg1._1());
+				dstNodeDist.add(arg1._2());
+				dstNodePaths.add(arg1._3());
+				
+				return new Tuple3<List<String>, List<Integer>, List<Integer>>(dstNode,dstNodeDist,dstNodePaths);
+				
+				
+			}
+		};
+
+		Function2<Tuple3<List<String>,List<Integer>,List<Integer>>,
+		Tuple3<List<String>,List<Integer>,List<Integer>>,
+		Tuple3<List<String>,List<Integer>,List<Integer>>> mergeCombiners = new Function2<Tuple3<List<String>,List<Integer>,List<Integer>>,
+				Tuple3<List<String>,List<Integer>,List<Integer>>,
+				Tuple3<List<String>,List<Integer>,List<Integer>>>(){
+
+					@Override
+					public Tuple3<List<String>, List<Integer>, List<Integer>> call(
+							Tuple3<List<String>, List<Integer>, List<Integer>> arg0,
+							Tuple3<List<String>, List<Integer>, List<Integer>> arg1) throws Exception {
+
+						List<String> dstNode = arg0._1();
+						List<Integer> dstNodeDist = arg0._2();
+						List<Integer> dstNodePaths = arg0._3();
+
+						dstNode.addAll(arg1._1());
+						dstNodeDist.addAll(arg1._2());
+						dstNodePaths.addAll(arg1._3());
+
+						return new Tuple3<List<String>, List<Integer>, List<Integer>>(dstNode,dstNodeDist,dstNodePaths);
+					}
+
+		};
+		finalMappedData.combineByKey(createCombiner, merger, mergeCombiners).foreach(x->System.out.println(x));;
+//		return finalMappedData.combineByKey(createCombiner, merger, mergeCombiners);
+		return null;
+	}
+	
+	private JavaPairRDD<String, Tuple4<List<String>, Integer, Integer, Integer>> PerformBFSReduceOperation(JavaPairRDD<String,Tuple4<List<String>,Integer,Integer,Integer>> mappedValues,final int iteration){
 		
 		Function<Tuple4<List<String>,Integer,Integer,Integer>,Tuple4<List<String>,Integer,Integer,Integer>> createCombiner 
 						= new Function<Tuple4<List<String>,Integer,Integer,Integer>,Tuple4<List<String>,Integer,Integer,Integer>>() {
 			
 			@Override
 			public Tuple4<List<String>,Integer,Integer,Integer> call(Tuple4<List<String>,Integer,Integer,Integer> line) throws Exception {
-				return new Tuple4<List<String>,Integer,Integer,Integer>(line._1(),line._2(),line._3(),line._4());
+				return line;
 			}
 		};
 
@@ -179,7 +284,17 @@ public class oldTests2 implements Serializable{
 				 *  		distances are same. Simply add 1 to the shortest paths.
 				 */
 				
-				return getReducedData(previousKey,newKey);
+				
+				Tuple4<List<String>, Integer, Integer, Integer> finalReturn = getReducedData(previousKey,newKey);
+
+				if(iteration==1){
+					System.out.println("merger phase");
+					System.out.println("Previous key = "+previousKey);
+					System.out.println("New key = "+newKey);
+					System.out.println("final Return = "+finalReturn);
+				}
+
+				return finalReturn;
 			}
 		};
 		
@@ -197,14 +312,20 @@ public class oldTests2 implements Serializable{
 
 				
 				Tuple4<List<String>, Integer, Integer, Integer> finalReturn = getReducedData(arg0,arg1);
-				
-				return finalReturn;
+
+				if(iteration==1){
+					
+					System.out.println("mergerCombiner phase");
+					System.out.println("part 1  = "+arg0);
+					System.out.println("part 2 = "+arg1);
+					System.out.println("final Return = "+finalReturn);
+				}
+
+				return finalReturn ;
 			}
 		};
 		
-		
-		
-//		mappedValues.combineByKey(createCombiner, merger, mergeCombiners).foreach(x->System.out.println(x));;
+//		mappedValues.combineByKey(createCombiner, merger, mergeCombiners).foreach(x->System.out.println("Muazzam"+x));;
 //		return null;
 		return mappedValues.combineByKey(createCombiner, merger, mergeCombiners);
 	}
@@ -232,9 +353,9 @@ public class oldTests2 implements Serializable{
 		}
 		
 		/* Step 3 */
-		else if((newKey._3() == 1 && previousKey._3() == 1) && 
-				(newKey._1() == null && previousKey._1() == null) &&
-				(newKey._2() == previousKey._2())){
+		else if((newKey._3().equals(1) && previousKey._3().equals(1)) && 
+				(newKey._1().size() == 0 && previousKey._1().size() == 0) &&
+				(newKey._2().equals(previousKey._2()))){
 
 			result = new Tuple4<List<String>,Integer,Integer,Integer>(newKey._1(),newKey._2(),newKey._3(),newKey._4()+1);
 		}
@@ -256,10 +377,8 @@ public class oldTests2 implements Serializable{
 
 				
 				List<Tuple2<String,Tuple4<List<String>, Integer, Integer, Integer>>> results = new ArrayList<Tuple2<String,Tuple4<List<String>, Integer, Integer, Integer>>>();
-				System.out.println("andar coming"+ line._1+" firstime="+ firstTime);
 				// If this is a grey node. Go inside.
 				if((line._2._3() == 1) || (firstTime && line._1.equals(sourceNode))){
-					System.out.println("andar andar coming");
 					
 					firstTime = false;
 
@@ -308,10 +427,11 @@ public class oldTests2 implements Serializable{
 						 */
 						
 						Tuple4<List<String>, Integer, Integer, Integer> neighborNodeT4 
-								= new Tuple4<List<String>, Integer, Integer, Integer>(null, line._2._2()+1, 1, line._2._4());
+								= new Tuple4<List<String>, Integer, Integer, Integer>(new ArrayList<String>(), line._2._2()+1, 1, line._2._4());
 
 						Tuple2<String,Tuple4<List<String>, Integer, Integer, Integer>> neighborNodeT2
 						  		= new Tuple2<String,Tuple4<List<String>, Integer, Integer, Integer>>(line._2._1().get(i),neighborNodeT4);
+						
 						
 						results.add(neighborNodeT2);
 					}
