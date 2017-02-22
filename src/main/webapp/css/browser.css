@@ -13,10 +13,6 @@
     font-style: italic;
 }
 
-#configuration.panel-body #numNeighborsDiv {
-    display: none;
-}
-
 #configuration.panel-body #sliderVal {
     font-weight: bold;
 }
