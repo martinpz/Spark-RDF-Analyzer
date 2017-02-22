@@ -86,8 +86,6 @@ public class EntryPoint {
 		double importance = row.getDouble(0);
 		String URI = row.getString(1);
 
-		System.out.println("ROW: " + row.toString());
-
 		suggestion.put("URI", URI);
 		suggestion.put("name", RDFgraph.shortenURI(URI));
 		suggestion.put("importance", importance);
