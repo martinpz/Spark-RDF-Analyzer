@@ -26,22 +26,6 @@
 <script type="text/javascript" src="js/browser.visual.js"></script>
 <script type="text/javascript" src="js/browser.window.js"></script>
 <script type="text/javascript" src="js/utility.js"></script>
-
-<script type="text/javascript">
-	function getGraphName() {
-		var name = getCookie('graphName');
-		document.getElementById("GraphName").innerHTML = name;
-	}
-
-	function getCookie(name) {
-		var value = "; " + document.cookie;
-		var parts = value.split("; " + name + "=");
-
-		if (parts.length == 2) {
-			return parts.pop().split(";").shift();
-		}
-	}
-</script>
 </head>
 
 <body onload="getGraphName()">
