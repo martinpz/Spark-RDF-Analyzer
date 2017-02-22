@@ -3,8 +3,10 @@ const LOADER = '<div class="progress progress-striped active page-progress-bar">
 const ANIMATION_SPEED = 'fast';
 const LAYOUT_ALGORITHMS = { 
 	noverlap: 'NOverlap',
+	/*
 	forcelink: 'ForceLink',
 	fruchterman: 'Fruchterman-Reingold',
+	*/
 	none: 'None'
 };
 const COLORS = {

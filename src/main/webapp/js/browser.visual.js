@@ -249,12 +249,14 @@ function layoutGraph() {
 		case 'noverlap':
 			performNOverlap();
 			break;
+		/*
 		case 'forcelink':
 			performForceLink();
 			break;
 		case 'fruchterman':
 			performFruchtermanReingold();
 			break;
+		*/
 
 		default:
 			// Do not layout the graph.
@@ -263,19 +265,20 @@ function layoutGraph() {
 }
 
 function performNOverlap() {
-	var no = s.configNoverlap(LAYOUT_NOVERLAP);
+	s.configNoverlap(LAYOUT_NOVERLAP);
 	s.startNoverlap();
 }
 
+/*
 function performForceLink() {
-	var fl = sigma.layouts.configForceLink(s, LAYOUT_FORCE_LINK);
-	sigma.layouts.startForceLink();
+	sigma.layouts.startForceLink(s, LAYOUT_FORCE_LINK);
 }
 
 function performFruchtermanReingold() {
-	var fr = sigma.layouts.fruchtermanReingold.configure(s, LAYOUT_FRUCHTERMAN_REINGOLD);
+	sigma.layouts.fruchtermanReingold.configure(s, LAYOUT_FRUCHTERMAN_REINGOLD);
 	sigma.layouts.fruchtermanReingold.start(s);
 }
+*/
 
 // ==================== Export ==================== //
 

@@ -86,24 +86,20 @@ const SIGMA_GRAPH_SETTINGS = {
 };
 
 const LAYOUT_NOVERLAP = {
-    nodeMargin: 150.0,
+    nodeMargin: 2.0,
     scaleNodes: 1.0,
-    gridSize: 50,
-    permittedExpansion: 1.1,
-    speed: 2,
-    maxIterations: 500,
-    easing: 'cubicInOut' // animation transition function (see sigma.utils.easing for available transitions)
+    gridSize: 60,
+    speed: 1,
+    easing: 'quadraticInOut'
 };
 
+/*
 const LAYOUT_FORCE_LINK = {
-    linLogMode: false, // def=false true = alternative energy model with linear repulsion force and logarithmic attraction force.
     outboundAttractionDistribution: false, // def=false
     autoadjustSizes: false, // def=false
-    scaleRatio: 1, // scalingRatio def=1
+    scaleRatio: 10, // scalingRatio def=1
     strongGravityMode: false, // def=false
-    gravity: 1, // def=1
-    barnesHutOptimize: false, // def=false should we use the algorithm's Barnes-Hut to improve repulsion's scalability? This is useful for large graph but harmful to small ones.
-    barnesHutTheta: 0.5, // def=0.5
+    gravity: 3, // def=1
     slowDown: 1, // def=1
     startingIterations: 1, // def=1 number of iterations to be run before the first render.
     iterationsPerRender: 1, // def=1 number of iterations to be run before each render.
@@ -112,9 +108,8 @@ const LAYOUT_FORCE_LINK = {
     autoStop: true, // def=false
     worker: true, // def=true should the layout use a web worker?
     background: false, // def=false run the layout on background, apply the new nodes position on stop.
-    easing: 'cubicInOut',
-    randomize: '', // def='' randomize the initial x and y coordinates of the nodes. Available values: globally || local
-    randomizeFactor: 1 // def=1 multiplicator of the Math.random() function if the randomize setting is used.
+    easing: 'quadraticInOut',
+    duration: 1000
 };
 
 const LAYOUT_FRUCHTERMAN_REINGOLD = {
@@ -123,8 +118,9 @@ const LAYOUT_FRUCHTERMAN_REINGOLD = {
     gravity: -0.5,
     speed: 0.1,
     iterations: 1000,
-    easing: 'cubicInOut'
+    easing: 'quadraticInOut'
 };
+*/
 
 const EXPORT_PNG = {
     download: true,
