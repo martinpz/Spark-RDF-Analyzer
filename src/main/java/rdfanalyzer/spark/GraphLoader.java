@@ -16,6 +16,7 @@
 
 package rdfanalyzer.spark;
 
+import ranking.RDFAnalyzerPageRank;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.DataFrame;
@@ -61,6 +62,9 @@ public class GraphLoader {
 
 		String[] rankingArguments = { Name };
 		CalculateRanking.main(rankingArguments);
+
+		RDFAnalyzerPageRank RDFAPR = new RDFAnalyzerPageRank(Name);
+		RDFAPR.PerformPageRank(schemaRDF);
 
 		return "Success";
 	}
