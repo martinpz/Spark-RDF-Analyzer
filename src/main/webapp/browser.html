@@ -20,6 +20,7 @@
 <script type="text/javascript" src="js/app-config.js"></script>
 <script type="text/javascript" src="js/browser.config.js"></script>
 <script type="text/javascript" src="js/browser.entrypoint.js"></script>
+<script type="text/javascript" src="js/browser.entrypoint.suggested.js"></script>
 <script type="text/javascript" src="js/browser.history.js"></script>
 <script type="text/javascript" src="js/browser.sigma.settings.js"></script>
 <script type="text/javascript" src="js/browser.textual.js"></script>
@@ -28,7 +29,7 @@
 <script type="text/javascript" src="js/utility.js"></script>
 </head>
 
-<body onload="getGraphName()">
+<body onload="getGraphName(); getSuggestedEntryPoints();">
 	<div class="navbar navbar-inverse" style="background-color: rgba(70, 130, 180, 0.95);">
 		<div class="navbar-header">
 			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-inverse-collapse">
@@ -79,7 +80,7 @@
 					</div>
 
 					<div class="checkbox">
-						<label><input id="limitNeighbors" type="checkbox" value="">Limit number of neighbors</label>
+						<label><input id="limitNeighbors" type="checkbox" value="" checked>Limit number of neighbors</label>
 						<p>Check this box if you want to limit the displayed number of neighbors.</p>
 					</div>
 
@@ -129,11 +130,19 @@
 				</button>
 			</div>
 
-			<div id="suggestions">
+			<div id="suggestions" class="col-lg-6" style="padding-left: 0;">
 				<h2>Suggested entry points</h2>
 				<p>Here we recommend some possible entry points that may be interesting for you.</p>
 
+				<div id="suggestionsList">
+					<p>Retrieving the suggested entry points ...</p>
+					<div class="progress progress-striped active page-progress-bar">
+						<div class="progress-bar progress-bar-success" style="width: 100%;"></div>
+					</div>
+				</div>
+
 				<!-- TODO This part must be removed for production. -->
+				<!--
 				#0 FOR TESTING: <a href="#" 
 					onClick="testBrowser('Harry_Potter_and_the_Philosophers_Stone_(film)', '<http://dbpedia.org/resource/Harry_Potter_and_the_Philosophers_Stone_(film)>')" 
 					style="background-color: white;">Start with Harry Potter and the Philosophers Stone (film)</a><br>
@@ -152,6 +161,7 @@
 					showBrowser(name, URI);
 				}
 				</script>
+				-->
 				<!-- TODO This part must be removed for production. -->
 			</div>
 		</div>

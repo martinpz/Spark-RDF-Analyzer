@@ -331,6 +331,19 @@ public class WebService {
 	}
 
 	@GET
+	@Path("/suggestedEntryPoints/{graph}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getSuggestedEntryPoints(@PathParam("graph") String graph,
+			@DefaultValue("") @QueryParam("method") String method,
+			@DefaultValue("3") @QueryParam("numSuggestions") int numSuggestions) throws UnsupportedEncodingException {
+		// Retrieve the suggestions for the entry point.
+		JSONObject suggestions = EntryPoint.getSuggestions(graph, method, numSuggestions);
+
+		// Return the response to the client.
+		return Response.ok().entity("" + suggestions).build();
+	}
+
+	@GET
 	@Path("/directNeighbors/{graph}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getDirectNeighbors(@PathParam("graph") String graph,
