@@ -25,7 +25,7 @@ function displaySuggestedEntryPoints(suggestions) {
 	$.each(suggestions, function (URI, props) {
 		suggestionsHTML += '<li>';
 		suggestionsHTML += '<a href="#" onclick="startBrowsingWithSuggestedEntryPoint(\'' + props.name + '\', \'' + URI + '\')">';
-		suggestionsHTML += props.name;
+		suggestionsHTML += props.name + '<br>(' + props.importance.toFixed(3) + ')';
 		suggestionsHTML += '</a></li>';
 	});
 	suggestionsHTML += '</ul>';

@@ -35,6 +35,40 @@
 }
 
 
+/* ==================== RDF Browser Configuration ==================== */
+
+#suggestions #suggestionsList ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#suggestions #suggestionsList ul li {
+    float: left;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+#suggestions #suggestionsList ul li a {
+    display: block;
+    width: 240px;
+    height: 95px;
+    padding: 15px;
+    border: 3px solid #ec971f;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.2);
+    text-align: left;
+    text-decoration: none;
+    word-wrap: break-word;
+    white-space: pre-line;
+    color: white;
+}
+
+#suggestions #suggestionsList ul li a:hover {
+    box-shadow: inset 0 0 10px #ec971f;
+}
+
+
 /* ==================== RDF Browser ==================== */
 
 #browser {
