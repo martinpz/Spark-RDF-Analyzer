@@ -28,6 +28,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.MediaType;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -337,7 +338,7 @@ public class WebService {
 			@DefaultValue("") @QueryParam("method") String method,
 			@DefaultValue("3") @QueryParam("numSuggestions") int numSuggestions) throws UnsupportedEncodingException {
 		// Retrieve the suggestions for the entry point.
-		JSONObject suggestions = EntryPoint.getSuggestions(graph, method, numSuggestions);
+		JSONArray suggestions = EntryPoint.getSuggestions(graph, method, numSuggestions);
 
 		// Return the response to the client.
 		return Response.ok().entity("" + suggestions).build();

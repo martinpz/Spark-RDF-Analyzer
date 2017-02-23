@@ -1,9 +1,7 @@
 // ########################## RDF Browser Suggested Entry Point ##########################
 function getSuggestedEntryPoints() {
 	const RANKING_METHOD = 'PageRanking';
-	const NUM_SUGGESTIONS = 9;
-
-	console.log('request: ', getEntryPointSuggestionRequest(RANKING_METHOD, NUM_SUGGESTIONS));
+	const NUM_SUGGESTIONS = 12;
 
 	var xhttp = new XMLHttpRequest();
 
@@ -18,16 +16,16 @@ function getSuggestedEntryPoints() {
 }
 
 function displaySuggestedEntryPoints(suggestions) {
-	console.log('suggestions: ', suggestions);
-
-	// Combine all suggestions to a list.
+	// Combine all suggestions to a HTML list.
 	var suggestionsHTML = '<ul>';
-	$.each(suggestions, function (URI, props) {
-		suggestionsHTML += '<li>';
-		suggestionsHTML += '<a href="#" onclick="startBrowsingWithSuggestedEntryPoint(\'' + props.name + '\', \'' + URI + '\')">';
-		suggestionsHTML += props.name + '<br>(' + props.importance.toFixed(3) + ')';
-		suggestionsHTML += '</a></li>';
-	});
+	suggestionsHTML += suggestions.map(function (entryJSON) {
+		var entryOBJ = JSON.parse(entryJSON);
+		var entryHTML = '<li>';
+		entryHTML += '<a href="#" onclick="startBrowsingWithSuggestedEntryPoint(\'' + entryOBJ.name + '\', \'' + entryOBJ.URI + '\')">';
+		entryHTML += entryOBJ.name + '<br>[' + entryOBJ.importance.toFixed(3) + ']';
+		entryHTML += '</a></li>';
+		return entryHTML;
+	}).join(' ');
 	suggestionsHTML += '</ul>';
 
 	$('#suggestionsList').html(suggestionsHTML);

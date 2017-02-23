@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class EntryPoint {
@@ -19,25 +20,15 @@ public class EntryPoint {
 	 * @param num
 	 *            How many suggestions to return.
 	 * 
-	 * @return A JSONObject mapping the URIs of the neighbors to a JSONObject of
+	 * @return A JSONArray mapping the URIs of the neighbors to a JSONObject of
 	 *         their properties for each neighbor.
 	 */
-	public static JSONObject getSuggestions(String graph, String method, int num) {
+	public static JSONArray getSuggestions(String graph, String method, int num) {
 		if (num <= 0) {
 			throw new IllegalArgumentException("Requested number of suggestions must be greater than zero.");
 		}
 
-		JSONObject suggestions = new JSONObject();
-
-		for (String suggestion : querySuggestions(graph + method, num)) {
-			// Convert the suggestion String back to a JSONObject.
-			JSONObject jsonNeighbor = new JSONObject(suggestion);
-
-			// Add element to suggestions. Format "URI" => {properties}
-			suggestions.put(jsonNeighbor.getString("URI"), jsonNeighbor);
-		}
-
-		return suggestions;
+		return new JSONArray(querySuggestions(graph + method, num));
 	}
 
 	/**
