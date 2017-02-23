@@ -10,7 +10,7 @@ function arrangeNodesByDirection(centralNode, centralNodeURI, neighbors) {
 }
 
 function arrangeNodesRandomized(centralNode, centralNodeURI, neighbors) {
-	arrangeNodes(centralNode, centralNodeURI, neighbors, true, calculatePositionRandomly);
+	arrangeNodes(centralNode, centralNodeURI, neighbors, false, calculatePositionRandomly);
 }
 
 function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calculatePosition) {
