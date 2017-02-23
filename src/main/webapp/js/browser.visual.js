@@ -84,12 +84,14 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			node.data.color = 'in';
 		} else if (props.name == '') {
 			// Special handling for literals. They don't have a name, but only an URI.
+			const literal = evaluateRDFLiteral(URI);
+
 			node.id = 'LITERAL_' + edgeCount;
-			node.label = URI;
+			node.label = literal;
 			node.data.type = 'LITERAL';
 			node.data.direction = '';
 			node.data.color = 'literal';
-			node.data.name = URI;
+			node.data.name = literal;
 			node.data.uri = '';
 			node.data.link = '#';
 			node.data.disableGoTo = 'disabled';

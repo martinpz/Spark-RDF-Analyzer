@@ -11,3 +11,14 @@ function getCookie(name) {
 		return parts.pop().split(';').shift();
 	}
 }
+
+function evaluateRDFLiteral(literal) {
+	const splitIdx = literal.indexOf('^^');
+
+	if (splitIdx > -1) {
+		const litVal = literal.substring(0, splitIdx);
+		return litVal;
+	}
+
+	return literal;
+}

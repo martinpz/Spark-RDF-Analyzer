@@ -66,8 +66,14 @@ public class RDFgraph implements Serializable {
 	public static String shortenURI(String inputURI) {
 		String result = "";
 
+		int index0 = inputURI.indexOf("^^");
 		int index1 = inputURI.lastIndexOf('#');
 		int index2 = inputURI.lastIndexOf('/');
+
+		// If we found a literal, we do not shorten the URL at all.
+		if (index0 > 0) {
+			return "";
+		}
 
 		if (index1 > index2) {
 			result = inputURI.substring(index1 + 1, inputURI.length() - 1);

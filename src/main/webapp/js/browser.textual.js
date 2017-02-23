@@ -32,12 +32,13 @@ function displayNodesTextual(centralNode, centralNodeURI, neighbors) {
 			// When there is no name, we have a literal. Reduce its length.
 			++literalCount;
 			const MAX_LEN = 100;
+			const literal = evaluateRDFLiteral(props.URI);
 
 			neighbor = '<span id="shortLiteral_' + literalCount + '" style="font-style: italic;">';
-			neighbor += props.URI;
+			neighbor += literal;
 			neighbor += '</span>';
 
-			if (props.URI.length > MAX_LEN) {
+			if (literal.length > MAX_LEN) {
 				neighbor += '<script>';
 				neighbor += '	$( "#shortLiteral_' + literalCount + '" ).shorten();';
 				neighbor += '</script>';
