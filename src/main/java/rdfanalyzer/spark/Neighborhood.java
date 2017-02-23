@@ -41,8 +41,8 @@ public class Neighborhood {
 	 *         their properties for each neighbor.
 	 */
 	public static JSONObject getNeighbors(String graph, String centralNode, int num) {
-		if (num <= 0) {
-			throw new IllegalArgumentException("Requested number of neighbors must be greater than zero.");
+		if (num < 0) {
+			throw new IllegalArgumentException("Requested number of neighbors must be greater or equal to zero.");
 		}
 
 		JSONObject neighbors = new JSONObject();
@@ -102,20 +102,33 @@ public class Neighborhood {
 	private static String getSQLQuery(String graph, String centralNode, int num) {
 		StringBuilder sb = new StringBuilder();
 
+		// Build an outer query for modifications after the union took place.
+		sb.append(" SELECT neighbor, connection, direction ");
+		sb.append(" FROM ( ");
+
 		// All nodes which have the central node as source ...
-		sb.append("SELECT object AS neighbor, predicate AS connection, 'out' AS direction ");
-		sb.append("FROM Graph ");
-		sb.append("WHERE subject='" + centralNode + "' ");
-		// sb.append("LIMIT " + num);
+		sb.append(" SELECT object AS neighbor, predicate AS connection, 'out' AS direction ");
+		sb.append(" FROM Graph ");
+		sb.append(" WHERE subject='" + centralNode + "' ");
+		// sb.append(" LIMIT " + num);
 
 		// ... combine these with ...
 		sb.append(" UNION ");
 
 		// ... all nodes which have the central node as target.
-		sb.append("SELECT subject AS neighbor, predicate AS connection, 'in' AS direction ");
-		sb.append("FROM Graph ");
-		sb.append("WHERE object='" + centralNode + "' ");
-		// sb.append("LIMIT " + num);
+		sb.append(" SELECT subject AS neighbor, predicate AS connection, 'in' AS direction ");
+		sb.append(" FROM Graph ");
+		sb.append(" WHERE object='" + centralNode + "' ");
+		// sb.append(" LIMIT " + num);
+
+		// Close the outer query and apply modifications.
+		sb.append(" ) tmp ");
+
+		// Only limit the neighbors if a number bigger than zero is given.
+		// Zero means that no LIMIT should be applied.
+		if (num > 0) {
+			sb.append(" LIMIT " + num);
+		}
 
 		return sb.toString();
 	}

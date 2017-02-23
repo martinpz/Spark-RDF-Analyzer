@@ -3,32 +3,33 @@
 <title>Spark RDF Analyzer - Browser</title>
 
 <link rel="stylesheet" type="text/css" href="bootstrap.css">
-<link rel="stylesheet" type="text/css" href="loader.css">
-<link rel="stylesheet" type="text/css" href="loader2.css">
+<link rel="stylesheet" type="text/css" href="css/browser.css">
+<link rel="stylesheet" type="text/css" href="css/bootstrap-slider.min.css">
 
-<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-<script type="text/javascript" src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/jquery/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="js/jquery/jquery.shorten.1.0.min.js"></script>
+<script type="text/javascript" src="js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/bootstrap/bootstrap-slider.min.js"></script>
+<script type="text/javascript" src="js/mustache/mustache.min.js"></script>
+
+<script src="js/linkurious/sigma.min.js"></script>
+<script src="js/linkurious/plugins.min.js"></script>
+<script src="js/linkurious/sigma.canvas.nodes.rect.js"></script>
+<script src="js/linkurious/sigma.canvas.hovers.rect.js"></script>
 
 <script type="text/javascript" src="js/app-config.js"></script>
-<script type="text/javascript" src="js/browser.js"></script>
-<script type="text/javascript">
-	function getGraphName() {
-		var name = getCookie('graphName');
-		document.getElementById("GraphName").innerHTML = name;
-	}
-
-	function getCookie(name) {
-		var value = "; " + document.cookie;
-		var parts = value.split("; " + name + "=");
-
-		if (parts.length == 2) {
-			return parts.pop().split(";").shift();
-		}
-	}
-</script>
+<script type="text/javascript" src="js/browser.config.js"></script>
+<script type="text/javascript" src="js/browser.entrypoint.js"></script>
+<script type="text/javascript" src="js/browser.entrypoint.suggested.js"></script>
+<script type="text/javascript" src="js/browser.history.js"></script>
+<script type="text/javascript" src="js/browser.sigma.settings.js"></script>
+<script type="text/javascript" src="js/browser.textual.js"></script>
+<script type="text/javascript" src="js/browser.visual.js"></script>
+<script type="text/javascript" src="js/browser.window.js"></script>
+<script type="text/javascript" src="js/utility.js"></script>
 </head>
 
-<body onload="getGraphName()">
+<body onload="getGraphName(); getSuggestedEntryPoints();">
 	<div class="navbar navbar-inverse" style="background-color: rgba(70, 130, 180, 0.95);">
 		<div class="navbar-header">
 			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-inverse-collapse">
@@ -43,7 +44,7 @@
 		</div>
 	</div>
 
-	<form id="IDbardh" class="form-horizontal col-md-8 col-md-offset-2"
+	<form id="IDbardh" onsubmit="simulateClickOnSearch(); return false;" class="form-horizontal col-md-10 col-md-offset-1"
 		style="padding-bottom: 20px; background-color: rgba(70, 130, 180, 0.95); border-radius: 15px" action="" method="post">
 		<br>
 		<fieldset>
@@ -61,32 +62,141 @@
 			</nav>
 		</fieldset>
 
+		<!---------------------- Browser Configuration ---------------------->
 		<div id="entrypoint">
-			<h1>Select your entry point!</h1>
-			<p>
-				Here you can select from two opportunities to start browsing through the RDF graph.<br> Either manually select a node you want to
-				start with or use one of our suggestions.
-			</p>
+			<div class="panel panel-default" style="float: right;">
+				<div class="panel-heading">
+					<span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Browser Configuration
+				</div>
+				<div id="configuration" class="panel-body">
+					<div>
+						<label for="browsingType">Select your browsing type</label>
+						<select class="form-control" id="browsingType">
+							<option value="random">Randomly arranged neighbors</option>
+							<option value="direction">Arranged by direction</option>
+							<option value="circular">Circular arrangement</option>
+							<option value="textual">Textual browsing</option>
+						</select>
+					</div>
+
+					<div class="checkbox">
+						<label><input id="limitNeighbors" type="checkbox" value="" checked>Limit number of neighbors</label>
+						<p>Check this box if you want to limit the displayed number of neighbors.</p>
+					</div>
+
+					<div id="numNeighborsDiv" class="range">
+						<input id="numNeighbors" data-slider-id='numNeighborsSlider' type="text" data-slider-min="5" data-slider-max="100" data-slider-step="1" data-slider-value="50" value="50" />
+						&nbsp; <span id="sliderVal">50</span><br>
+						<p>Select how many neighbor nodes should be displayed at most.</p>
+					</div>
+
+					<div id="colorSchemeSelection">
+					</div>
+
+					<div id="layoutAlgorithmSelection">
+					</div>
+				</div>
+			</div>
+
+			<!---------------------- Entry Point ---------------------->
+			<div id="welcome">
+				<h1>Select your entry point!</h1>
+				<p>
+					Here you can select from two opportunities to start browsing through the RDF graph.<br>
+					Either manually select a node you want to start with or use one of our suggestions.
+				</p>
+			</div>
 
 			<div id="manual">
 				<h2>Manual selection</h2>
-				<p>Enter a node's name and click button 'Search'.</p>
-				<input type="text" class="form-control" id="entryNode" style="width: 300px; display: inline;"> <a href="#"
-					class="btn btn-warning" id="btnSearch" onClick="showAutocompletionModal()" role="button" data-toggle="modal" data-target="#modal"
-					data-backdrop="static" data-keyboard="false" style="width: 120px; margin-left: 10px; margin-top: -2px;"><span
-					class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</a>
+				<p>
+					Enter a node's name and click button 'Search'.<br>
+					<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> 
+					To start from another node, just perform a new search! This will reset the browser to its initial state.
+				</p>
+				<div class="col-lg-4" style="padding-left: 0;">
+					<div class="input-group">
+						<input id="entryNode" type="text" class="form-control" placeholder="Entry node">
+						<span class="input-group-btn">
+							<button id="btnSearch" type="button" class="btn btn-warning" data-toggle="modal" data-target="#modal" data-backdrop="static" data-keyboard="false"> 
+								<span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search
+							</button>
+						</span>
+					</div>
+				</div>
+
+				<button id="btnReturnToBrowser" type="button" class="btn btn-success invisible" aria-label="Return to the browser" title="Reopen the browser in the latest state.">
+					<span class="glyphicon glyphicon-repeat" aria-hidden="true"></span> Return to Browser
+				</button>
 			</div>
 
-			<div id="suggestions">
+			<div id="suggestions" class="col-lg-8" style="padding-left: 0;">
 				<h2>Suggested entry points</h2>
-				<p>Here we recommend some possible entry points that may be interesting for you.</p>
+				<p>
+					Here we recommend some possible entry points that may be interesting for you.<br>
+					<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> 
+					The number in brackets is the computed PageRank for the respective node.
+				</p>
+
+				<div id="suggestionsList">
+					<p>Retrieving the suggested entry points ...</p>
+					<div class="progress progress-striped active page-progress-bar">
+						<div class="progress-bar progress-bar-success" style="width: 100%;"></div>
+					</div>
+				</div>
 			</div>
+		</div>
+
+		<!---------------------- Browser ---------------------->
+		<div id="browser" class="panel panel-default">
+			<div id="browserHeader" class="panel-heading">
+				<div id="actionBtns" class="btn-group" role="group" aria-label="Actions">
+					<div class="btn-group" role="group">
+						<button id="btnShowKey" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>
+							<span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Legend <span class="caret"></span>
+						</button>
+						<ul id="keyForUsedColors" class="dropdown-menu">
+							<li><span class="glyphicon glyphicon-screenshot"></span><span class="colorIndicator central"></span> Central Node</li>
+							<li><span class="glyphicon glyphicon-circle-arrow-left"></span><span class="colorIndicator in"></span> Incoming Node</li>
+							<li><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="colorIndicator out"></span> Outgoing Node</li>
+							<li><span class="glyphicon glyphicon-star"></span><span class="colorIndicator literal"></span> Literal</li>
+						</ul>
+					</div>
+					<div class="btn-group" role="group">
+						<button id="btnExportDropdown" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>
+							<span class="glyphicon glyphicon-export" aria-hidden="true"></span> Export Graph <span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu">
+							<li><a id="btnExportGraphPNG" href="#">Export as PNG</a></li>
+							<li><a id="btnExportGraphSVG" href="#">Export as SVG</a></li>
+						</ul>
+					</div>
+					<button id="btnReloadGraph" type="button" class="btn btn-default" aria-label="Reload the current graph">
+						<span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Reload Graph
+					</button>
+					<button id="btnFullscreenBrowser" type="button" class="btn btn-default" aria-label="View browser in full-screen">
+						<span class="glyphicon glyphicon-resize-full" aria-hidden="true"></span> Full-screen
+					</button>
+					<button id="btnCloseBrowser" type="button" class="btn btn-default" aria-label="Close browser and return to entry point">
+						<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Close Browser
+					</button>
+				</div>
+
+				<h3><span class="glyphicon glyphicon-globe" aria-hidden="true"></span> RDF Browser</h3>
+				
+				<div id="browsingHistory">
+					<span>History:&nbsp;&nbsp;&nbsp;</span>
+					<ol id="list" class="breadcrumb"></ol>
+				</div>
+			</div>
+
+			<div id="browserBody" class="panel-body">...</div>
 		</div>
 	</form>
 
-	<!-- Autocompletion Modal -->
+	<!---------------------- Autocompletion Modal ---------------------->
 	<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle">
-		<div class="modal-dialog" role="document">
+		<div class="modal-dialog" role="document" style="width: 80%;">
 			<div class="modal-content">
 				<div class="modal-header">
 					<button type="button" id="btnCloseModal" class="close" data-dismiss="modal" aria-label="Close">
@@ -100,35 +210,8 @@
 
 				<div class="modal-footer">
 					<button type="button" id="btnCancelModal" class="btn btn-default" data-dismiss="modal">Cancel</button>
-					<button type="button" id="btnStartBrowsing" class="btn btn-primary" onClick="startBrowsing(event)" data-toggle="modal"
-						data-target="#browserModal" data-backdrop="static" data-keyboard="false">Start Browsing</button>
+					<button type="button" id="btnStartBrowsing" class="btn btn-primary" onClick="startBrowsing(event)">Start Browsing</button>
 				</div>
-			</div>
-		</div>
-	</div>
-
-	<!-- Browser Modal -->
-	<div class="modal modal-fullscreen fade" id="browserModal" tabindex="-1" role="dialog" aria-labelledby="browserModalTitle">
-		<div class="modal-dialog" role="document" style="width: 100%; height: 100%; margin: 0; padding: 0;">
-			<div class="modal-content" style="height: 100%; width: 100%; border: none; border-radius: 0;">
-				<div id="browserModalHeader" class="modal-header">
-					<button type="button" id="btnCloseBrowserModal" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-
-					<h4 id="modalTitle" class="modal-title">RDF Browser</h4>
-
-					<div id="browsingHistory">
-						<span>History:&nbsp;&nbsp;&nbsp;</span>
-						<ol id="list" class="breadcrumb" style="display: inline; margin: 0; padding: 0;"></ol>
-					</div>
-				</div>
-
-				<div id="browserModalBody" class="modal-body" style="overflow: auto;">...</div>
-
-				<!--<div class="modal-footer" style="position: fixed; bottom: 0; width: 100%;">
-					<button type="button" id="btnCancelBrowserModal" class="btn btn-default" data-dismiss="modal">Exit Browser</button>
-				</div>-->
 			</div>
 		</div>
 	</div>
