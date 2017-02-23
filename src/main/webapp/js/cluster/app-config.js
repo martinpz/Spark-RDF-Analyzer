@@ -10,6 +10,6 @@ const REST_API = CONFIG.prot + "://" + CONFIG.site + ":" + CONFIG.port + "/" +
 
 const NEW_GRAPH = {
 	label: 'The HDFS path to the folder that contains the graph data',
-	examplePath: 'e.g. hdfs://sydney.informatik.privat:8020/user/teamproject2016/data/dbpedia',
+	examplePath: 'e.g. /user/teamproject2016/data/dbpedia',
 	exampleName: 'e.g. DBpedia'
 }
