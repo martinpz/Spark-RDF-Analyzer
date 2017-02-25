@@ -22,7 +22,7 @@ import scala.Tuple3;
 
 public class RDFAnalyzerPageRank implements Serializable{
 
-	
+	private String graphName = "";
 	
 	public JavaPairRDD<String,Tuple2<Tuple2<String,Double>,Double>> pair;
 	public JavaPairRDD<String, Tuple3<String, Double, Double>> doo ;
@@ -41,7 +41,9 @@ public class RDFAnalyzerPageRank implements Serializable{
 	 */
 	public double lastscore = 99999999.0;
 	
-	
+	public RDFAnalyzerPageRank(String graphName) {
+		this.graphName = graphName;
+	}
 	
 	public void PerformPageRank(DataFrame records) throws Exception{
 
@@ -146,7 +148,7 @@ public class RDFAnalyzerPageRank implements Serializable{
 			  finalData.collect(),
 			  personEncoder
 			);
-			javaBeanDS.toDF().write().parquet(rdfanalyzer.spark.Configuration.storage() + "sib200PageRank.parquet");
+			javaBeanDS.toDF().write().parquet(rdfanalyzer.spark.Configuration.storage() + graphName + "PageRanking.parquet");
 		}
 		catch(NullPointerException e){
 			System.out.println("We are in the error");
