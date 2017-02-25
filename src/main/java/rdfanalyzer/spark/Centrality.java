@@ -2,8 +2,10 @@ package rdfanalyzer.spark;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -14,12 +16,10 @@ import org.apache.spark.sql.Row;
 
 import com.google.common.io.Resources;
 
+import ranking.DataFramePartitionLooper;
+import ranking.APSP;
 import ranking.ClosenessBean;
 import ranking.ClosenessCentrality;
-import ranking.RDFAnalyzerPageRank;
-import ranking.oldTests;
-import ranking.oldTests2;
-//import ranking.oldTests;
 
 public class Centrality {
 	private final static Logger logger = Logger.getLogger(Centrality.class);
@@ -107,16 +107,104 @@ public class Centrality {
 	}
 
 	public static String CalculateCloseness(String nodeName)  throws Exception{
-		oldTests2 test = new oldTests2();
-		test.test(null);
+
 		
-//		DataFrame resultFrame = Service.sqlCtx()
-//				.sql("SELECT subject,object FROM Graph WHERE subject='" + nodeName + "' LIMIT 5");
+//		relations.registerTempTable("relations");
+//		Service.sqlCtx().sql("select * from relations where subId=1460288880641").show();;
+
+		/*
+		 *  We'll loop the unique nodes to find APSP w.r.t each node
+		 *  
+		 *  but we'll create the adjacency matrix using the relations data.
+		 */
+
+		
+//		ReadAllPairShortestPathSingleNode();
+//
+		ReadAllPairShortestPathAllNode();
+
+//		RunAllPairShortestPathForAllNodes();
+//		RunAllPairShortestPathWithTestData();
+		
+//		uniqueNodes.foreachPartition(partitionerLoop);
+		
+		// step 1
+//		DataFrame uniqueFrame = Service.sqlCtx().sql(""
+//		 + "SELECT DISTINCT"
+//		 + " a.nodes FROM "
+//		 + "(SELECT subject as nodes from Graph "
+//		 + " UNION ALL "
+//		 + " SELECT object as nodes FROM Graph) a").withColumn("id", functions.monotonically_increasing_id());
+//
+//		uniqueFrame.write().parquet(rdfanalyzer.spark.Configuration.storage() +
+//		 "UniqueNodes.parquet");
+//		uniqueFrame.registerTempTable("UniqueNodes");
+//
+//		
+//		// step 2
+//		 DataFrame relationsFrame = Service.sqlCtx().sql(""
+//		 + "SELECT unSub.id as subId,unObj.id as objId FROM Graph g "
+//		 + "INNER JOIN UniqueNodes unSub ON unSub.nodes=g.subject "
+//		 + "INNER JOIN UniqueNodes unObj ON unObj.nodes=g.object");
+//		 relationsFrame.write().parquet(rdfanalyzer.spark.Configuration.storage()
+//		 + "relations.parquet");
+		 
+		
+		
+//		relationsFrame.foreachPartition(new DataFramePartitionLooper());		
+
+		
 		
 //		RDFAnalyzerPageRank rank  = new RDFAnalyzerPageRank();
 //		rank.PerformPageRank(resultFrame);
 		return "";
 	}
+
+	public static void ReadAllPairShortestPathSingleNode() throws Exception{
+		DataFrame singleNodeAPSP = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
+				 + "sib200APSP.parquet");
+		singleNodeAPSP.show();
+		System.out.println("The count of single node is "+singleNodeAPSP.count());
+	}	
+	public static void ReadAllPairShortestPathAllNode() throws Exception{
+		DataFrame allNodeAPSP = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
+				 + "sib200APSPAll.parquet");
+		allNodeAPSP.show();
+		
+		System.out.println("The count of all nodes is "+allNodeAPSP.count());
+	}	
+
+	public static void RunAllPairShortestPathWithTestData() throws Exception{
+		// This is for testing with small graph
+		APSP apsp = new APSP();
+		apsp.test();
+	}	
+	
+	
+	public static void RunAllPairShortestPathForAllNodes(){
+		// [ nodes, ids ]
+		DataFrame uniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
+				 + "UniqueNodes.parquet");
+
+		// [ subids, objids ]
+		DataFrame relations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
+				 + "relations.parquet");
+		
+		Row[] uniqueNodesRows = uniqueNodes.collect();
+		System.out.println("number of unique nodes " + uniqueNodesRows.length);
+		
+		DataFramePartitionLooper partitionerLoop  = new DataFramePartitionLooper(relations);
+
+		for(int i=0;i<uniqueNodesRows.length;i++){
+			long nodeid =  uniqueNodesRows[i].getLong(1);
+			partitionerLoop.ApplyBFS(nodeid);
+			System.out.println("roribaba"+nodeid);
+			break;
+		}
+		
+		partitionerLoop.WriteDataToFile();
+	}
+
 	public static String CalculateClosenessByHop(String nodeName) throws Exception {
 
 		closenessbean = new ArrayList<ClosenessBean>();
