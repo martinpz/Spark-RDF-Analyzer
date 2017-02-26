@@ -26,25 +26,37 @@ import org.apache.spark.sql.types.StructType;
 
 import rdfanalyzer.spark.Service;
 
-public class DataFramePartitionLooper extends AbstractFunction1<Iterator<Row>, BoxedUnit> implements Serializable {
+public class DataFramePartitionLooper 
+//extends AbstractFunction1<Iterator<Row>, BoxedUnit> 
+implements Serializable {
 
 	private static final long serialVersionUID = -1919222653470217466L;
 	
-	private boolean starter = true;
 	private APSP apsp ;
 	private JavaPairRDD<Long, Tuple4<List<Long>,Integer,Integer, Integer>> adjacencyMatrix;
 	private JavaPairRDD<Long, Tuple3<List<Long>, List<Integer>, List<Integer>>> result;
+	
+	private Row[] uniqueNodesRows;
+	
+	private int index = 0;
+	
+	private boolean start = true;
 
-	public DataFramePartitionLooper(DataFrame relations) {
+	public DataFramePartitionLooper(DataFrame relations,Row[] uniqueNodesRows) {
 		
 		apsp = new APSP();
+		
+		this.uniqueNodesRows = uniqueNodesRows;
+		
+		// remove self loops.
+//		relations = relations.select("subId","objId").where(relations.col("subId").notEqual("objId"));
+//		relations.show();
 		
 		JavaPairRDD<Long,Long> rdd = DFToRDD(relations);
 		
 		// get the adjacency matrix first.
 		adjacencyMatrix = apsp.reduceToAdjacencyMatrix(rdd);
 		adjacencyMatrix.cache();
-		
 	}
 
 	private JavaRDD<APSPCase> ConvertPairRDDToCaseRDD(JavaPairRDD<Long, Tuple3<List<Long>, List<Integer>, List<Integer>>> result){
@@ -94,46 +106,63 @@ public class DataFramePartitionLooper extends AbstractFunction1<Iterator<Row>, B
 
 			@Override
 			public Tuple2<Long, Long> call(Row arg0) throws Exception {
+				
+				
 				return new Tuple2<Long,Long>(arg0.getLong(0),arg0.getLong(1));
 			}
 		});
 	}
 	
+	public void run(){
+
+		for(int i=0;i<uniqueNodesRows.length;i++){
+			
+			System.out.println("Finding the shortest path for a node.");
+
+			ApplyBFS(uniqueNodesRows[i].getLong(1),index);
+		}
+	}
 	
-	public void ApplyBFS(long subject){
+	
+	public void ApplyBFS(long subject,int index){
 		
-		 if(starter){
-			starter = false;
+		 System.out.println("chilgoza loop is starting");
+		 if(this.start){
+
+			System.out.println("chilgoza start if condition" + subject);
 			result = this.apsp.applyBFSForNode(subject, adjacencyMatrix);
+			this.start = false;
 		 }
 		 else{
-			 
+
+			System.out.println("chilgoza start else condition"+ subject);
 			result = result.union(this.apsp.applyBFSForNode(subject, adjacencyMatrix));
 		 }
+		 
 	}
 
 
-	@Override
-	public BoxedUnit apply(Iterator<Row> iterator) {
-		
-		System.out.println("iterator called");
-		
-		while (iterator.hasNext()) {
-			 Row row = iterator.next();
-			 
-			 long subject = row.getLong(1);
-			 
-			 if(starter){
-				starter = false;
-				result = this.apsp.applyBFSForNode(subject, adjacencyMatrix);
-			 }
-			 else{
-				 
-				result = result.union(this.apsp.applyBFSForNode(subject, adjacencyMatrix));
-			 }
-		}
-		
-		return BoxedUnit.UNIT;
-	}
+//	@Override
+//	public BoxedUnit apply(Iterator<Row> iterator) {
+//		
+//		System.out.println("iterator called");
+//		
+//		while (iterator.hasNext()) {
+//			 Row row = iterator.next();
+//			 
+//			 long subject = row.getLong(1);
+//			 
+//			 if(starter){
+//				starter = false;
+//				result = this.apsp.applyBFSForNode(subject, adjacencyMatrix);
+//			 }
+//			 else{
+//				 
+//				result = result.union(this.apsp.applyBFSForNode(subject, adjacencyMatrix));
+//			 }
+//		}
+//		
+//		return BoxedUnit.UNIT;
+//	}
 
 }

@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.functions;
 
 import com.google.common.io.Resources;
 
@@ -121,33 +122,14 @@ public class Centrality {
 		
 //		ReadAllPairShortestPathSingleNode();
 //
-		ReadAllPairShortestPathAllNode();
-
-//		RunAllPairShortestPathForAllNodes();
+//		ReadAllPairShortestPathAllNode();
+//		generateDataFrame();
+		RunAllPairShortestPathForAllNodes();
 //		RunAllPairShortestPathWithTestData();
 		
 //		uniqueNodes.foreachPartition(partitionerLoop);
 		
 		// step 1
-//		DataFrame uniqueFrame = Service.sqlCtx().sql(""
-//		 + "SELECT DISTINCT"
-//		 + " a.nodes FROM "
-//		 + "(SELECT subject as nodes from Graph "
-//		 + " UNION ALL "
-//		 + " SELECT object as nodes FROM Graph) a").withColumn("id", functions.monotonically_increasing_id());
-//
-//		uniqueFrame.write().parquet(rdfanalyzer.spark.Configuration.storage() +
-//		 "UniqueNodes.parquet");
-//		uniqueFrame.registerTempTable("UniqueNodes");
-//
-//		
-//		// step 2
-//		 DataFrame relationsFrame = Service.sqlCtx().sql(""
-//		 + "SELECT unSub.id as subId,unObj.id as objId FROM Graph g "
-//		 + "INNER JOIN UniqueNodes unSub ON unSub.nodes=g.subject "
-//		 + "INNER JOIN UniqueNodes unObj ON unObj.nodes=g.object");
-//		 relationsFrame.write().parquet(rdfanalyzer.spark.Configuration.storage()
-//		 + "relations.parquet");
 		 
 		
 		
@@ -158,6 +140,31 @@ public class Centrality {
 //		RDFAnalyzerPageRank rank  = new RDFAnalyzerPageRank();
 //		rank.PerformPageRank(resultFrame);
 		return "";
+	}
+	
+	public static void generateDataFrame(){
+		
+		DataFrame uniqueFrame = Service.sqlCtx().sql(""
+		 + "SELECT DISTINCT"
+		 + " a.nodes FROM "
+		 + "(SELECT subject as nodes from Graph "
+		 + " UNION ALL "
+		 + " SELECT object as nodes FROM Graph) a").withColumn("id", functions.monotonically_increasing_id());
+
+		uniqueFrame.write().parquet(rdfanalyzer.spark.Configuration.storage() +
+		 "UniqueNodes.parquet");
+		
+		uniqueFrame.registerTempTable("UniqueNodes");
+
+		
+		// step 2
+		 DataFrame relationsFrame = Service.sqlCtx().sql(""
+		 + "SELECT unSub.id as subId,unObj.id as objId FROM Graph g "
+		 + "INNER JOIN UniqueNodes unSub ON unSub.nodes=g.subject "
+		 + "INNER JOIN UniqueNodes unObj ON unObj.nodes=g.object "
+		 + "WHERE g.subject != g.object");
+		 relationsFrame.write().parquet(rdfanalyzer.spark.Configuration.storage()
+		 + "relations.parquet");
 	}
 
 	public static void ReadAllPairShortestPathSingleNode() throws Exception{
@@ -193,16 +200,19 @@ public class Centrality {
 		Row[] uniqueNodesRows = uniqueNodes.collect();
 		System.out.println("number of unique nodes " + uniqueNodesRows.length);
 		
-		DataFramePartitionLooper partitionerLoop  = new DataFramePartitionLooper(relations);
-
-		for(int i=0;i<uniqueNodesRows.length;i++){
-			long nodeid =  uniqueNodesRows[i].getLong(1);
-			partitionerLoop.ApplyBFS(nodeid);
-			System.out.println("roribaba"+nodeid);
-			break;
-		}
+//		uniqueNodes.show();
 		
+		DataFramePartitionLooper partitionerLoop  = new DataFramePartitionLooper(relations,uniqueNodesRows);
+		partitionerLoop.run();
 		partitionerLoop.WriteDataToFile();
+
+//		for(int i=0;i<uniqueNodesRows.length;i++){
+//			long nodeid =  uniqueNodesRows[i].getLong(1);
+//			partitionerLoop.ApplyBFS(nodeid);
+//			System.out.println("roribaba"+nodeid);
+//			break;
+//		}
+		
 	}
 
 	public static String CalculateClosenessByHop(String nodeName) throws Exception {
