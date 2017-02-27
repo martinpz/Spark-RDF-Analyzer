@@ -18,7 +18,7 @@ import org.apache.spark.sql.functions;
 import com.google.common.io.Resources;
 
 import ranking.DataFramePartitionLooper;
-import ranking.APSP;
+import ranking.SSSP;
 import ranking.ClosenessBean;
 import ranking.ClosenessCentrality;
 
@@ -183,7 +183,7 @@ public class Centrality {
 
 	public static void RunAllPairShortestPathWithTestData() throws Exception{
 		// This is for testing with small graph
-		APSP apsp = new APSP();
+		SSSP apsp = new SSSP();
 		apsp.test();
 	}	
 	

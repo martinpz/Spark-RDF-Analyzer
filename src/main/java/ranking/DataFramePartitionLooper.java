@@ -32,7 +32,7 @@ implements Serializable {
 
 	private static final long serialVersionUID = -1919222653470217466L;
 	
-	private APSP apsp ;
+	private SSSP apsp ;
 	private JavaPairRDD<Long, Tuple4<List<Long>,Integer,Integer, Integer>> adjacencyMatrix;
 	private JavaPairRDD<Long, Tuple3<List<Long>, List<Integer>, List<Integer>>> result;
 	
@@ -44,7 +44,7 @@ implements Serializable {
 
 	public DataFramePartitionLooper(DataFrame relations,Row[] uniqueNodesRows) {
 		
-		apsp = new APSP();
+		apsp = new SSSP();
 		
 		this.uniqueNodesRows = uniqueNodesRows;
 		
@@ -59,13 +59,13 @@ implements Serializable {
 		adjacencyMatrix.cache();
 	}
 
-	private JavaRDD<APSPCase> ConvertPairRDDToCaseRDD(JavaPairRDD<Long, Tuple3<List<Long>, List<Integer>, List<Integer>>> result){
-		return result.map(new Function<Tuple2<Long,Tuple3<List<Long>, List<Integer>, List<Integer>>>, APSPCase>() {
+	private JavaRDD<SSSPCase> ConvertPairRDDToCaseRDD(JavaPairRDD<Long, Tuple3<List<Long>, List<Integer>, List<Integer>>> result){
+		return result.map(new Function<Tuple2<Long,Tuple3<List<Long>, List<Integer>, List<Integer>>>, SSSPCase>() {
 
 			@Override
-			public APSPCase call(Tuple2<Long,Tuple3<List<Long>, List<Integer>, List<Integer>>> line) throws Exception {
+			public SSSPCase call(Tuple2<Long,Tuple3<List<Long>, List<Integer>, List<Integer>>> line) throws Exception {
 				
-				APSPCase apspcase = new APSPCase();
+				SSSPCase apspcase = new SSSPCase();
 				apspcase.setSourceNodes(line._1);
 				apspcase.setNodeDistances(line._2._2());
 				apspcase.setNodeShortestPaths(line._2._3());
@@ -79,17 +79,17 @@ implements Serializable {
 
 	
 	public void WriteDataToFile(){
-		JavaRDD<APSPCase> apspRDD = ConvertPairRDDToCaseRDD(result);
+		JavaRDD<SSSPCase> apspRDD = ConvertPairRDDToCaseRDD(result);
 		WriteInfoToParquet(apspRDD);
 	}
 	
-	private void WriteInfoToParquet(JavaRDD<APSPCase> finalData){
+	private void WriteInfoToParquet(JavaRDD<SSSPCase> finalData){
 
 		try{
 			org.apache.spark.sql.catalyst.encoders.OuterScopes.addOuterScope(this);
 
-			Encoder<APSPCase> encoder = Encoders.bean(APSPCase.class);
-			Dataset<APSPCase> javaBeanDS = Service.sqlCtx().createDataset(
+			Encoder<SSSPCase> encoder = Encoders.bean(SSSPCase.class);
+			Dataset<SSSPCase> javaBeanDS = Service.sqlCtx().createDataset(
 			  finalData.collect(),
 			  encoder
 			);

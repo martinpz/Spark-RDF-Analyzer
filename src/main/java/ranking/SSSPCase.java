@@ -3,7 +3,7 @@ package ranking;
 import java.io.Serializable;
 import java.util.List;
 
-public class APSPCase implements Serializable{
+public class SSSPCase implements Serializable{
 
 	private Long sourceNode;
 	private List<Integer> nodeDistances;

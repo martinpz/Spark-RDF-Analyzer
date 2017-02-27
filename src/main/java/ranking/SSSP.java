@@ -22,7 +22,7 @@ import scala.Tuple2;
 import scala.Tuple3;
 import scala.Tuple4;
 
-public class APSP implements Serializable{
+public class SSSP implements Serializable{
 	
 	public List<Tuple2<Long,Long>> vertices = new ArrayList<>();
 	public List<Edge<Long>> edges = new ArrayList<>();
