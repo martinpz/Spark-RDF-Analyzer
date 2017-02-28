@@ -193,7 +193,7 @@ public class Centrality {
 	public static void RunAllPairShortestPathForAllNodes(){
 		// responsible for dividing the number unique nodes into subnodes.
 		// so that we can solve the problem individually and merge all 10 in the end together.
-		final int nodeDivider = 10000;
+		final int nodeDivider = 10;
 		
 		
 		// [ nodes, ids ]
