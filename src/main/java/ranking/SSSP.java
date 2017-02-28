@@ -128,7 +128,7 @@ public class SSSP implements Serializable{
 	 * Convert <Key,[Neighbors]> To <key, Tuple4 < [Neighbors] , Distance, Color, ShortestPaths >
 	 */
 	
-	public JavaPairRDD<Long, Tuple3<List<Long>, List<Integer>, List<Integer>>> applyBFSForNode(JavaPairRDD<Long, Tuple2<String, Integer>> sourceNodes, JavaPairRDD<Long, Tuple4<List<Long>,Integer,Integer, Integer>> adjacencyMatrixx){
+	public JavaPairRDD<Long, Tuple3<List<Long>, List<Integer>, List<Integer>>> applyBFSForNode(long sourceNode, JavaPairRDD<Long, Tuple4<List<Long>,Integer,Integer, Integer>> adjacencyMatrixx){
 
 		
 		
@@ -143,28 +143,28 @@ public class SSSP implements Serializable{
 		 *  2 = black color. So if all the items are 2 i.e black. Than we can break. Hence our breakPoint is
 		 *  itemCount * 2. And once we reduce we will check if we get this value from our reducer than we'll break.
 		 */
-//
-//		int i=0;
-//
-//		while(true){
-////			System.out.println("Iteration"+i);
-//			mappedValues = PerformBFSMapOperation(sourceNode,adjacencyMatrixx).cache();
-////			System.out.println("IterationMapped"+i);
-//			
-//
-//			adjacencyMatrixx = PerformBFSReduceOperation(mappedValues,i);
-////			System.out.println("IterationMappedReduced"+i);
-//			
-//			
-//			if(breakloop(adjacencyMatrixx,i)){
-////				System.out.println("IterationBreakloopinside"+i);
-//				break;
-//			}
-////			System.out.println("IterationBreakloopoutside"+i);
-//			i++;
-//		}
-//		
-//		adjacencyMatrixx.cache();
+
+		int i=0;
+
+		while(true){
+//			System.out.println("Iteration"+i);
+			mappedValues = PerformBFSMapOperation(sourceNode,adjacencyMatrixx).cache();
+//			System.out.println("IterationMapped"+i);
+			
+
+			adjacencyMatrixx = PerformBFSReduceOperation(mappedValues,i);
+//			System.out.println("IterationMappedReduced"+i);
+			
+			
+			if(breakloop(adjacencyMatrixx,i)){
+//				System.out.println("IterationBreakloopinside"+i);
+				break;
+			}
+//			System.out.println("IterationBreakloopoutside"+i);
+			i++;
+		}
+		
+		adjacencyMatrixx.cache();
 		
 		/*
 		 * Now we've got the final distances of source node to all other nodes.
@@ -176,9 +176,8 @@ public class SSSP implements Serializable{
 		 */
 			
 			
-//		return finalReduce(finalMap(adjacencyMatrixx, sourceNode));
+		return finalReduce(finalMap(adjacencyMatrixx, sourceNode));
 		
-		return null;
 		
 	}
 	

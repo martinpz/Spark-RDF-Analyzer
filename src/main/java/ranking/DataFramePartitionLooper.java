@@ -11,6 +11,7 @@ import scala.Tuple2;
 import scala.Tuple3;
 import scala.Tuple4;
 import scala.Tuple5;
+import scala.Tuple6;
 import scala.collection.Iterator;
 import scala.runtime.AbstractFunction1;
 import scala.runtime.BoxedUnit;
@@ -38,6 +39,8 @@ implements Serializable {
 	private SSSP apsp ;
 	private JavaPairRDD<Long, Tuple4<List<Long>,Integer,Integer, Integer>> adjacencyMatrix;
 	private JavaPairRDD<Long, Tuple3<List<Long>, List<Integer>, List<Integer>>> result;
+	
+	public final int NODE_DIVIDER = 10;
 	
 	private Row[] uniqueNodesRows;
 	
@@ -78,19 +81,29 @@ implements Serializable {
 		});
 	}
 	
-	public void ApplyBFSForSeveralNodes(DataFrame nodeslist,int index){
+	
+	public void ApplyBFSOnInterimFiles(){
+		for(int i=0;i<NODE_DIVIDER;i++){
+			
+			DataFrame interimFile = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
+					 + "sib200APSPInterim"+i+".parquet");
+		}
+	}
+	
+	
+	public void CreateInterimFilesForBFS(DataFrame nodeslist,int index){
 		
-		JavaPairRDD<Long, Tuple5<List<Long>, Integer, Integer, Integer, Long>> completeNodes = AddConstantColumn(nodeslist);
+		JavaPairRDD<Long, Tuple6<List<Long>, Integer, Integer, Integer, Long, Long>> completeNodes = AddConstantColumn(nodeslist);
 		JavaRDD<RepeatedRowsCase> caseRDD = ConvertToCaseRDD(completeNodes);
 		ConvertToParquet(caseRDD, index);
 		
 	}
 	
-	public JavaRDD<RepeatedRowsCase> ConvertToCaseRDD(JavaPairRDD<Long, Tuple5<List<Long>, Integer, Integer, Integer, Long>> completeNodes ){
-		return completeNodes.map(new Function<Tuple2<Long,Tuple5<List<Long>,Integer,Integer,Integer,Long>>, RepeatedRowsCase>() {
+	public JavaRDD<RepeatedRowsCase> ConvertToCaseRDD(JavaPairRDD<Long, Tuple6<List<Long>, Integer, Integer, Integer, Long, Long>> completeNodes ){
+		return completeNodes.map(new Function<Tuple2<Long,Tuple6<List<Long>,Integer,Integer,Integer,Long,Long>>, RepeatedRowsCase>() {
 
 			@Override
-			public RepeatedRowsCase call(Tuple2<Long, Tuple5<List<Long>, Integer, Integer, Integer, Long>> arg0)
+			public RepeatedRowsCase call(Tuple2<Long, Tuple6<List<Long>, Integer, Integer, Integer, Long,Long>> arg0)
 					throws Exception {
 				
 				RepeatedRowsCase casee = new RepeatedRowsCase();
@@ -125,13 +138,14 @@ implements Serializable {
 	
 	
 	
-	private JavaPairRDD<Long, Tuple5<List<Long>, Integer, Integer, Integer, Long>> AddConstantColumn(DataFrame nodeslist){
+	private JavaPairRDD<Long, Tuple6<List<Long>, Integer, Integer, Integer, Long,Long>> AddConstantColumn(DataFrame nodeslist){
 		
 		Row[] uniqueNodes = nodeslist.collect();
-		return adjacencyMatrix.flatMapToPair(new PairFlatMapFunction<Tuple2<Long,Tuple4<List<Long>,Integer,Integer,Integer>>, Long, Tuple5<List<Long>,Integer,Integer,Integer,Long>>() {
+
+		return adjacencyMatrix.flatMapToPair(new PairFlatMapFunction<Tuple2<Long,Tuple4<List<Long>,Integer,Integer,Integer>>, Long, Tuple6<List<Long>,Integer,Integer,Integer,Long,Long>>() {
 
 			@Override
-			public Iterable<Tuple2<Long, Tuple5<List<Long>, Integer, Integer, Integer, Long>>> call(
+			public Iterable<Tuple2<Long, Tuple6<List<Long>, Integer, Integer, Integer, Long,Long>>> call(
 					Tuple2<Long, Tuple4<List<Long>, Integer, Integer, Integer>> arg0) throws Exception {
 				
 				/*
@@ -139,21 +153,34 @@ implements Serializable {
 				 *		@param2 : distance 
 				 *		@param3 : color
 				 *		@param4 : NShortestPaths
-				 *		@param5 : outerLoopIDs
+				 *		@param5 : SourceID ( source for this adjacencyMatrix )
+				 *		@param6 : ConstantID
 				 *		
 				 *		@param5 helps us identify separate id's from the nodes. Using this we will update our keys before starting our 
 				 *		bfs to make sure all the keys are different for each group. By group here we mean an adjacencyMatrix is initialized
 				 *		for each unique node meaning that for n nodes we have n adjacencyMatrix on which the bfs will be applied.
 				 *		This param will help us not to mix up those adjacencyMatrix records for the keys column w.r.t each unique node.
 				 *
+				 *		@param0 which is the key. It is calculated by multiplying the key in the adjacencyMatrix for which we're in this 
+				 *		function right now multiply by the source node for this adjacency matrix multiply by the random unique constant
+				 *		we retrieved in Centrality class for uniqueNodes. By doing this we'll ensure that the keys in the adjacency matrix
+				 *		while applying bfs to it are not same for same sourceNode.
+				 *
+				 *		For.eg we've 10 adjacency matrix which has keys 1 ... 10. Now we've random 10 values for each 10 keys and also
+				 *		in 10 adjacency matrix we've 1 sourceNode which is why we've 10 adjacencyMatrix repeated i.e one for every sourceNode.
+				 *		
+				 *		So now we can make the key using sourceNode*RandomConstant*nodeOfThatRowOfAdjacencyMatrix. giving us a unique node
+				 *		which will be repeated only for the adjacencyMatrix and not for others.
+				 *
+				 *
 				 */
 				
-				List<Tuple2<Long, Tuple5<List<Long>, Integer, Integer, Integer, Long>>> result = new ArrayList<Tuple2<Long, Tuple5<List<Long>, Integer, Integer, Integer, Long>>>();
+				List<Tuple2<Long, Tuple6<List<Long>, Integer, Integer, Integer, Long,Long>>> result = new ArrayList<Tuple2<Long, Tuple6<List<Long>, Integer, Integer, Integer, Long,Long>>>();
 
 				for (Row r :uniqueNodes)
 				{
-					Tuple5<List<Long>, Integer, Integer, Integer, Long> tuple5 = new Tuple5<List<Long>, Integer, Integer, Integer, Long>(arg0._2._1(), arg0._2._2(), arg0._2._3(), arg0._2._4(), r.getLong(2));
-					Tuple2<Long,Tuple5<List<Long>, Integer, Integer, Integer, Long>> abc = new Tuple2<Long,Tuple5<List<Long>, Integer, Integer, Integer, Long>>(arg0._1,tuple5);
+					Tuple6<List<Long>, Integer, Integer, Integer, Long, Long> tuple6 = new Tuple6<List<Long>, Integer, Integer, Integer, Long,Long>(arg0._2._1(), arg0._2._2(), arg0._2._3(), arg0._2._4(), r.getLong(0) ,r.getLong(2));
+					Tuple2<Long,Tuple6<List<Long>, Integer, Integer, Integer, Long,Long>> abc = new Tuple2<Long,Tuple6<List<Long>, Integer, Integer, Integer, Long,Long>>(arg0._1* r.getLong(2) * r.getLong(0),tuple6);
 					result.add(abc);
 				}
 				return result;
@@ -218,30 +245,30 @@ implements Serializable {
 	
 	public void run(){
 
-		for(int i=0;i<uniqueNodesRows.length;i++){
-			
-			System.out.println("Finding the shortest path for a node.");
+//		for(int i=0;i<uniqueNodesRows.length;i++){
+//			
+//			System.out.println("Finding the shortest path for a node.");
 
-			ApplyBFS(uniqueNodesRows[i].getLong(1),index);
-		}
+			ApplyBFS(uniqueNodesRows[0].getLong(1),index);
+//		}
 	}
 	
 	
 	public void ApplyBFS(long subject,int index){
 //		
-//		 System.out.println("chilgoza loop is starting");
-//		 if(this.start){
-//
-//			System.out.println("chilgoza start if condition" + subject);
-//			result = this.apsp.applyBFSForNode(subject, adjacencyMatrix);
-//			this.start = false;
-//		 }
-//		 else{
-//
-//			System.out.println("chilgoza start else condition"+ subject);
-//			result = result.union(this.apsp.applyBFSForNode(subject, adjacencyMatrix));
-//		 }
-//		 
+		 System.out.println("chilgoza loop is starting");
+		 if(this.start){
+
+			System.out.println("chilgoza start if condition" + subject);
+			result = this.apsp.applyBFSForNode(subject, adjacencyMatrix);
+			this.start = false;
+		 }
+		 else{
+
+			System.out.println("chilgoza start else condition"+ subject);
+			result = result.union(this.apsp.applyBFSForNode(subject, adjacencyMatrix));
+		 }
+		 
 	}
 
 
