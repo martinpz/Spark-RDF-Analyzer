@@ -260,7 +260,6 @@ public class Centrality {
 			lastRow = subNodes.collect();
 
 			lastId = lastRow[lastRow.length - 1].getLong(1);
-			break;
 		}
 		
 		
