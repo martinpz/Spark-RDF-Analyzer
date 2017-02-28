@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
@@ -19,6 +20,7 @@ import com.google.common.io.Resources;
 
 import ranking.DataFramePartitionLooper;
 import ranking.SSSP;
+import scala.Tuple4;
 import ranking.ClosenessBean;
 import ranking.ClosenessCentrality;
 
@@ -189,22 +191,82 @@ public class Centrality {
 	
 	
 	public static void RunAllPairShortestPathForAllNodes(){
+		// responsible for dividing the number unique nodes into subnodes.
+		// so that we can solve the problem individually and merge all 10 in the end together.
+		final int nodeDivider = 10000;
+		
+		
 		// [ nodes, ids ]
 		DataFrame uniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
 				 + "UniqueNodes.parquet");
+		uniqueNodes.registerTempTable("UniqueNodes");
+		
+		
+		DataFrame sortedUniqueNodes = uniqueNodes.sqlContext().sql("SELECT * FROM UniqueNodes ORDER BY id DESC");
+
+		// this column will help us distinguish the keys in bfs because we assigned a unique constant to each key.
+		sortedUniqueNodes = sortedUniqueNodes.withColumn("randomConstants", functions.monotonically_increasing_id());
+		sortedUniqueNodes.registerTempTable("SortedUniqueNodes");
+		
+		
+		DataFrame subNodes;
+		Row[] lastRow;
+		
+		
+		/*
+		 *  we need to find the first row id. This will help us set the initial condition on the query i.e from which
+		 *  id should be our id less than
+		 */
+		
+		Row firstRow = sortedUniqueNodes.first();
+		
+		long lastId = firstRow.getLong(1);
 
 		// [ subids, objids ]
 		DataFrame relations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
 				 + "relations.parquet");
-		
+
+		double differenceDouble = (uniqueNodes.count()/nodeDivider);
+		int difference = (int) differenceDouble;
+
 		Row[] uniqueNodesRows = uniqueNodes.collect();
-		System.out.println("number of unique nodes " + uniqueNodesRows.length);
+		DataFramePartitionLooper partitionerLoop  = new DataFramePartitionLooper(relations,uniqueNodesRows);
+		
+//		partitionerLoop.run();
+//		partitionerLoop.WriteDataToFile();
+
+		for(int i=0;i<nodeDivider;i++){
+			
+			/*
+			 *  Suppose we've total 1000 nodes which means adjacency matrix has 1000 rows and we've to populate an RDD
+			 *  of 1000*1000. So what we did is that we will divide 1000 by 10 i.e 1000/10 = 100. And solve bfs for those
+			 *  100 nodes this makes the number of rows in the rdd to 1000*100. Once done we generate a parquet file with 
+			 *  it and than we generate the next 100 and so on until all the files are generated. In the end we merge all 
+			 *  the data to get our final result.
+			 */
+			
+			
+			subNodes = sortedUniqueNodes.sqlContext().sql("SELECT * FROM SortedUniqueNodes WHERE id < "+ lastId +" LIMIT "+ difference);
+			/*
+			 *  Calculate the bfs for these subNodes and generate a parquet file of the result.
+			 */
+			partitionerLoop.ApplyBFSForSeveralNodes(sortedUniqueNodes,i);
+			
+			
+			/*
+			 *  Set the last id as the last record in the subNodes DF
+			 */
+			
+			lastRow = subNodes.collect();
+
+			lastId = lastRow[lastRow.length - 1].getLong(1);
+			break;
+		}
+		
+		
 		
 //		uniqueNodes.show();
 		
-		DataFramePartitionLooper partitionerLoop  = new DataFramePartitionLooper(relations,uniqueNodesRows);
-		partitionerLoop.run();
-		partitionerLoop.WriteDataToFile();
 
 //		for(int i=0;i<uniqueNodesRows.length;i++){
 //			long nodeid =  uniqueNodesRows[i].getLong(1);
@@ -214,6 +276,8 @@ public class Centrality {
 //		}
 		
 	}
+	
+	
 
 	public static String CalculateClosenessByHop(String nodeName) throws Exception {
 
