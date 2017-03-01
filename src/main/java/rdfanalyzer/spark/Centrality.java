@@ -135,7 +135,7 @@ public class Centrality {
 //
 //		ReadAllPairShortestPathAllNode();
 //		generateDataFrame();
-		RunAllPairShortestPathForAllNodes();
+		RunAllPairShortestPathForAllNodes(nodeName);
 //		RunAllPairShortestPathWithTestData();
 		
 //		uniqueNodes.foreachPartition(partitionerLoop);
@@ -199,7 +199,7 @@ public class Centrality {
 	}	
 	
 	
-	public static void RunAllPairShortestPathForAllNodes(){
+	public static void RunAllPairShortestPathForAllNodes(String nodeName){
 		// responsible for dividing the number unique nodes into subnodes.
 		// so that we can solve the problem individually and merge all 10 in the end together.
 		
@@ -213,22 +213,27 @@ public class Centrality {
 		DataFrame relations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
 				 + "relations.parquet");
 		
+		
+//		DataFrame selectedNodeid = Service.sqlCtx().sql("SELECT * FROM UniqueNodes WHERE nodes='"+nodeName+"'");
+//		selectedNodeid.show();
+		
+		
 //		DataFrame uniqueNodes = DummyUniqueDataForInterimFile();
 //		DataFrame relations = DummyRelationDataForInterimFile();
 
-		uniqueNodes.registerTempTable("UniqueNodes");
+//		uniqueNodes.registerTempTable("UniqueNodes");
 
 
-		DataFrame sortedUniqueNodes = uniqueNodes.sqlContext().sql("SELECT * FROM UniqueNodes ORDER BY id DESC");
-		sortedUniqueNodes.show();
-
-		// this column will help us distinguish the keys in bfs because we assigned a unique constant to each key.
-		sortedUniqueNodes = sortedUniqueNodes.withColumn("randomConstants", functions.monotonically_increasing_id());
-		sortedUniqueNodes.registerTempTable("SortedUniqueNodes");
+//		DataFrame sortedUniqueNodes = uniqueNodes.sqlContext().sql("SELECT * FROM UniqueNodes ORDER BY id DESC");
+//		sortedUniqueNodes.show();
+//
+//		// this column will help us distinguish the keys in bfs because we assigned a unique constant to each key.
+//		sortedUniqueNodes = sortedUniqueNodes.withColumn("randomConstants", functions.monotonically_increasing_id());
+//		sortedUniqueNodes.registerTempTable("SortedUniqueNodes");
 		
 		
-		DataFrame subNodes;
-		Row[] lastRow = null;
+//		DataFrame subNodes;
+//		Row[] lastRow = null;
 		
 		
 		/*
@@ -241,46 +246,46 @@ public class Centrality {
 
 		Row[] uniqueNodesRows = uniqueNodes.collect();
 		DataFramePartitionLooper partitionerLoop  = new DataFramePartitionLooper(relations,uniqueNodesRows);
-
-		double differenceDouble = (uniqueNodes.count()/partitionerLoop.NODE_DIVIDER);
-		int difference = (int) differenceDouble;
-
-		Row firstRow = sortedUniqueNodes.first();
+//
+//		double differenceDouble = (uniqueNodes.count()/partitionerLoop.NODE_DIVIDER);
+//		int difference = (int) differenceDouble;
+//
+//		Row firstRow = sortedUniqueNodes.first();
+//		
+//		long lastId = firstRow.getLong(1);
 		
-		long lastId = firstRow.getLong(1);
-		
-//		partitionerLoop.run();
-//		partitionerLoop.WriteDataToFile();
+		partitionerLoop.run(1142461300807L);
+		partitionerLoop.WriteDataToFile();
 
-		for(int i=0;i<partitionerLoop.NODE_DIVIDER;i++){
-			
-			/*
-			 *  Suppose we've total 1000 nodes which means adjacency matrix has 1000 rows and we've to populate an RDD
-			 *  of 1000*1000. So what we did is that we will divide 1000 by 10 i.e 1000/10 = 100. And solve bfs for those
-			 *  100 nodes this makes the number of rows in the rdd to 1000*100. Once done we generate a parquet file with 
-			 *  it and than we generate the next 100 and so on until all the files are generated. In the end we merge all 
-			 *  the data to get our final result.
-			 */
-			
-			
-			subNodes = sortedUniqueNodes.sqlContext().sql("SELECT * FROM SortedUniqueNodes WHERE id < "+ lastId +" LIMIT "+ difference);
-			subNodes.show();
-			/*
-			 *  Calculate the bfs for these subNodes and generate a parquet file of the result.
-			 */
-			partitionerLoop.CreateInterimFilesForBFS(subNodes,i);
-			
-			
-			/*
-			 *  Set the last id as the last record in the subNodes DF
-			 */
-			
-			System.out.print("coming here");
-			lastRow = subNodes.collect();
-
-			lastId = lastRow[lastRow.length - 1].getLong(1);
-			break;
-		}
+//		for(int i=0;i<partitionerLoop.NODE_DIVIDER;i++){
+//			
+//			/*
+//			 *  Suppose we've total 1000 nodes which means adjacency matrix has 1000 rows and we've to populate an RDD
+//			 *  of 1000*1000. So what we did is that we will divide 1000 by 10 i.e 1000/10 = 100. And solve bfs for those
+//			 *  100 nodes this makes the number of rows in the rdd to 1000*100. Once done we generate a parquet file with 
+//			 *  it and than we generate the next 100 and so on until all the files are generated. In the end we merge all 
+//			 *  the data to get our final result.
+//			 */
+//			
+//			
+//			subNodes = sortedUniqueNodes.sqlContext().sql("SELECT * FROM SortedUniqueNodes WHERE id < "+ lastId +" LIMIT "+ difference);
+//			subNodes.show();
+//			/*
+//			 *  Calculate the bfs for these subNodes and generate a parquet file of the result.
+//			 */
+//			partitionerLoop.CreateInterimFilesForBFS(subNodes,i);
+//			
+//			
+//			/*
+//			 *  Set the last id as the last record in the subNodes DF
+//			 */
+//			
+//			System.out.print("coming here");
+//			lastRow = subNodes.collect();
+//
+//			lastId = lastRow[lastRow.length - 1].getLong(1);
+//			break;
+//		}
 		
 		
 		
@@ -334,219 +339,13 @@ public class Centrality {
 
 	public static String CalculateClosenessByHop(String nodeName) throws Exception {
 
-		closenessbean = new ArrayList<ClosenessBean>();
-		List<String> node = new ArrayList<String>();
-		node.add(nodeName);
-
-		DataFrame resultFrame = Service.sqlCtx()
-				.sql("SELECT subject,object FROM Graph WHERE subject='" + nodeName + "' LIMIT 5");
-
-		List<String> neighbours = getListFromDatasetRows(resultFrame);
-		for (String string : neighbours) {
-			node.add(string);
-		}
-
-		System.out.println("List Size: " + node.size());
-
-		System.out.println("[LOGS] Present in metric type 4");
-
-		
-		List<String> tobeQueried = new ArrayList<>();
-		tobeQueried.add(nodeName);
-
-		// All The records of parquet.
-		DataFrame existingParquetData = null;
-
-		// The records which already exists in parquet sent through arg of this
-		// function.
-		DataFrame existingcurrentNodesData = null;
-
-		File f = new File(closenessParquetPath);
-
-		System.out.println("query 1");
-
-		if (f.exists()) {
-			System.out.println("file exists reading...");
-
-			// Read existing closeness data from Parquet
-			existingParquetData = Service.sqlCtx().read().parquet(closenessParquetPath); // 1
-																							// record
-			existingcurrentNodesData = Service.sqlCtx().read().parquet(closenessParquetPath);
-
-			System.out.println("query 222");
-
-			// Getting All the nodes from Parquet Table which are present in the
-			// queried list passed as an arg to this function.
-//			existingcurrentNodesData
-//					.select(existingcurrentNodesData.col("closeness"), existingcurrentNodesData.col("node"))
-//					.where(existingcurrentNodesData.col("node").isin(node.stream().toArray(String[]::new))).show(); // 1
-//																													// record
-
-			// Convert the parquet dataset nodesName col into List<String>
-			List<String> existingNodes = getListFromDatasetRows(existingcurrentNodesData);
-			System.out.println("query 2");
-
-			System.out.println("Passed nodes " + node.size());
-			/*
-			 * Subtract the existingNodes from the ones which are queried, since
-			 * the existing ones are already available through parquet.
-			 */
-			tobeQueried = getUniqueValues(node, existingNodes);
-		}
-
 		DataFrame resultsFrame = Service.sqlCtx().sql("SELECT * from Graph");
-		System.out.println("query 3");
-
 		resultsFrame.cache();
-		System.out.println("query 4");
 
 		ClosenessCentrality path = new ClosenessCentrality();
-		System.out.println("query 5");
+		path.calculateCloseness(resultsFrame, nodeName);
 
-		for (String anode : tobeQueried) {
-			// closenessbean.add(path.calculateCloseness(resultsFrame,anode));
-		}
-		System.out.println("query 6");
-
-		DataFrame newDataset = Service.sqlCtx().createDataFrame(closenessbean, ClosenessBean.class);
-
-		System.out.println("Parquet data");
-		if (existingcurrentNodesData != null) {
-			existingcurrentNodesData.show();
-		}
-
-		System.out.println("Before");
-		newDataset.show();
-
-		if (f.exists()) {
-			// newDataset = existingParquetData.union(newDataset);
-			System.out.println("query 7");
-		}
-
-		System.out.println("After");
-		newDataset.show();
-
-		System.out.println("To Be Queried size = " + tobeQueried.size());
-
-		// deleteDirectory(f);
-
-		System.out.println("saving file");
-		newDataset.write().parquet(closenessParquetPath);
-
-		// DataFrame vertFrame = Service.sqlCtx().sql("select *,row_number()
-		// OVER(ORDER BY(SELECT 0)) as id from Graph");
-
-		// DataFrame vertFrame = Service.sqlCtx().sql(""
-		// + "SELECT DISTINCT row_number() OVER(ORDER BY(SELECT 0)) as
-		// id,a.nodes FROM "
-		// + "(SELECT subject as nodes from Graph"
-		// + " UNION ALL"
-		// + " SELECT object as nodes FROM Graph) a");
-
-		// String nodee = node;
-		// System.out.println("query 0 success");
-		// DataFrame hop1Nodes = Service.sqlCtx().sql("SELECT subject,object
-		// FROM Graph WHERE subject='"+nodee+"' AND object!='"+nodee+"'");
-		// System.out.println("query 1 success");
-		//
-		// List<String> hop1Objects = getListFromDatasetRows(hop1Nodes);
-		//
-		//
-		// DataFrame hop2Nodes =
-		// graphFrame.select(graphFrame.col("subject"),graphFrame.col("object"))
-		// .where(graphFrame.col("subject").isin(hop1Objects.stream().toArray(String[]::new))
-		// .and(graphFrame.col("object").notEqual(hop1Nodes.col("object"))
-		// .and(graphFrame.col("object").notEqual(nodee))));
-		// System.out.println("query 3 success");
-		//
-		// List<String> hop2Objects = getListFromDatasetRows(hop2Nodes);
-		// System.out.println("query 4 success");
-		//
-		// DataFrame hop3Nodes =
-		// graphFrame.select(graphFrame.col("subject"),graphFrame.col("object"))
-		// .where(graphFrame.col("subject").isin(hop2Objects.stream().toArray(String[]::new))
-		// .and(graphFrame.col("object").notEqual(hop2Nodes.col("object")))
-		// .and(graphFrame.col("object").notEqual(hop1Nodes.col("object")))
-		// .and(graphFrame.col("object").notEqual(nodee)));
-		//
-		// System.out.println("query 5 success");
-		//
-		// System.out.println("hop1 = "+ hop1Nodes.count());
-		// System.out.println("hop2 = "+ hop2Nodes.count());
-		// System.out.println("hop3 = "+ hop3Nodes.count());
-		//
-		// hop1Nodes = hop1Nodes.union(hop2Nodes).union(hop3Nodes);
-		// hop1Nodes.show();
-
-		// vertFrame.write().parquet(rdfanalyzer.spark.Configuration.storage() +
-		// "UniqueNodes.parquet");
-		// vertFrame.createOrReplaceTempView("UniqueNodes");
-
-		// DataFrame vertFrame =
-		// Service.spark().read().parquet(rdfanalyzer.spark.Configuration.storage()
-		// + "UniqueNodes.parquet");
-		// vertFrame.show();
-		// vertFrame.createOrReplaceTempView("UniqueNodes");
-		//
-		// DataFrame relationsFrame = Service.sqlCtx().sql(""
-		// + "SELECT unSub.id as subId,unObj.id as objId,predicate FROM Graph g
-		// "
-		// + "INNER JOIN UniqueNodes unSub ON unSub.nodes=g.subject "
-		// + "INNER JOIN UniqueNodes unObj ON unObj.nodes=g.object");
-		// relationsFrame.write().parquet(rdfanalyzer.spark.Configuration.storage()
-		// + "relations.parquet");
-		// relationsFrame.show();
-
-		// DataFrame relationsFrame = Service.sqlCtx().sql("SELECT
-		// subject,predicate,object from Graph");
-
-		// // this give us the value of max indegree of a particular node.
-		// long highestIndegree = getHighestIndegree();
-		//
-		//
-		// long inDegreeignoreLimit = (highestIndegree * LIMIT_DELTA)/ 100;
-		//
-		// String query = "SELECT g.subject,g.object FROM Graph g INNER JOIN "
-		// + "(SELECT object FROM Graph GROUP BY object HAVING "
-		// + "COUNT(subject)<"+inDegreeignoreLimit+") ss ON ss.object =
-		// g.object";
-		//
-		// DataFrame allSubjects = Service.sqlCtx().sql(query);
-		//
-		// RDFAnalyzerPageRank analyzer = new RDFAnalyzerPageRank();
-		// analyzer.PerformPageRank(allSubjects);
 		return "";
-	}
-
-	private static void deleteDirectory(File f) {
-		if (f.exists()) {
-			System.out.println("File exists and is a directory");
-			try {
-				FileUtils.deleteDirectory(f);
-				System.out.println("Directory deleted");
-			} catch (IOException | SecurityException e) {
-				System.out.println("Error is: " + e.getMessage());
-			}
-		}
-	}
-
-	private static List<String> getUniqueValues(List<String> bList, List<String> aList) {
-
-		List<String> union = new ArrayList<String>(aList);
-		union.addAll(bList);
-
-		System.out.println("Union list = " + union.size());
-
-		List<String> intersection = new ArrayList<String>(aList);
-		intersection.retainAll(bList);
-		intersection.addAll(aList);
-		System.out.println("Intersec list = " + intersection.size());
-
-		List<String> symmetricDifference = new ArrayList<String>(union);
-		symmetricDifference.removeAll(intersection);
-		System.out.println("SymmetricDiff list = " + symmetricDifference.size());
-
-		return symmetricDifference;
 	}
 
 	public static List<String> getListFromDatasetRows(DataFrame rows) {

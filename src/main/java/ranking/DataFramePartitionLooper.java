@@ -250,13 +250,19 @@ implements Serializable {
 		});
 	}
 	
-	public void run(){
+	public void run(long nodeid){
 
 //		for(int i=0;i<uniqueNodesRows.length;i++){
 //			
 //			System.out.println("Finding the shortest path for a node.");
 
-			ApplyBFS(uniqueNodesRows[0].getLong(1),index);
+				System.out.print("algo started");
+				result = this.apsp.finalReduce
+					(this.apsp.applyBFSForNode(nodeid, adjacencyMatrix));
+				System.out.print("algo finished");
+		
+				
+				WriteDataToFile();
 //		}
 	}
 	

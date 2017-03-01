@@ -154,19 +154,20 @@ public class SSSP implements Serializable{
 
 		int i=0;
 
+		System.out.println("mapreduce job loop working");
 		while(true){
 
 			mappedValues = PerformBFSMapOperation(sourceNode,adjacencyMatrixx).cache();
 			adjacencyMatrixx = PerformBFSReduceOperation(mappedValues,i);
 			
-			if(!fullBfs){
-				/*
-				 *  Get the grey nodes and check if they are already present in the master SSSP node parquet file.
-				 */
-				JavaPairRDD<Long, Tuple4<List<Long>, Integer, Integer, Integer>> pluckedGreyNodes = PluckGreyNodes(adjacencyMatrixx);
-				
-				
-			}
+//			if(!fullBfs){
+//				/*
+//				 *  Get the grey nodes and check if they are already present in the master SSSP node parquet file.
+//				 */
+//				JavaPairRDD<Long, Tuple4<List<Long>, Integer, Integer, Integer>> pluckedGreyNodes = PluckGreyNodes(adjacencyMatrixx);
+//				
+//				
+//			}
 			
 			
 			if(breakloop(adjacencyMatrixx,i)){
@@ -175,6 +176,7 @@ public class SSSP implements Serializable{
 
 			i++;
 		}
+		System.out.println("mapreduce job loop finished");
 		
 		adjacencyMatrixx.cache();
 		
