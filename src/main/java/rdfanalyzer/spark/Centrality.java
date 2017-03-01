@@ -5,21 +5,28 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.functions;
+import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.StructField;
+import org.apache.spark.sql.types.StructType;
 
 import com.google.common.io.Resources;
 
 import ranking.DataFramePartitionLooper;
 import ranking.SSSP;
+import scala.Tuple2;
 import scala.Tuple4;
 import ranking.ClosenessBean;
 import ranking.ClosenessCentrality;
@@ -30,6 +37,8 @@ public class Centrality {
 	public static ConnAdapter objAdapter = new ConnAdapter();
 	public static DataFrame graphFrame;
 	public static List<ClosenessBean> closenessbean;
+	public static List<Tuple2<Long,Long>> vertices = new ArrayList<>();
+	public static List<Long> Uniquevertices = new ArrayList<>();
 
 	public static final String closenessParquetPath = rdfanalyzer.spark.Configuration.storage() + "closeness.parquet";
 	/*
@@ -200,8 +209,18 @@ public class Centrality {
 				 + "UniqueNodes.parquet");
 		uniqueNodes.registerTempTable("UniqueNodes");
 		
+		// [ subids, objids ]
+		DataFrame relations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
+				 + "relations.parquet");
 		
+//		DataFrame uniqueNodes = DummyUniqueDataForInterimFile();
+//		DataFrame relations = DummyRelationDataForInterimFile();
+
+		uniqueNodes.registerTempTable("UniqueNodes");
+
+
 		DataFrame sortedUniqueNodes = uniqueNodes.sqlContext().sql("SELECT * FROM UniqueNodes ORDER BY id DESC");
+		sortedUniqueNodes.show();
 
 		// this column will help us distinguish the keys in bfs because we assigned a unique constant to each key.
 		sortedUniqueNodes = sortedUniqueNodes.withColumn("randomConstants", functions.monotonically_increasing_id());
@@ -209,7 +228,7 @@ public class Centrality {
 		
 		
 		DataFrame subNodes;
-		Row[] lastRow;
+		Row[] lastRow = null;
 		
 		
 		/*
@@ -217,13 +236,7 @@ public class Centrality {
 		 *  id should be our id less than
 		 */
 		
-		Row firstRow = sortedUniqueNodes.first();
-		
-		long lastId = firstRow.getLong(1);
 
-		// [ subids, objids ]
-		DataFrame relations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "relations.parquet");
 
 
 		Row[] uniqueNodesRows = uniqueNodes.collect();
@@ -232,6 +245,9 @@ public class Centrality {
 		double differenceDouble = (uniqueNodes.count()/partitionerLoop.NODE_DIVIDER);
 		int difference = (int) differenceDouble;
 
+		Row firstRow = sortedUniqueNodes.first();
+		
+		long lastId = firstRow.getLong(1);
 		
 //		partitionerLoop.run();
 //		partitionerLoop.WriteDataToFile();
@@ -248,19 +264,22 @@ public class Centrality {
 			
 			
 			subNodes = sortedUniqueNodes.sqlContext().sql("SELECT * FROM SortedUniqueNodes WHERE id < "+ lastId +" LIMIT "+ difference);
+			subNodes.show();
 			/*
 			 *  Calculate the bfs for these subNodes and generate a parquet file of the result.
 			 */
-			partitionerLoop.CreateInterimFilesForBFS(sortedUniqueNodes,i);
+			partitionerLoop.CreateInterimFilesForBFS(subNodes,i);
 			
 			
 			/*
 			 *  Set the last id as the last record in the subNodes DF
 			 */
 			
+			System.out.print("coming here");
 			lastRow = subNodes.collect();
 
 			lastId = lastRow[lastRow.length - 1].getLong(1);
+			break;
 		}
 		
 		
@@ -278,6 +297,40 @@ public class Centrality {
 	}
 	
 	
+	
+	public static DataFrame DummyUniqueDataForInterimFile(){
+		
+		JavaRDD<Row> verRow = Service.sparkCtx()
+				.parallelize(Arrays.asList(RowFactory.create("node1",1L), RowFactory.create("node2",2L),
+						RowFactory.create("node3",3L), RowFactory.create("node4",4L)));
+
+		// Creating column and declaring dataType for vertex:
+		List<StructField> verFields = new ArrayList<StructField>();
+		verFields.add(DataTypes.createStructField("nodes", DataTypes.StringType, true));
+		verFields.add(DataTypes.createStructField("id", DataTypes.LongType, true));
+		StructType verSchema = DataTypes.createStructType(verFields);
+		return Service.sqlCtx().createDataFrame(verRow, verSchema);
+
+
+	}
+	public static DataFrame DummyRelationDataForInterimFile(){
+	
+		JavaRDD<Row> relationsRow = Service.sparkCtx()
+				.parallelize(Arrays.asList(RowFactory.create(1L,2L),
+						RowFactory.create(1L,3L), RowFactory.create(2L,4L),
+						RowFactory.create(3L,1L), RowFactory.create(4L,1L)));
+
+		// Edge column Creation with dataType:
+		List<StructField> EdgFields = new ArrayList<StructField>();
+		EdgFields.add(DataTypes.createStructField("subId", DataTypes.LongType, true));
+		EdgFields.add(DataTypes.createStructField("objId", DataTypes.LongType, true));
+
+		// Creating Schema:
+		StructType edgSchema = DataTypes.createStructType(EdgFields);
+
+		// Creating vertex DataFrame and edge DataFrame:
+		return Service.sqlCtx().createDataFrame(relationsRow, edgSchema);		
+	}
 
 	public static String CalculateClosenessByHop(String nodeName) throws Exception {
 

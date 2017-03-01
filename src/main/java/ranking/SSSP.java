@@ -35,7 +35,15 @@ public class SSSP implements Serializable{
 
 	public int sumOfCOlorColumn = 0;
 	public int lastsumOfCOlorColumn = 0;
+	
+	public boolean fullBfs = true;
+	
+	
+	JavaPairRDD<Long, Tuple3<List<Long>, List<Integer>, List<Integer>>> masterNodeBFS;
 
+	public void setMasterNodeBFS(JavaPairRDD<Long, Tuple3<List<Long>, List<Integer>, List<Integer>>> masterNodeBFS){
+		this.masterNodeBFS = masterNodeBFS;
+	}
 
 	public void test() throws Exception{
 		
@@ -128,7 +136,7 @@ public class SSSP implements Serializable{
 	 * Convert <Key,[Neighbors]> To <key, Tuple4 < [Neighbors] , Distance, Color, ShortestPaths >
 	 */
 	
-	public JavaPairRDD<Long, Tuple3<List<Long>, List<Integer>, List<Integer>>> applyBFSForNode(long sourceNode, JavaPairRDD<Long, Tuple4<List<Long>,Integer,Integer, Integer>> adjacencyMatrixx){
+	public JavaPairRDD<Long, Tuple3<Long, Integer, Integer>> applyBFSForNode(long sourceNode, JavaPairRDD<Long, Tuple4<List<Long>,Integer,Integer, Integer>> adjacencyMatrixx){
 
 		
 		
@@ -147,20 +155,24 @@ public class SSSP implements Serializable{
 		int i=0;
 
 		while(true){
-//			System.out.println("Iteration"+i);
-			mappedValues = PerformBFSMapOperation(sourceNode,adjacencyMatrixx).cache();
-//			System.out.println("IterationMapped"+i);
-			
 
+			mappedValues = PerformBFSMapOperation(sourceNode,adjacencyMatrixx).cache();
 			adjacencyMatrixx = PerformBFSReduceOperation(mappedValues,i);
-//			System.out.println("IterationMappedReduced"+i);
+			
+			if(!fullBfs){
+				/*
+				 *  Get the grey nodes and check if they are already present in the master SSSP node parquet file.
+				 */
+				JavaPairRDD<Long, Tuple4<List<Long>, Integer, Integer, Integer>> pluckedGreyNodes = PluckGreyNodes(adjacencyMatrixx);
+				
+				
+			}
 			
 			
 			if(breakloop(adjacencyMatrixx,i)){
-//				System.out.println("IterationBreakloopinside"+i);
 				break;
 			}
-//			System.out.println("IterationBreakloopoutside"+i);
+
 			i++;
 		}
 		
@@ -175,10 +187,24 @@ public class SSSP implements Serializable{
 		 * 
 		 */
 			
+		return finalMap(adjacencyMatrixx, sourceNode);
+		
+		
+	}
+	
+	
+	private JavaPairRDD<Long, Tuple4<List<Long>, Integer, Integer, Integer>> PluckGreyNodes(JavaPairRDD<Long, Tuple4<List<Long>, Integer, Integer, Integer>> adjacencyMatrixx){
+		return adjacencyMatrixx.filter(new Function<Tuple2<Long,Tuple4<List<Long>,Integer,Integer,Integer>>, Boolean>() {
 			
-		return finalReduce(finalMap(adjacencyMatrixx, sourceNode));
-		
-		
+			@Override
+			public Boolean call(Tuple2<Long, Tuple4<List<Long>, Integer, Integer, Integer>> arg0) throws Exception {
+				
+				if(arg0._2()._2() == 1){
+					return true;
+				}
+				return false;
+			}
+		});
 	}
 	
 	
@@ -200,7 +226,7 @@ public class SSSP implements Serializable{
 		});
 	}
 	
-	private JavaPairRDD<Long, Tuple3<List<Long>, List<Integer>, List<Integer>>> finalReduce(JavaPairRDD<Long, Tuple3<Long, Integer, Integer>> finalMappedData){
+	public JavaPairRDD<Long, Tuple3<List<Long>, List<Integer>, List<Integer>>> finalReduce(JavaPairRDD<Long, Tuple3<Long, Integer, Integer>> finalMappedData){
 		
 		
 		Function<Tuple3<Long, Integer, Integer>,Tuple3<List<Long>,List<Integer>,List<Integer>>> createCombiner = new Function<Tuple3<Long,Integer,Integer>, Tuple3<List<Long>,List<Integer>,List<Integer>>>() {

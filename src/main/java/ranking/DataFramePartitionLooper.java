@@ -40,7 +40,7 @@ implements Serializable {
 	private JavaPairRDD<Long, Tuple4<List<Long>,Integer,Integer, Integer>> adjacencyMatrix;
 	private JavaPairRDD<Long, Tuple3<List<Long>, List<Integer>, List<Integer>>> result;
 	
-	public final int NODE_DIVIDER = 10;
+	public final int NODE_DIVIDER = 1000;
 	
 	private Row[] uniqueNodesRows;
 	
@@ -92,9 +92,15 @@ implements Serializable {
 	
 	
 	public void CreateInterimFilesForBFS(DataFrame nodeslist,int index){
+		System.out.println("show kring");
+		nodeslist.show();
+		System.out.println("Doing step 1 full parquet");
 		JavaPairRDD<Long, Tuple6<List<Long>, Integer, Integer, Integer, Long, Long>> completeNodes = AddConstantColumn(nodeslist);
+		System.out.println("Doing step 2 full parquet = "+completeNodes.count());
 		JavaRDD<RepeatedRowsCase> caseRDD = ConvertToCaseRDD(completeNodes);
+		System.out.println("Doing step 3 full parquet = " + caseRDD.count());
 		ConvertToParquet(caseRDD, index);
+		System.out.println("Doing step 4 full parquet");
 		
 	}
 	
@@ -120,6 +126,7 @@ implements Serializable {
 	private void ConvertToParquet(JavaRDD<RepeatedRowsCase> finalData,int index){
 
 		try{
+			
 			org.apache.spark.sql.catalyst.encoders.OuterScopes.addOuterScope(this);
 
 			Encoder<RepeatedRowsCase> encoder = Encoders.bean(RepeatedRowsCase.class);
@@ -178,9 +185,10 @@ implements Serializable {
 
 				for (Row r :uniqueNodes)
 				{
-					Tuple6<List<Long>, Integer, Integer, Integer, Long, Long> tuple6 = new Tuple6<List<Long>, Integer, Integer, Integer, Long,Long>(arg0._2._1(), arg0._2._2(), arg0._2._3(), arg0._2._4(), r.getLong(0) ,r.getLong(2));
-					Tuple2<Long,Tuple6<List<Long>, Integer, Integer, Integer, Long,Long>> abc = new Tuple2<Long,Tuple6<List<Long>, Integer, Integer, Integer, Long,Long>>(arg0._1* r.getLong(2) * r.getLong(0),tuple6);
+					Tuple6<List<Long>, Integer, Integer, Integer, Long, Long> tuple6 = new Tuple6<List<Long>, Integer, Integer, Integer, Long,Long>(arg0._2._1(), arg0._2._2(), arg0._2._3(), arg0._2._4(), r.getLong(1) ,r.getLong(2));
+					Tuple2<Long,Tuple6<List<Long>, Integer, Integer, Integer, Long,Long>> abc = new Tuple2<Long,Tuple6<List<Long>, Integer, Integer, Integer, Long,Long>>(arg0._1* r.getLong(2) * r.getLong(1),tuple6);
 					result.add(abc);
+					break;
 				}
 				return result;
 			}
@@ -255,19 +263,19 @@ implements Serializable {
 	
 	public void ApplyBFS(long subject,int index){
 //		
-		 System.out.println("chilgoza loop is starting");
-		 if(this.start){
-
-			System.out.println("chilgoza start if condition" + subject);
-			result = this.apsp.applyBFSForNode(subject, adjacencyMatrix);
-			this.start = false;
-		 }
-		 else{
-
-			System.out.println("chilgoza start else condition"+ subject);
-			result = result.union(this.apsp.applyBFSForNode(subject, adjacencyMatrix));
-		 }
-		 
+//		 System.out.println("chilgoza loop is starting");
+//		 if(this.start){
+//
+//			System.out.println("chilgoza start if condition" + subject);
+//			result = this.apsp.applyBFSForNode(subject, adjacencyMatrix);
+//			this.start = false;
+//		 }
+//		 else{
+//
+//			System.out.println("chilgoza start else condition"+ subject);
+//			result = result.union(this.apsp.applyBFSForNode(subject, adjacencyMatrix));
+//		 }
+//		 
 	}
 
 
