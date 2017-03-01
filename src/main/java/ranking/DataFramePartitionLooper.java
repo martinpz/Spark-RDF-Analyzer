@@ -92,7 +92,6 @@ implements Serializable {
 	
 	
 	public void CreateInterimFilesForBFS(DataFrame nodeslist,int index){
-		
 		JavaPairRDD<Long, Tuple6<List<Long>, Integer, Integer, Integer, Long, Long>> completeNodes = AddConstantColumn(nodeslist);
 		JavaRDD<RepeatedRowsCase> caseRDD = ConvertToCaseRDD(completeNodes);
 		ConvertToParquet(caseRDD, index);

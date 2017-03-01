@@ -201,15 +201,15 @@ public class Centrality {
 		uniqueNodes.registerTempTable("UniqueNodes");
 		
 		
-//		DataFrame sortedUniqueNodes = uniqueNodes.sqlContext().sql("SELECT * FROM UniqueNodes ORDER BY id DESC");
+		DataFrame sortedUniqueNodes = uniqueNodes.sqlContext().sql("SELECT * FROM UniqueNodes ORDER BY id DESC");
 
 		// this column will help us distinguish the keys in bfs because we assigned a unique constant to each key.
-//		sortedUniqueNodes = sortedUniqueNodes.withColumn("randomConstants", functions.monotonically_increasing_id());
-//		sortedUniqueNodes.registerTempTable("SortedUniqueNodes");
+		sortedUniqueNodes = sortedUniqueNodes.withColumn("randomConstants", functions.monotonically_increasing_id());
+		sortedUniqueNodes.registerTempTable("SortedUniqueNodes");
 		
 		
-//		DataFrame subNodes;
-//		Row[] lastRow;
+		DataFrame subNodes;
+		Row[] lastRow;
 		
 		
 		/*
@@ -217,9 +217,9 @@ public class Centrality {
 		 *  id should be our id less than
 		 */
 		
-//		Row firstRow = sortedUniqueNodes.first();
-//		
-//		long lastId = firstRow.getLong(1);
+		Row firstRow = sortedUniqueNodes.first();
+		
+		long lastId = firstRow.getLong(1);
 
 		// [ subids, objids ]
 		DataFrame relations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
@@ -229,41 +229,41 @@ public class Centrality {
 		Row[] uniqueNodesRows = uniqueNodes.collect();
 		DataFramePartitionLooper partitionerLoop  = new DataFramePartitionLooper(relations,uniqueNodesRows);
 
-//		double differenceDouble = (uniqueNodes.count()/partitionerLoop.NODE_DIVIDER);
-//		int difference = (int) differenceDouble;
-//
-		
-		partitionerLoop.run();
-		partitionerLoop.WriteDataToFile();
+		double differenceDouble = (uniqueNodes.count()/partitionerLoop.NODE_DIVIDER);
+		int difference = (int) differenceDouble;
 
-//		for(int i=0;i<partitionerLoop.NODE_DIVIDER;i++){
-//			
-//			/*
-//			 *  Suppose we've total 1000 nodes which means adjacency matrix has 1000 rows and we've to populate an RDD
-//			 *  of 1000*1000. So what we did is that we will divide 1000 by 10 i.e 1000/10 = 100. And solve bfs for those
-//			 *  100 nodes this makes the number of rows in the rdd to 1000*100. Once done we generate a parquet file with 
-//			 *  it and than we generate the next 100 and so on until all the files are generated. In the end we merge all 
-//			 *  the data to get our final result.
-//			 */
-//			
-//			
-//			subNodes = sortedUniqueNodes.sqlContext().sql("SELECT * FROM SortedUniqueNodes WHERE id < "+ lastId +" LIMIT "+ difference);
-//			/*
-//			 *  Calculate the bfs for these subNodes and generate a parquet file of the result.
-//			 */
-//			partitionerLoop.CreateInterimFilesForBFS(sortedUniqueNodes,i);
-//			
-//			
-//			/*
-//			 *  Set the last id as the last record in the subNodes DF
-//			 */
-//			
-//			lastRow = subNodes.collect();
-//
-//			lastId = lastRow[lastRow.length - 1].getLong(1);
-//		}
-//		
-//		
+		
+//		partitionerLoop.run();
+//		partitionerLoop.WriteDataToFile();
+
+		for(int i=0;i<partitionerLoop.NODE_DIVIDER;i++){
+			
+			/*
+			 *  Suppose we've total 1000 nodes which means adjacency matrix has 1000 rows and we've to populate an RDD
+			 *  of 1000*1000. So what we did is that we will divide 1000 by 10 i.e 1000/10 = 100. And solve bfs for those
+			 *  100 nodes this makes the number of rows in the rdd to 1000*100. Once done we generate a parquet file with 
+			 *  it and than we generate the next 100 and so on until all the files are generated. In the end we merge all 
+			 *  the data to get our final result.
+			 */
+			
+			
+			subNodes = sortedUniqueNodes.sqlContext().sql("SELECT * FROM SortedUniqueNodes WHERE id < "+ lastId +" LIMIT "+ difference);
+			/*
+			 *  Calculate the bfs for these subNodes and generate a parquet file of the result.
+			 */
+			partitionerLoop.CreateInterimFilesForBFS(sortedUniqueNodes,i);
+			
+			
+			/*
+			 *  Set the last id as the last record in the subNodes DF
+			 */
+			
+			lastRow = subNodes.collect();
+
+			lastId = lastRow[lastRow.length - 1].getLong(1);
+		}
+		
+		
 		
 //		uniqueNodes.show();
 		
