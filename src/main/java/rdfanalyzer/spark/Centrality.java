@@ -80,6 +80,7 @@ public class Centrality {
 			System.out.println("[LOGS] Present in metric type 3");
 			return CalculateBetweenness(nodeName);
 		} else if (metricType.equals("4")) {
+			
 
 			return CalculateCloseness(nodeName);
 		} else if (metricType.equals("5")) {
@@ -198,6 +199,32 @@ public class Centrality {
 		apsp.test();
 	}	
 	
+	public static DataFrame return10RandomNodes(){
+		
+		DataFrame uniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
+				 + "UniqueNodes.parquet");
+		uniqueNodes.registerTempTable("UniqueNodes");
+		
+		return uniqueNodes.sqlContext().sql("SELECT * FROM UniqueNodes ORDER BY id ASC LIMIT 10");
+	}
+	
+	public static void ApplyHopBFS(DataFrame top10) throws Exception{
+		
+		Row[] rows = top10.collect();
+		
+		List<ClosenessBean> bean = new ArrayList<ClosenessBean>();
+		
+		for(Row r:rows){
+			bean.add(CalculateClosenessByHop(r.getString(0)));
+		}
+		
+		
+		for(ClosenessBean b:bean){
+			System.out.println("NodeName = "+b.getNode() + " Node 3 hop Centrality = "+b.getCloseness());
+		}
+		
+	}
+	
 	
 	public static void RunAllPairShortestPathForAllNodes(String nodeName){
 		// responsible for dividing the number unique nodes into subnodes.
@@ -254,7 +281,18 @@ public class Centrality {
 //		
 //		long lastId = firstRow.getLong(1);
 		
-		partitionerLoop.run(1142461300807L);
+		DataFrame top10 = return10RandomNodes();
+		
+		
+		Row[] rows = top10.collect();
+		
+		int i = 0;
+		for(Row r:rows){
+			partitionerLoop.run(r.getLong(1),i);
+			i++;
+		}
+		
+		
 		partitionerLoop.WriteDataToFile();
 
 //		for(int i=0;i<partitionerLoop.NODE_DIVIDER;i++){
@@ -337,15 +375,15 @@ public class Centrality {
 		return Service.sqlCtx().createDataFrame(relationsRow, edgSchema);		
 	}
 
-	public static String CalculateClosenessByHop(String nodeName) throws Exception {
+	public static ClosenessBean CalculateClosenessByHop(String nodeName) throws Exception {
 
 		DataFrame resultsFrame = Service.sqlCtx().sql("SELECT * from Graph");
 		resultsFrame.cache();
-
+		System.out.println("logo = "+nodeName);
+		
 		ClosenessCentrality path = new ClosenessCentrality();
-		path.calculateCloseness(resultsFrame, nodeName);
+		return path.calculateCloseness(resultsFrame, nodeName);
 
-		return "";
 	}
 
 	public static List<String> getListFromDatasetRows(DataFrame rows) {

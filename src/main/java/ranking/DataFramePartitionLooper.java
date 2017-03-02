@@ -230,7 +230,7 @@ implements Serializable {
 			  finalData.collect(),
 			  encoder
 			);
-			javaBeanDS.toDF().write().parquet(rdfanalyzer.spark.Configuration.storage() + "sib200APSPAll.parquet");
+			javaBeanDS.toDF().write().parquet(rdfanalyzer.spark.Configuration.storage() + "sib200SSSP10Nodes.parquet");
 		}
 		catch(NullPointerException e){
 			System.out.println("We are in the error");
@@ -250,19 +250,28 @@ implements Serializable {
 		});
 	}
 	
-	public void run(long nodeid){
+	public void run(long nodeid,int index){
 
 //		for(int i=0;i<uniqueNodesRows.length;i++){
 //			
 //			System.out.println("Finding the shortest path for a node.");
 
-				System.out.print("algo started");
+		
+			if(index == 0){
+				
 				result = this.apsp.finalReduce
-					(this.apsp.applyBFSForNode(nodeid, adjacencyMatrix));
-				System.out.print("algo finished");
+						(this.apsp.applyBFSForNode(nodeid, adjacencyMatrix));
+			}
+			else{
+				
+				result = result.union(this.apsp.finalReduce
+						(this.apsp.applyBFSForNode(nodeid, adjacencyMatrix)));
+			}
+				
+				
 		
 				
-				WriteDataToFile();
+//				WriteDataToFile();
 //		}
 	}
 	

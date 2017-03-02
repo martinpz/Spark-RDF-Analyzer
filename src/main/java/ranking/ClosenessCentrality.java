@@ -36,6 +36,8 @@ public class ClosenessCentrality implements Serializable {
 	// this is mentioned in step 4
 	List<String> nextQueryArray = new ArrayList<>();
 	
+	
+	
 	private int sum = 0;
 	private final int HOPS = 3; 
 	
@@ -53,6 +55,7 @@ public class ClosenessCentrality implements Serializable {
 		
 		
 		
+		
 		visited.add(node);
 
 		nextQueryArray.add(node);
@@ -61,16 +64,20 @@ public class ClosenessCentrality implements Serializable {
 
 			// Step 2
 			objectsOfSubjects = getObjectsOfSubjects(record);
+			
+			System.out.println("Objects of subjects = " + objectsOfSubjects.count());
 
 			// Step 3
 			nextQueryArray = new ArrayList<>();
 			nextQueryArray = objectsOfSubjects.values().collect();
 
+			System.out.println("nextQueryArray = " + nextQueryArray.size());
 
 			sum += (i+1) * nextQueryArray.size();
 
 			System.out.println("working step 1");
 			nextQueryArray = getUniqueValues(nextQueryArray,visited);
+			System.out.println("working step query " + nextQueryArray.size());
 			
 			// Step 4
 			visited.addAll(nextQueryArray);
@@ -80,7 +87,7 @@ public class ClosenessCentrality implements Serializable {
 		System.out.println("the sum is = "+ sum);
 		System.out.printf("dexp: %f\n", round(closeness,15));
 		return new ClosenessBean(node,closeness);
-		}	
+	}	
 	
 	/*
 	 * This method will return us the values which are not contained in visited list.

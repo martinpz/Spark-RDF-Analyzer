@@ -1,6 +1,8 @@
 package ranking;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -189,9 +191,10 @@ public class SSSP implements Serializable{
 		 * 
 		 */
 			
-		return finalMap(adjacencyMatrixx, sourceNode);
-		
-		
+		JavaPairRDD<Long, Tuple3<Long, Integer, Integer>> mappeddata = finalMap(adjacencyMatrixx, sourceNode);
+//		printSumOfWholeBFS(mappeddata);
+
+		return mappeddata;
 	}
 	
 	
@@ -209,6 +212,28 @@ public class SSSP implements Serializable{
 		});
 	}
 	
+	public void printSumOfWholeBFS(JavaPairRDD<Long, Tuple3<Long, Integer, Integer>> mappedData){
+		int finalvalues = mappedData.mapValues(new Function<Tuple3<Long,Integer,Integer>, Integer>() {
+
+			@Override
+			public Integer call(Tuple3<Long, Integer, Integer> line) throws Exception {
+				
+				return line._2();
+			}
+		}).values().collect().stream().mapToInt(Integer::intValue).sum();
+		
+		System.out.println("Final value for complete bfs = "+finalvalues);
+		double closeness = ((double)1/(double)finalvalues);
+		System.out.printf("dexp final ballay ballay: %f\n", round(closeness,25));
+	}
+	public double round(double value, int places) {
+	    if (places < 0) throw new IllegalArgumentException();
+
+	    BigDecimal bd = new BigDecimal(value);
+	    bd = bd.setScale(places, RoundingMode.HALF_UP);
+	    return bd.doubleValue();
+	}
+
 	
 	/*
 	 *  This converts the finalResult into sourceNode, DestNode, Distance, NPaths
