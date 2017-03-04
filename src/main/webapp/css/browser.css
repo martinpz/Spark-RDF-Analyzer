@@ -1,0 +1,232 @@
+/* ==================== RDF Browser Configuration ==================== */
+
+#configuration.panel-body {
+    color: white;
+    background-color: rgba(70, 130, 180, 0.95);
+}
+
+#configuration.panel-body div label {
+    font-weight: bold;
+}
+
+#configuration.panel-body div p {
+    font-style: italic;
+}
+
+#configuration.panel-body #sliderVal {
+    font-weight: bold;
+}
+
+#configuration.panel-body #numNeighborsSlider {
+    width: 350px;
+}
+
+#configuration.panel-body #numNeighborsSlider .slider-selection {
+    background: #ec971f;
+    opacity: 0.5;
+}
+
+#configuration.panel-body #numNeighborsSlider .slider-handle {
+    background: #ec971f;
+}
+
+#configuration.panel-body #numNeighborsSlider .tooltip {
+    z-index: 0;
+}
+
+
+/* ==================== RDF Browser Configuration ==================== */
+
+#suggestions #suggestionsList ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#suggestions #suggestionsList ul li {
+    float: left;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+#suggestions #suggestionsList ul li a {
+    display: block;
+    width: 240px;
+    height: 95px;
+    padding: 15px;
+    border: 3px solid #ec971f;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.2);
+    text-align: left;
+    text-decoration: none;
+    word-wrap: break-word;
+    white-space: pre-line;
+    color: white;
+}
+
+#suggestions #suggestionsList ul li a:hover {
+    box-shadow: inset 0 0 10px #ec971f;
+}
+
+
+/* ==================== RDF Browser ==================== */
+
+#browser {
+    display: none;
+    margin-bottom: 0;
+}
+
+#browser #browserHeader h3 {
+    margin-top: 0;
+    float: left;
+}
+
+#browser #browserHeader #actionBtns {
+    float: right;
+}
+
+#browser #keyForUsedColors {
+    padding: 15px;
+    width: 170px;
+}
+
+#browser #keyForUsedColors .colorIndicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+#browsingHistory {
+    clear: both;
+}
+
+#browsingHistory #list {
+    display: inline;
+    margin: 0;
+    padding: 0;
+}
+
+#browserBody {
+    position: relative;
+    color: black;
+    overflow: auto;
+}
+
+#browserBody.visual {
+    overflow: visible;
+}
+
+#browserBody table td {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    padding-right: 10px;
+    padding-bottom: 4px;
+    text-align: left;
+}
+
+#browser.fullscreen {
+    z-index: 9999;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    border-radius: 0;
+}
+
+#browserBody #container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+
+/* ==================== RDF Browser Tooltips ==================== */
+
+.sigma-tooltip {
+    max-width: 550px;
+    max-height: 350px;
+    background-color: rgba(0, 0, 0, 0.9);
+    /* rgb(249, 247, 237);*/
+    box-shadow: 0 2px 6px rgba(35, 82, 124, 0.8);
+    border-radius: 8px;
+    color: white;
+}
+
+.sigma-tooltip-header {
+    font-variant: small-caps;
+    font-size: 120%;
+    border-bottom: 5px solid rgba(35, 82, 124, 0.8);
+    padding: 10px;
+}
+
+.sigma-tooltip-header #tooltipActionBtns {
+    float: right;
+    margin-left: 20px;
+}
+
+.sigma-tooltip-body {
+    padding: 10px;
+    max-height: calc(350px - 55px);
+    overflow: auto;
+}
+
+.sigma-tooltip>.arrow {
+    border-width: 10px;
+    position: absolute;
+    display: block;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+}
+
+.sigma-tooltip.top {
+    margin-top: -12px;
+}
+
+.sigma-tooltip.top>.arrow {
+    left: 50%;
+    bottom: -10px;
+    margin-left: -10px;
+    border-top-color: rgba(0, 0, 0, 0.9);
+    border-bottom-width: 0;
+}
+
+.sigma-tooltip.bottom {
+    margin-top: 12px;
+}
+
+.sigma-tooltip.bottom>.arrow {
+    left: 50%;
+    top: -10px;
+    margin-left: -10px;
+    border-bottom-color: rgba(0, 0, 0, 0.9);
+    border-top-width: 0;
+}
+
+.sigma-tooltip.left {
+    margin-left: -12px;
+}
+
+.sigma-tooltip.left>.arrow {
+    top: 50%;
+    right: -10px;
+    margin-top: -10px;
+    border-left-color: rgba(0, 0, 0, 0.9);
+    border-right-width: 0;
+}
+
+.sigma-tooltip.right {
+    margin-left: 12px;
+}
+
+.sigma-tooltip.right>.arrow {
+    top: 50%;
+    left: -10px;
+    margin-top: -10px;
+    border-right-color: rgba(0, 0, 0, 0.9);
+    border-left-width: 0;
+}

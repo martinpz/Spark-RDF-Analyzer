@@ -1,9 +1,15 @@
-var CONFIG = {
-	prot : 'http',
-	site : 'isydney.informatik.uni-freiburg.de',
-	port : '8080',
-	rest : 'spark-rdfanalyzer2/rest/ALL'
+const CONFIG = {
+	prot: 'http',
+	site: 'isydney.informatik.uni-freiburg.de',
+	port: '8080',
+	rest: 'spark-rdfanalyzer2/rest/ALL'
 };
 
-var REST_API = CONFIG.prot + "://" + CONFIG.site + ":" + CONFIG.port + "/"
-		+ CONFIG.rest + "/";
+const REST_API = CONFIG.prot + "://" + CONFIG.site + ":" + CONFIG.port + "/" +
+	CONFIG.rest + "/";
+
+const NEW_GRAPH = {
+	label: 'The HDFS path to the folder that contains the graph data',
+	examplePath: 'e.g. /user/teamproject2016/data/dbpedia',
+	exampleName: 'e.g. DBpedia'
+}

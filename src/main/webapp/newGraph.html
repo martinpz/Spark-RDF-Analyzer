@@ -72,11 +72,12 @@
 			<div id="result"></div>
 			<form style="margin: 20px">
 				<div class="form-group">
-					<label>Local path of graph folder in server</label> <input type="text" class="form-control" id="inputPath"
-						placeholder="e.g. /home/cloudera/Desktop/sib200">
+					<label><script>document.write(NEW_GRAPH.label)</script></label> <input type="text" class="form-control" id="inputPath">
+						<script>document.write(NEW_GRAPH.examplePath)</script>
 				</div>
 				<div class="form-group">
-					<label>Graph Name</label> <input type="text" class="form-control" id="inputName" placeholder="e.g. sib200">
+					<label>Graph Name</label> <input type="text" class="form-control" id="inputName">
+					<script>document.write(NEW_GRAPH.exampleName)</script>
 				</div>
 
 				<div class="form-group">
