@@ -250,24 +250,15 @@ implements Serializable {
 		});
 	}
 	
-	public void run(long nodeid,int index){
+	public void run(long nodeid,int index) throws Exception{
 
 //		for(int i=0;i<uniqueNodesRows.length;i++){
 //			
 //			System.out.println("Finding the shortest path for a node.");
 
 		
-			if(index == 0){
-				
 				result = this.apsp.finalReduce
 						(this.apsp.applyBFSForNode(nodeid, adjacencyMatrix));
-			}
-			else{
-				
-				result = result.union(this.apsp.finalReduce
-						(this.apsp.applyBFSForNode(nodeid, adjacencyMatrix)));
-			}
-				
 				
 		
 				

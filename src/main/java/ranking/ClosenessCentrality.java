@@ -39,7 +39,7 @@ public class ClosenessCentrality implements Serializable {
 	
 	
 	private int sum = 0;
-	private final int HOPS = 3; 
+	private final int HOPS = 6; 
 	
 	public static ConnAdapter objAdapter = new ConnAdapter();
 	public static DataFrame graphFrame,allSubjectsDF;
@@ -112,8 +112,7 @@ public class ClosenessCentrality implements Serializable {
 	// Get objects of unique subjects
 	private JavaPairRDD<String,String> getObjectsOfSubjects(DataFrame records) throws Exception{
 
-		return records.
-				filter(records.col("subject").isin(nextQueryArray.stream().toArray())).toJavaRDD().mapToPair(
+		return records.select(records.col("object").isin(nextQueryArray.stream().toArray())).toJavaRDD().mapToPair(
 		new PairFunction<Row,String,String>(){
 
 			@Override

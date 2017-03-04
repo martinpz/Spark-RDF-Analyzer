@@ -16,6 +16,9 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Encoder;
+import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.functions;
@@ -83,6 +86,7 @@ public class Centrality implements Serializable{
 			System.out.println("[LOGS] Present in metric type 3");
 			return CalculateBetweenness(nodeName);
 		} else if (metricType.equals("4")) {
+<<<<<<< Updated upstream
 		
 			
 			System.out.println("graph frame lines = "+ graphFrame.count());
@@ -97,6 +101,10 @@ public class Centrality implements Serializable{
 			});
 
 		
+=======
+//			return10RandomNodes();
+			CreateUniqueNodesWithoutQuotes();
+>>>>>>> Stashed changes
 		} else if (metricType.equals("5")) {
 			System.out.println("[LOGS] Present in metric type 5");
 			return "<h1>" + calculateStartNode() + "</h1>";

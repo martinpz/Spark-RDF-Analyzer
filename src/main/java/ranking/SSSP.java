@@ -62,12 +62,11 @@ public class SSSP implements Serializable{
 		createVertices();
 		
 		JavaPairRDD<Long,Long> distData = Service.sparkCtx().parallelizePairs(vertices);
-		JavaPairRDD<Long,Long> uniqueData = Service.sparkCtx().parallelizePairs(vertices);
 
 		
 		JavaPairRDD<Long, Tuple4<List<Long>,Integer,Integer, Integer>> adjacencyMatrix = reduceToAdjacencyMatrix(distData);
 
-		
+		applyBFSForNode(1L, adjacencyMatrix);
 		
 //		adjacencyMatrix.mapToPair(new PairFunction<Tuple2<Long,
 //				Tuple4<List<Long>,Integer,Integer, Integer>>, 
@@ -160,6 +159,10 @@ public class SSSP implements Serializable{
 		while(true){
 
 			mappedValues = PerformBFSMapOperation(sourceNode,adjacencyMatrixx).cache();
+			
+			
+			
+			
 			adjacencyMatrixx = PerformBFSReduceOperation(mappedValues,i);
 			
 //			if(!fullBfs){
@@ -192,7 +195,8 @@ public class SSSP implements Serializable{
 		 */
 			
 		JavaPairRDD<Long, Tuple3<Long, Integer, Integer>> mappeddata = finalMap(adjacencyMatrixx, sourceNode);
-//		printSumOfWholeBFS(mappeddata);
+
+		printSumOfWholeBFS(mappeddata,sourceNode);
 
 		return mappeddata;
 	}
@@ -212,7 +216,7 @@ public class SSSP implements Serializable{
 		});
 	}
 	
-	public void printSumOfWholeBFS(JavaPairRDD<Long, Tuple3<Long, Integer, Integer>> mappedData){
+	public void printSumOfWholeBFS(JavaPairRDD<Long, Tuple3<Long, Integer, Integer>> mappedData,long sourceNode){
 		int finalvalues = mappedData.mapValues(new Function<Tuple3<Long,Integer,Integer>, Integer>() {
 
 			@Override
@@ -222,9 +226,9 @@ public class SSSP implements Serializable{
 			}
 		}).values().collect().stream().mapToInt(Integer::intValue).sum();
 		
-		System.out.println("Final value for complete bfs = "+finalvalues);
+		System.out.println("Final value for complete bfs = "+finalvalues + " for node " + sourceNode);
 		double closeness = ((double)1/(double)finalvalues);
-		System.out.printf("dexp final ballay ballay: %f\n", round(closeness,25));
+		System.out.printf("dexp final ballay ballay: %f\n", round(closeness,100000));
 	}
 	public double round(double value, int places) {
 	    if (places < 0) throw new IllegalArgumentException();
