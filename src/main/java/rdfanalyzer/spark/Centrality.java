@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
@@ -31,7 +32,7 @@ import scala.Tuple4;
 import ranking.ClosenessBean;
 import ranking.ClosenessCentrality;
 
-public class Centrality {
+public class Centrality implements Serializable{
 	private final static Logger logger = Logger.getLogger(Centrality.class);
 
 	public static ConnAdapter objAdapter = new ConnAdapter();
@@ -80,9 +81,20 @@ public class Centrality {
 			System.out.println("[LOGS] Present in metric type 3");
 			return CalculateBetweenness(nodeName);
 		} else if (metricType.equals("4")) {
+		
 			
+			System.out.println("graph frame lines = "+ graphFrame.count());
+			graphFrame.show();
+			graphFrame.select("subject","object").toJavaRDD().mapToPair(new PairFunction<Row, String, String>() {
 
-			return CalculateCloseness(nodeName);
+				@Override
+				public Tuple2<String, String> call(Row arg0) throws Exception {
+					System.out.println("subject = "+arg0.getString(0) + " object = "+arg0.getString(1));
+					return new Tuple2<String,String>(arg0.getString(0),arg0.getString(1));
+				}
+			});
+
+		
 		} else if (metricType.equals("5")) {
 			System.out.println("[LOGS] Present in metric type 5");
 			return "<h1>" + calculateStartNode() + "</h1>";
