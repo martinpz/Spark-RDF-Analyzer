@@ -139,6 +139,12 @@ function bindListeners() {
 	});
 }
 
+// ==================== Resizing ==================== //
+
+function updateGraphSize() {
+	cy.resize().layout();
+}
+
 // ==================== Export ==================== //
 
 function exportGraphAsPNG() {
