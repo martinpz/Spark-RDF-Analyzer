@@ -1,5 +1,6 @@
 // ########################## RDF Browser Graphical ##########################
-var s; // Global variable for the sigma graph instance.
+const VISIBLE_CHARS = 25; // The maximum number of characters to show for labels.
+var cy; // Global variable for the sigma graph instance.
 
 function arrangeNodesCircular(centralNode, centralNodeURI, neighbors) {
 	arrangeNodes(centralNode, centralNodeURI, neighbors, true, calculatePositionCircular);
@@ -10,208 +11,152 @@ function arrangeNodesByDirection(centralNode, centralNodeURI, neighbors) {
 }
 
 function arrangeNodesRandomized(centralNode, centralNodeURI, neighbors) {
-	arrangeNodes(centralNode, centralNodeURI, neighbors, false, calculatePositionRandomly);
+	arrangeNodes(centralNode, centralNodeURI, neighbors, true, calculatePositionRandomly);
 }
 
 function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calculatePosition) {
 	var nodeCount = 0,
-		edgeCount = 0;
-	var numNeighbors = Object.keys(neighbors).length;
-	var centralNodeID = 'CENTRALNODE';
-	var g = {
-		nodes: [],
-		edges: []
-	};
+		edgeCount = 0,
+		numNeighbors = Object.keys(neighbors).length,
+		centralNodeID = 'CENTRALNODE',
+		graph = [];
 
 	// Add central node to the graph instance.
-	g.nodes.push({
-		id: centralNodeID,
-		label: centralNode,
-		x: 0,
-		y: 0,
-		size: 1,
-		type: 'rect',
+	graph.push({
+		group: 'nodes',
 		data: {
-			type: 'CENTRALNODE',
-			direction: '',
-			color: 'central',
+			id: centralNodeID,
 			name: centralNode,
+			label: centralNode.substr(0, VISIBLE_CHARS),
 			uri: centralNodeURI,
 			link: centralNodeURI.slice(1, -1),
 			predicate: '',
 			predicateLink: '#',
-			disableGoTo: 'disabled'
+			type: 'CENTRALNODE'
+		},
+		position: {
+			x: 0,
+			y: 0
 		}
 	});
 
 	// Add all neighbor nodes to the graph instance.
 	$.each(neighbors, function (URI, props) {
-		// Calculate position for node with given function.
-		var position = calculatePosition(edgeCount, numNeighbors, props.direction);
-
 		// Create default node and edge. Assume OUT-going connection.
 		var node = {
-			id: 'NEIGHBOR_' + nodeCount,
-			label: props.name,
-			type: 'rect',
-			x: position.x,
-			y: position.y,
-			size: 1,
-			data: {
-				type: 'NEIGHBOR',
-				direction: '(' + props.direction + ')',
-				color: props.direction,
-				name: props.name,
-				uri: URI,
-				link: URI.slice(1, -1),
-				predicate: props.predicate,
-				predicateLink: props.predicateURI.slice(1, -1)
-			}
-		};
-
-		var edge = {
-			id: props.direction + '_e_' + edgeCount,
-			label: props.predicate,
-			source: centralNodeID,
-			target: node.id,
-			size: 1
-		};
+				group: 'nodes',
+				data: {
+					id: 'NEIGHBOR_' + nodeCount,
+					name: props.name,
+					label: props.name.substr(0, VISIBLE_CHARS),
+					uri: URI,
+					link: URI.slice(1, -1),
+					predicate: props.predicate,
+					predicateLink: props.predicateURI.slice(1, -1),
+					direction: props.direction,
+					type: 'NEIGHBOR'
+				},
+				// Calculate initial position for node with given function.
+				position: calculatePosition(edgeCount, numNeighbors, props.direction)
+			},
+			edge = {
+				group: 'edges',
+				data: {
+					id: props.direction + '_e_' + edgeCount,
+					label: props.predicate.substr(0, VISIBLE_CHARS),
+					source: centralNodeID,
+					target: node.data.id,
+					isdirected: true
+				}
+			};
 
 		if (props.direction == 'in') {
 			// Change properties for IN-going connection.
-			edge.source = node.id;
-			edge.target = centralNodeID;
-			node.data.color = 'in';
+			edge.data.source = node.data.id;
+			edge.data.target = centralNodeID;
 		} else if (props.name == '') {
 			// Special handling for literals. They don't have a name, but only an URI.
-			const literal = evaluateRDFLiteral(URI);
+			const LITERAL = evaluateRDFLiteral(URI);
 
-			node.id = 'LITERAL_' + edgeCount;
-			node.label = literal;
-			node.data.type = 'LITERAL';
-			node.data.direction = '';
-			node.data.color = 'literal';
-			node.data.name = literal;
+			node.data.id = 'LITERAL_' + edgeCount;
+			node.data.name = LITERAL;
+			node.data.label = LITERAL.substr(0, VISIBLE_CHARS);
 			node.data.uri = '';
+			node.data.type = 'LITERAL';
 			node.data.link = '#';
 			node.data.disableGoTo = 'disabled';
 
-			edge.target = node.id;
+			edge.data.target = node.data.id;
 		}
 
-		g.nodes.push(node);
+		graph.push(node);
 
 		if (withEdges) {
-			g.edges.push(edge);
+			graph.push(edge);
 		}
 
 		++nodeCount
 		++edgeCount;
 	});
 
-	instantiateGraph(g);
-	instantiateTooltips();
-	bindListeners();
-	designGraph();
-	layoutGraph();
-}
+	// Instantiate the Cytoscape instance.
+	cy = getCytoscapeInstance(graph);
 
-function instantiateGraph(g) {
-	// Instantiate the sigma instance with the graph data.
-	s = new sigma({
-		graph: g,
-		renderer: {
-			container: document.getElementById('container'),
-			type: 'canvas'
-		},
-		settings: SIGMA_GRAPH_SETTINGS
-	});
+	bindListeners();
 }
 
 // ==================== Tooltips ==================== //
 
-var tooltips;
+const TOOLTIP_TEMPLATE =
+	'	<div class="tooltipHeader">' +
+	'		{{type}}&nbsp;' +
+	'		<span style="font-size: 90%;">' +
+	'			{{direction}}' +
+	'		</span>' +
+	'		<div id="tooltipActionBtns" class="btn-group" role="group" aria-label="Actions">' +
+	'			<button id="btnGoToNode" type="button" onclick="prepareBrowser(\'{{name}}\', \'{{uri}}\'); closeTooltip()" class="btn btn-primary" aria-label="Go to node" title="Navigate to this node." {{disableGoTo}}>' +
+	'				<span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span>' +
+	'			</button>' +
+	'			<button id="btnCloseTooltip" type="button" onclick="closeTooltip()" class="btn btn-default" aria-label="Close tooltip" title="Close this tooltip.">' +
+	'				<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>' +
+	'			</button>' +
+	'		</div>' +
+	'	</div>' +
+	'	<div class="tooltipBody">' +
+	'		{{name}}' +
+	'		<br><br>' +
+	'		<span style="white-space: nowrap;">Predicate: <a href="{{predicateLink}}" target="_blank">{{predicate}}</a></span><br>' +
+	'		<span style="white-space: nowrap;">URI: <a href="{{link}}" target="_blank">{{uri}}</a></span>' +
+	'	</div>';
 
-function instantiateTooltips() {
-	const TOOLTIP_CONFIG = {
-		node: {
-			show: 'rightClickNode',
-			cssClass: 'sigma-tooltip',
-			position: 'top',
-			autoadjust: true,
-			template: '<div class="arrow"></div>' +
-				'	<div class="sigma-tooltip-header">' +
-				'		{{data.type}}&nbsp;' +
-				'		<span style="font-size: 90%;">' +
-				'			{{data.direction}}' +
-				'		</span>' +
-				'		<div id="tooltipActionBtns" class="btn-group" role="group" aria-label="Actions">' +
-				'			<button id="btnGoToNode" type="button" onclick="prepareBrowser(\'{{data.name}}\', \'{{data.uri}}\')" class="btn btn-primary" aria-label="Go to node" title="Navigate to this node." {{data.disableGoTo}}>' +
-				'				<span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span>' +
-				'			</button>' +
-				'			<button id="btnCloseTooltip" type="button" onclick="closeTooltips()" class="btn btn-default" aria-label="Close tooltip" title="Close this tooltip.">' +
-				'				<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>' +
-				'			</button>' +
-				'		</div>' +
-				'	</div>' +
-				'	<div class="sigma-tooltip-body">' +
-				'		{{data.name}}' +
-				'		<br><br>' +
-				'		<span style="white-space: nowrap;">Predicate: <a href="{{data.predicateLink}}" target="_blank">{{data.predicate}}</a></span><br>' +
-				'		<span style="white-space: nowrap;">URI: <a href="{{data.link}}" target="_blank">{{data.uri}}</a></span>' +
-				'	</div>',
-			renderer: function (node, template) {
-				return Mustache.render(template, node);
-			}
-		}
-	};
-
-	// Instantiate the tooltips plugin with a Mustache renderer for node tooltips.
-	tooltips = sigma.plugins.tooltips(s, s.renderers[0], TOOLTIP_CONFIG);
+function getTooltip(nodeData) {
+	return Mustache.render(TOOLTIP_TEMPLATE, nodeData);
 }
 
-function closeTooltips() {
-	if (tooltips) {
-		tooltips.close();
-	}
+function closeTooltip() {
+	$('.qtip').remove();
 }
 
 // ==================== Listeners ==================== //
 
 function bindListeners() {
-	s.bind('doubleClickNode', function (e) {
+	cy.on('tap', 'node', function (evt) {
 		// Only browse when clicking a neighbor. Not on central node or a literal.
-		if ((e.data.node.id).startsWith('NEIGHBOR')) {
-			prepareBrowser(e.data.node.data.name, e.data.node.data.uri);
+		if ((this.id()).startsWith('NEIGHBOR')) {
+			prepareBrowser(this.data('name'), this.data('uri'));
 		}
 	});
-}
 
-// ==================== Design ==================== //
-
-function designGraph() {
-	var design = sigma.plugins.design(s, {
-		styles: {
-			nodes: {
-				label: {
-					by: 'label',
-					format: function (value) {
-						return value.substr(0, 22);
-					}
-				},
-				color: {
-					by: 'data.color',
-					scheme: getColorScheme()
-				}
-			},
-			edges: {
-				// TODO
+	cy.on('cxttap', 'node', function (evt) {
+		this.qtip({
+			content: getTooltip(this.data()),
+			show: {
+				event: 'cxttap',
+				ready: true,
+				solo: true
 			}
-		},
-		palette: COLORS
+		});
 	});
-
-	design.apply('nodes');
 }
 
 // ==================== Layout ==================== //
@@ -251,14 +196,14 @@ function layoutGraph() {
 		case 'noverlap':
 			performNOverlap();
 			break;
-		/*
-		case 'forcelink':
-			performForceLink();
-			break;
-		case 'fruchterman':
-			performFruchtermanReingold();
-			break;
-		*/
+			/*
+			case 'forcelink':
+				performForceLink();
+				break;
+			case 'fruchterman':
+				performFruchtermanReingold();
+				break;
+			*/
 
 		default:
 			// Do not layout the graph.
