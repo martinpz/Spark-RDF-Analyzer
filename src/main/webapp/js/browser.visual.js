@@ -2,19 +2,7 @@
 const VISIBLE_CHARS = 25; // The maximum number of characters to show for labels.
 var cy; // Global variable for the sigma graph instance.
 
-function arrangeNodesCircular(centralNode, centralNodeURI, neighbors) {
-	arrangeNodes(centralNode, centralNodeURI, neighbors, true, calculatePositionCircular);
-}
-
-function arrangeNodesByDirection(centralNode, centralNodeURI, neighbors) {
-	arrangeNodes(centralNode, centralNodeURI, neighbors, true, calculatePositionByDirection);
-}
-
-function arrangeNodesRandomized(centralNode, centralNodeURI, neighbors) {
-	arrangeNodes(centralNode, centralNodeURI, neighbors, true, calculatePositionRandomly);
-}
-
-function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calculatePosition) {
+function arrangeNodes(centralNode, centralNodeURI, neighbors, layout, withEdges) {
 	var nodeCount = 0,
 		edgeCount = 0,
 		numNeighbors = Object.keys(neighbors).length,
@@ -34,10 +22,6 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			predicateLink: '#',
 			type: 'CENTRALNODE',
 			disableGoTo: 'disabled'
-		},
-		position: {
-			x: 0,
-			y: 0
 		}
 	});
 
@@ -57,9 +41,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 					direction: props.direction,
 					type: 'NEIGHBOR'
 				},
-				classes: props.direction,
-				// Calculate initial position for node with given function.
-				position: calculatePosition(edgeCount, numNeighbors, props.direction)
+				classes: props.direction
 			},
 			edge = {
 				group: 'edges',
@@ -79,7 +61,6 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 		} else if (props.name == '') {
 			// Special handling for literals. They don't have a name, but only an URI.
 			const LITERAL = evaluateRDFLiteral(URI);
-
 			node.data.id = 'LITERAL_' + edgeCount;
 			node.data.name = LITERAL;
 			node.data.label = LITERAL.substr(0, VISIBLE_CHARS);
@@ -87,24 +68,19 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			node.data.type = 'LITERAL';
 			node.data.link = '#';
 			node.data.disableGoTo = 'disabled';
-
 			node.classes = 'literal';
-
 			edge.data.target = node.data.id;
 		}
 
 		graph.push(node);
-
-		if (withEdges) {
-			graph.push(edge);
-		}
+		graph.push(edge);
 
 		++nodeCount
 		++edgeCount;
 	});
 
 	// Instantiate the Cytoscape instance.
-	cy = getCytoscapeInstance(graph);
+	cy = getCytoscapeInstance(graph, layout, withEdges);
 
 	bindListeners();
 }
@@ -162,74 +138,6 @@ function bindListeners() {
 		});
 	});
 }
-
-// ==================== Layout ==================== //
-
-function calculatePositionCircular(currEdgeNum, totalNumNeighbors, direction) {
-	return {
-		x: Math.cos(Math.PI * 2 * currEdgeNum / totalNumNeighbors),
-		y: Math.sin(Math.PI * 2 * currEdgeNum / totalNumNeighbors)
-	};
-}
-
-function calculatePositionByDirection(currEdgeNum, totalNumNeighbors, direction) {
-	return {
-		x: (direction == 'out' ? 2 : -2) * Math.abs(Math.cos(Math.PI * 2 * currEdgeNum / totalNumNeighbors)),
-		y: Math.sin(Math.PI * 2 * currEdgeNum / totalNumNeighbors)
-	};
-}
-
-function calculatePositionRandomly(currEdgeNum, totalNumNeighbors, direction) {
-	const quadrant = (currEdgeNum % 4) + 1;
-	const xFactor = (quadrant == 1 || quadrant == 2) ? 1 : -1;
-	const yFactor = (quadrant == 2 || quadrant == 3) ? 1 : -1;
-	const outerMargin = 50;
-	const container = {
-		width: $('#container').width() / 2 - outerMargin,
-		height: $('#container').height() / 2 - outerMargin
-	};
-
-	return {
-		x: xFactor * container.width * Math.random(),
-		y: yFactor * container.height * Math.random()
-	};
-}
-
-function layoutGraph() {
-	switch (getLayoutAlgorithm()) {
-		case 'noverlap':
-			performNOverlap();
-			break;
-			/*
-			case 'forcelink':
-				performForceLink();
-				break;
-			case 'fruchterman':
-				performFruchtermanReingold();
-				break;
-			*/
-
-		default:
-			// Do not layout the graph.
-			break;
-	}
-}
-
-function performNOverlap() {
-	s.configNoverlap(LAYOUT_NOVERLAP);
-	s.startNoverlap();
-}
-
-/*
-function performForceLink() {
-	sigma.layouts.startForceLink(s, LAYOUT_FORCE_LINK);
-}
-
-function performFruchtermanReingold() {
-	sigma.layouts.fruchtermanReingold.configure(s, LAYOUT_FRUCHTERMAN_REINGOLD);
-	sigma.layouts.fruchtermanReingold.start(s);
-}
-*/
 
 // ==================== Export ==================== //
 

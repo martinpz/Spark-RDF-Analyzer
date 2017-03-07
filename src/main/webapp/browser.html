@@ -7,6 +7,7 @@
 <link rel="stylesheet" type="text/css" href="css/bootstrap-slider.min.css">
 <link rel="stylesheet" type="text/css" href="css/jquery.qtip.min.css">
 
+<script type="text/javascript" src="js/cola/cola.v3.min.js"></script>
 <script type="text/javascript" src="js/jquery/jquery-3.1.1.min.js"></script>
 <script type="text/javascript" src="js/jquery/jquery.qtip.min.js"></script>
 <script type="text/javascript" src="js/jquery/jquery.shorten.1.0.min.js"></script>
@@ -15,6 +16,7 @@
 <script type="text/javascript" src="js/mustache/mustache.min.js"></script>
 
 <script src="js/cytoscape/cytoscape.js"></script>
+<script src="js/cytoscape/cytoscape.cola.js"></script>
 <script src="js/cytoscape/cytoscape.qtip.js"></script>
 <script src="js/cytoscape/cytoscape.spread.js"></script>
 
@@ -71,12 +73,13 @@
 				</div>
 				<div id="configuration" class="panel-body">
 					<div>
-						<label for="browsingType">Select your browsing type</label>
+						<label for="browsingType">Select how you want to layout the nodes</label>
 						<select class="form-control" id="browsingType">
-							<option value="random">Randomly arranged neighbors</option>
-							<option value="direction">Arranged by direction</option>
-							<option value="circular">Circular arrangement</option>
-							<option value="textual">Textual browsing</option>
+							<option value="COLA">Cola</option>
+							<option value="GRID">In a grid</option>
+							<option value="SPREAD">Spreaded</option>
+							<option value="RANDOM">Randomly</option>
+							<option value="TEXTUAL">NO LAYOUT - I prefer textual browsing!</option>
 						</select>
 					</div>
 
@@ -92,9 +95,6 @@
 					</div>
 
 					<div id="colorSchemeSelection">
-					</div>
-
-					<div id="layoutAlgorithmSelection">
 					</div>
 				</div>
 			</div>

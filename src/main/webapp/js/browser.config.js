@@ -1,14 +1,6 @@
 // ########################## RDF Browser Configuration ##########################
 const LOADER = '<div class="progress progress-striped active page-progress-bar"><div class="progress-bar" style="width: 100%;"></div></div>';
 const ANIMATION_SPEED = 'fast';
-const LAYOUT_ALGORITHMS = {
-	noverlap: 'NOverlap',
-	/*
-	forcelink: 'ForceLink',
-	fruchterman: 'Fruchterman-Reingold',
-	*/
-	none: 'None'
-};
 const COLORS = {
 	pastel: {
 		central: {
@@ -119,10 +111,6 @@ function getColorScheme() {
 	return selectedColorScheme;
 }
 
-function getLayoutAlgorithm() {
-	return $('#layoutAlgorithmSelection input:checked').val();
-}
-
 function getNeighborhoodRequest(centralNodeURI) {
 	return REST_API + 'directNeighbors/' + getCookie('graphName') +
 		'?centralNode=' + encodeURIComponent(centralNodeURI) +
@@ -167,15 +155,4 @@ $(document).ready(function () {
 	});
 	$('#colorSchemeSelection').html(colorGroup).append('<p>Select the color scheme you want to use.</p>');
 	$('#colorSchemeSelection input').first().attr('checked', true);
-
-	// Fill layout algorithm selection with options.
-	var layoutGroup = '';
-	$.each(LAYOUT_ALGORITHMS, function (layoutShortName, layoutName) {
-		layoutGroup += '<div class="radio-inline">';
-		layoutGroup += '<label><input type="radio" name="layoutAlgorithm" value="' + layoutShortName + '">';
-		layoutGroup += '<span>' + layoutName + '</span>';
-		layoutGroup += '</label></div>';
-	});
-	$('#layoutAlgorithmSelection').html(layoutGroup).append('<p>Select the graph layout algorithm you want to use.</p>');
-	$('#layoutAlgorithmSelection input').first().attr('checked', true);
 });

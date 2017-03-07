@@ -1,5 +1,55 @@
 // ########################## RDF Browser Cytoscape Instance Helper ##########################
-function getCytoscapeInstance(graphElements) {
+const LAYOUTS = {
+    RANDOM: {
+        name: 'random',
+        fit: true, // whether to fit to viewport
+        padding: 0 // fit padding
+    },
+    SPREAD: {
+        name: 'spread',
+        animate: false, // whether to show the layout as it's running
+        fit: true, // Reset viewport to fit default simulationBounds
+        padding: 0, // Padding
+        minDist: 40, // Minimum distance between nodes
+        expandingFactor: -1.0, // If the network does not satisfy the minDist criterium then it expands the network of this amount
+        // If it is set to -1.0 the amount of expansion is automatically calculated based on the minDist, the aspect ratio and the number of nodes
+        maxFruchtermanReingoldIterations: 100, // Maximum number of initial force-directed iterations
+        maxExpandIterations: 6, // Maximum number of expanding iterations
+        randomize: true // uses random initial node positions on true
+    },
+    GRID: {
+        name: 'grid',
+        fit: true, // whether to fit the viewport to the graph
+        padding: 0, // padding used on fit
+        avoidOverlap: true, // prevents node overlap, may overflow boundingBox if not enough space
+        avoidOverlapPadding: 5, // extra spacing around nodes when avoidOverlap: true
+        condense: false, // uses all available space on false, uses minimal space on true
+        rows: undefined, // force num of rows in the grid
+        cols: 10 // force num of columns in the grid
+    },
+    COLA: {
+        name: 'cola',
+        animate: true, // whether to show the layout as it's running
+        refresh: 1, // number of ticks per frame; higher is faster but more jerky
+        maxSimulationTime: 2000, // max length in ms to run the layout
+        ungrabifyWhileSimulating: false, // so you can't drag nodes during layout
+        fit: true, // on every layout reposition of nodes, fit the viewport
+        padding: 0, // padding around the simulation
+        randomize: true, // use random node positions at beginning of layout
+        avoidOverlap: true, // if true, prevents overlap of node bounding boxes
+        handleDisconnected: true, // if true, avoids disconnected components from overlapping
+        nodeSpacing: 10, // extra spacing around nodes
+        edgeLength: undefined, // sets edge length directly in simulation
+        edgeSymDiffLength: undefined, // symmetric diff edge length in simulation
+        edgeJaccardLength: undefined, // jaccard edge length in simulation
+        unconstrIter: undefined, // unconstrained initial layout iterations
+        userConstIter: undefined, // initial layout iterations with user-specified constraints
+        allConstIter: undefined, // initial layout iterations with all constraints including non-overlap
+        infinite: false // overrides all other options for a forces-all-the-time mode
+    }
+};
+
+function getCytoscapeInstance(graphElements, layoutToUse) {
     const colorScheme = getColorScheme();
     return cytoscape({
         container: $('#container'),
@@ -12,17 +62,14 @@ function getCytoscapeInstance(graphElements) {
             y: 0
         },
 
-        layout: {
-            name: 'spread',
-            minDist: 40
-        },
+        layout: LAYOUTS[layoutToUse],
 
         style: [{
             selector: 'node',
             style: {
                 'shape': 'rectangle',
-                'width': 'label', // 'width': 'mapData(score, 0, 0.006769776522008331, 20, 60)',
-                'height': 'label', // 'height': 'mapData(score, 0, 0.006769776522008331, 10, 30)',
+                'width': 'label',
+                'height': 'label',
                 'padding': '7px',
                 'overlay-padding': '6px',
                 'background-color': COLORS[colorScheme].central.back,

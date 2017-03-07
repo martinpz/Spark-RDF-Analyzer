@@ -33,24 +33,14 @@ function displayNodes(centralNode, centralNodeURI, neighbors) {
 	updateColorKeys();
 
 	// Determine how to display the graph.
-	switch (getBrowsingType()) {
-		case 'circular':
-			arrangeNodesCircular(centralNode, centralNodeURI, neighbors);
-			break;
-		case 'direction':
-			arrangeNodesByDirection(centralNode, centralNodeURI, neighbors);
-			break;
-		case 'random':
-			arrangeNodesRandomized(centralNode, centralNodeURI, neighbors);
-			break;
-		case 'textual':
-			enableVisualActions(false);
-			$('#browserBody').removeClass('visual');
-			displayNodesTextual(centralNode, centralNodeURI, neighbors);
-			break;
-		default:
-			console.error('Undefined browsing type.');
-			break;
+	const browsingType = getBrowsingType();
+
+	if (browsingType == 'TEXTUAL') {
+		enableVisualActions(false);
+		$('#browserBody').removeClass('visual');
+		displayNodesTextual(centralNode, centralNodeURI, neighbors);
+	} else {
+		arrangeNodes(centralNode, centralNodeURI, neighbors, browsingType);
 	}
 }
 
@@ -61,10 +51,10 @@ function enableVisualActions(enable) {
 
 function updateColorKeys() {
 	const colorScheme = getColorScheme();
-	$('#keyForUsedColors li span.central').css('background-color', COLORS[colorScheme].central);
-	$('#keyForUsedColors li span.in').css('background-color', COLORS[colorScheme].in);
-	$('#keyForUsedColors li span.out').css('background-color', COLORS[colorScheme].out);
-	$('#keyForUsedColors li span.literal').css('background-color', COLORS[colorScheme].literal);
+	$('#keyForUsedColors li span.central').css('background-color', COLORS[colorScheme].central.back);
+	$('#keyForUsedColors li span.in').css('background-color', COLORS[colorScheme].in.back);
+	$('#keyForUsedColors li span.out').css('background-color', COLORS[colorScheme].out.back);
+	$('#keyForUsedColors li span.literal').css('background-color', COLORS[colorScheme].literal.back);
 }
 
 function showLoader(centralNode) {
