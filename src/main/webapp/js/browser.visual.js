@@ -32,7 +32,8 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			link: centralNodeURI.slice(1, -1),
 			predicate: '',
 			predicateLink: '#',
-			type: 'CENTRALNODE'
+			type: 'CENTRALNODE',
+			disableGoTo: 'disabled'
 		},
 		position: {
 			x: 0,
@@ -56,6 +57,7 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 					direction: props.direction,
 					type: 'NEIGHBOR'
 				},
+				classes: props.direction,
 				// Calculate initial position for node with given function.
 				position: calculatePosition(edgeCount, numNeighbors, props.direction)
 			},
@@ -85,6 +87,8 @@ function arrangeNodes(centralNode, centralNodeURI, neighbors, withEdges, calcula
 			node.data.type = 'LITERAL';
 			node.data.link = '#';
 			node.data.disableGoTo = 'disabled';
+
+			node.classes = 'literal';
 
 			edge.data.target = node.data.id;
 		}

@@ -1,5 +1,6 @@
 // ########################## RDF Browser Cytoscape Instance Helper ##########################
 function getCytoscapeInstance(graphElements) {
+    const colorScheme = getColorScheme();
     return cytoscape({
         container: $('#container'),
 
@@ -23,18 +24,31 @@ function getCytoscapeInstance(graphElements) {
                 'width': 'label', // 'width': 'mapData(score, 0, 0.006769776522008331, 20, 60)',
                 'height': 'label', // 'height': 'mapData(score, 0, 0.006769776522008331, 10, 30)',
                 'padding': '7px',
-                'overflow': 'hidden',
-                'white-space': 'nowrap',
                 'overlay-padding': '6px',
-                'background-color': '#555',
-                'color': '#fff',
+                'background-color': COLORS[colorScheme].central.back,
+                'color': COLORS[colorScheme].central.text,
                 'content': 'data(label)',
                 'font-size': '11px',
-                'text-overflow': 'clip',
                 'text-valign': 'center',
-                'text-halign': 'center',
-                'text-outline-color': '#555',
-                'text-outline-width': '2px'
+                'text-halign': 'center'
+            }
+        }, {
+            'selector': 'node.in',
+            'style': {
+                'background-color': COLORS[colorScheme].in.back,
+                'color': COLORS[colorScheme].in.text
+            }
+        }, {
+            'selector': 'node.out',
+            'style': {
+                'background-color': COLORS[colorScheme].out.back,
+                'color': COLORS[colorScheme].out.text
+            }
+        }, {
+            'selector': 'node.literal',
+            'style': {
+                'background-color': COLORS[colorScheme].literal.back,
+                'color': COLORS[colorScheme].literal.text
             }
         }, {
             selector: 'edge',
