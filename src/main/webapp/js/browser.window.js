@@ -45,7 +45,7 @@ function displayNodes(centralNode, centralNodeURI, neighbors) {
 }
 
 function enableVisualActions(enable) {
-	$('#btnExportDropdown').prop('disabled', !enable);
+	$('#btnExportGraph').prop('disabled', !enable);
 	$('#btnShowKey').prop('disabled', !enable);
 }
 
@@ -105,11 +105,8 @@ $(document).ready(function () {
 	$('#btnReloadGraph').click(function () {
 		reloadGraph();
 	});
-	$('#btnExportGraphPNG').click(function () {
+	$('#btnExportGraph').click(function () {
 		exportGraphAsPNG();
-	});
-	$('#btnExportGraphSVG').click(function () {
-		exportGraphAsSVG();
 	});
 	$('#btnFullscreenBrowser').click(function () {
 		toggleBrowserFullscreen();

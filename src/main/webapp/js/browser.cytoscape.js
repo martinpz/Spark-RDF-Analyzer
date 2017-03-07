@@ -57,11 +57,6 @@ function getCytoscapeInstance(graphElements, layoutToUse) {
         boxSelectionEnabled: false,
         autounselectify: true,
 
-        pan: {
-            x: 0,
-            y: 0
-        },
-
         layout: LAYOUTS[layoutToUse],
 
         style: [{

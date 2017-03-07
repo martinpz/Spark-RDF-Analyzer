@@ -164,13 +164,13 @@
 						</ul>
 					</div>
 					<div class="btn-group" role="group">
-						<button id="btnExportDropdown" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>
+						<button id="btnExportGraph" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>
 							<span class="glyphicon glyphicon-export" aria-hidden="true"></span> Export Graph <span class="caret"></span>
 						</button>
-						<ul class="dropdown-menu">
-							<li><a id="btnExportGraphPNG" href="#">Export as PNG</a></li>
-							<li><a id="btnExportGraphSVG" href="#">Export as SVG</a></li>
-						</ul>
+						<div class="dropdown-menu">
+							<p style="padding: 10px;">Simply right click on the image to download it.</p>
+							<img id="imgGraphExport" alt="The exported graph."/>
+						</div>
 					</div>
 					<button id="btnReloadGraph" type="button" class="btn btn-default" aria-label="Reload the current graph">
 						<span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Reload Graph

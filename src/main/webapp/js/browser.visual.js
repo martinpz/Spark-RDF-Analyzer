@@ -142,10 +142,6 @@ function bindListeners() {
 // ==================== Export ==================== //
 
 function exportGraphAsPNG() {
-	console.log('renderes:', s.renderers);
-	sigma.plugins.image(s, s.renderers[0], EXPORT_PNG);
-}
-
-function exportGraphAsSVG() {
-	var output = s.toSVG(EXPORT_SVG);
+	const img = cy.png();
+	$('#imgGraphExport').attr('src', '' + img);
 }
