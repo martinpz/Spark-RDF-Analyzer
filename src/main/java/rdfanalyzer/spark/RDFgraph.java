@@ -69,9 +69,10 @@ public class RDFgraph implements Serializable {
 		int index0 = inputURI.indexOf("^^");
 		int index1 = inputURI.lastIndexOf('#');
 		int index2 = inputURI.lastIndexOf('/');
+		boolean isResource = inputURI.startsWith("<") && inputURI.endsWith(">");
 
-		// If we found a literal, we do not shorten the URL at all.
-		if (index0 > 0) {
+		// If we found a literal, we do not shorten the URI at all.
+		if (!isResource || index0 > 0) {
 			return "";
 		}
 
