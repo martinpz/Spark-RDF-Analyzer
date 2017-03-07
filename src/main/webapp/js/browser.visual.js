@@ -118,24 +118,35 @@ function closeTooltip() {
 }
 
 // ==================== Listeners ==================== //
+var skipNextClick = false;
 
 function bindListeners() {
 	cy.on('tap', 'node', function (evt) {
 		// Only browse when clicking a neighbor. Not on central node or a literal.
-		if ((this.id()).startsWith('NEIGHBOR')) {
+		if (!skipNextClick && (this.id()).startsWith('NEIGHBOR')) {
 			prepareBrowser(this.data('name'), this.data('uri'));
 		}
+		skipNextClick = false;
 	});
 
 	cy.on('cxttap', 'node', function (evt) {
-		this.qtip({
-			content: getTooltip(this.data()),
-			show: {
-				event: 'cxttap',
-				ready: true,
-				solo: true
-			}
-		});
+		showTooltip(this);
+	});
+
+	cy.on('taphold', 'node', function (evt) {
+		skipNextClick = true;
+		showTooltip(this);
+	});
+}
+
+function showTooltip(node) {
+	node.qtip({
+		content: getTooltip(node.data()),
+		show: {
+			event: 'cxttap taphold',
+			ready: true,
+			solo: true
+		}
 	});
 }
 
