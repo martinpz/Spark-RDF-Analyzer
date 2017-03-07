@@ -1,3 +1,4 @@
+
 /* ==================== RDF Browser Configuration ==================== */
 
 #configuration.panel-body {
@@ -85,6 +86,10 @@
     float: right;
 }
 
+#browser #imgGraphExport {
+    width: 400px;
+}
+
 #browser #keyForUsedColors {
     padding: 15px;
     width: 170px;
@@ -145,88 +150,45 @@
 
 /* ==================== RDF Browser Tooltips ==================== */
 
-.sigma-tooltip {
-    max-width: 550px;
+.qtip-default {
+    border: none !important;
+    background-color: transparent !important;
+}
+
+.qtip-content {
+    width: 500px;
     max-height: 350px;
+    padding: 10px !important;
     background-color: rgba(0, 0, 0, 0.9);
-    /* rgb(249, 247, 237);*/
     box-shadow: 0 2px 6px rgba(35, 82, 124, 0.8);
     border-radius: 8px;
+    font-size: 14px;
+    line-height: 17px;
     color: white;
 }
 
-.sigma-tooltip-header {
+.qtip-content .tooltipHeader {
+    height: 40px;
+    padding-top: 7px;
+    padding-left: 10px;
     font-variant: small-caps;
     font-size: 120%;
     border-bottom: 5px solid rgba(35, 82, 124, 0.8);
-    padding: 10px;
 }
 
-.sigma-tooltip-header #tooltipActionBtns {
-    float: right;
+.qtip-content .tooltipHeader #tooltipActionBtns {
+    position: absolute;
+    right: 10px;
+    top: 10px;
     margin-left: 20px;
 }
 
-.sigma-tooltip-body {
+.qtip-content .tooltipBody {
     padding: 10px;
     max-height: calc(350px - 55px);
     overflow: auto;
 }
 
-.sigma-tooltip>.arrow {
-    border-width: 10px;
-    position: absolute;
-    display: block;
-    width: 0;
-    height: 0;
-    border-color: transparent;
-    border-style: solid;
-}
-
-.sigma-tooltip.top {
-    margin-top: -12px;
-}
-
-.sigma-tooltip.top>.arrow {
-    left: 50%;
-    bottom: -10px;
-    margin-left: -10px;
-    border-top-color: rgba(0, 0, 0, 0.9);
-    border-bottom-width: 0;
-}
-
-.sigma-tooltip.bottom {
-    margin-top: 12px;
-}
-
-.sigma-tooltip.bottom>.arrow {
-    left: 50%;
-    top: -10px;
-    margin-left: -10px;
-    border-bottom-color: rgba(0, 0, 0, 0.9);
-    border-top-width: 0;
-}
-
-.sigma-tooltip.left {
-    margin-left: -12px;
-}
-
-.sigma-tooltip.left>.arrow {
-    top: 50%;
-    right: -10px;
-    margin-top: -10px;
-    border-left-color: rgba(0, 0, 0, 0.9);
-    border-right-width: 0;
-}
-
-.sigma-tooltip.right {
-    margin-left: 12px;
-}
-
-.sigma-tooltip.right>.arrow {
-    top: 50%;
-    left: -10px;
-    margin-top: -10px;
-    border-right-color: rgba(0, 0, 0, 0.9);
-    border-left-width: 0;
+.qtip-content .tooltipBody a:hover {
+    color: #337ab7;
 }

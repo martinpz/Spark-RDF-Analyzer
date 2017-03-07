@@ -5,24 +5,27 @@
 <link rel="stylesheet" type="text/css" href="bootstrap.css">
 <link rel="stylesheet" type="text/css" href="css/browser.css">
 <link rel="stylesheet" type="text/css" href="css/bootstrap-slider.min.css">
+<link rel="stylesheet" type="text/css" href="css/jquery.qtip.min.css">
 
+<script type="text/javascript" src="js/cola/cola.v3.min.js"></script>
 <script type="text/javascript" src="js/jquery/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="js/jquery/jquery.qtip.min.js"></script>
 <script type="text/javascript" src="js/jquery/jquery.shorten.1.0.min.js"></script>
 <script type="text/javascript" src="js/bootstrap/bootstrap.min.js"></script>
 <script type="text/javascript" src="js/bootstrap/bootstrap-slider.min.js"></script>
 <script type="text/javascript" src="js/mustache/mustache.min.js"></script>
 
-<script src="js/linkurious/sigma.min.js"></script>
-<script src="js/linkurious/plugins.min.js"></script>
-<script src="js/linkurious/sigma.canvas.nodes.rect.js"></script>
-<script src="js/linkurious/sigma.canvas.hovers.rect.js"></script>
+<script src="js/cytoscape/cytoscape.min.js"></script>
+<script src="js/cytoscape/cytoscape.cola.js"></script>
+<script src="js/cytoscape/cytoscape.qtip.js"></script>
+<script src="js/cytoscape/cytoscape.spread.js"></script>
 
 <script type="text/javascript" src="js/app-config.js"></script>
 <script type="text/javascript" src="js/browser.config.js"></script>
+<script type="text/javascript" src="js/browser.cytoscape.js"></script>
 <script type="text/javascript" src="js/browser.entrypoint.js"></script>
 <script type="text/javascript" src="js/browser.entrypoint.suggested.js"></script>
 <script type="text/javascript" src="js/browser.history.js"></script>
-<script type="text/javascript" src="js/browser.sigma.settings.js"></script>
 <script type="text/javascript" src="js/browser.textual.js"></script>
 <script type="text/javascript" src="js/browser.visual.js"></script>
 <script type="text/javascript" src="js/browser.window.js"></script>
@@ -70,12 +73,13 @@
 				</div>
 				<div id="configuration" class="panel-body">
 					<div>
-						<label for="browsingType">Select your browsing type</label>
+						<label for="browsingType">Select how you want to layout the nodes</label>
 						<select class="form-control" id="browsingType">
-							<option value="random">Randomly arranged neighbors</option>
-							<option value="direction">Arranged by direction</option>
-							<option value="circular">Circular arrangement</option>
-							<option value="textual">Textual browsing</option>
+							<option value="COLA">Cola</option>
+							<option value="GRID">In a grid</option>
+							<option value="SPREAD">Spreaded</option>
+							<option value="RANDOM">Randomly</option>
+							<option value="TEXTUAL">NO LAYOUT - I prefer textual browsing!</option>
 						</select>
 					</div>
 
@@ -91,9 +95,6 @@
 					</div>
 
 					<div id="colorSchemeSelection">
-					</div>
-
-					<div id="layoutAlgorithmSelection">
 					</div>
 				</div>
 			</div>
@@ -144,6 +145,7 @@
 						<div class="progress-bar progress-bar-success" style="width: 100%;"></div>
 					</div>
 				</div>
+				<br style="clear: both;">
 			</div>
 		</div>
 
@@ -163,13 +165,13 @@
 						</ul>
 					</div>
 					<div class="btn-group" role="group">
-						<button id="btnExportDropdown" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>
+						<button id="btnExportGraph" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>
 							<span class="glyphicon glyphicon-export" aria-hidden="true"></span> Export Graph <span class="caret"></span>
 						</button>
-						<ul class="dropdown-menu">
-							<li><a id="btnExportGraphPNG" href="#">Export as PNG</a></li>
-							<li><a id="btnExportGraphSVG" href="#">Export as SVG</a></li>
-						</ul>
+						<div class="dropdown-menu">
+							<p style="padding: 10px;">Simply right click on the image to download it.</p>
+							<img id="imgGraphExport" alt="The exported graph."/>
+						</div>
 					</div>
 					<button id="btnReloadGraph" type="button" class="btn btn-default" aria-label="Reload the current graph">
 						<span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Reload Graph
