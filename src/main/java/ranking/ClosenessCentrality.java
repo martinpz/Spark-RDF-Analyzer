@@ -112,11 +112,14 @@ public class ClosenessCentrality implements Serializable {
 	// Get objects of unique subjects
 	private JavaPairRDD<String,String> getObjectsOfSubjects(DataFrame records) throws Exception{
 
-		return records.select(records.col("object").isin(nextQueryArray.stream().toArray())).toJavaRDD().mapToPair(
+		return records.filter(records.col("object").isin(nextQueryArray.stream().toArray())).toJavaRDD().mapToPair(
 		new PairFunction<Row,String,String>(){
+
 
 			@Override
 			public Tuple2<String, String> call(Row row) throws Exception {
+
+
 				return new Tuple2<String, String>(row.getString(0), row.getString(1));
 			}
 		});
@@ -129,18 +132,6 @@ public class ClosenessCentrality implements Serializable {
 	    bd = bd.setScale(places, RoundingMode.HALF_UP);
 	    return bd.doubleValue();
 	}
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	/**********************************************************************************************************************/
 	/**************************************************Under Development***************************************************/

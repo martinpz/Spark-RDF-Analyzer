@@ -175,9 +175,13 @@ public class SSSP implements Serializable{
 //			}
 			
 			
-			if(breakloop(adjacencyMatrixx,i)){
+			if(i==2){
 				break;
 			}
+			
+//			if(breakloop(adjacencyMatrixx,i)){
+//				break;
+//			}
 
 			i++;
 		}
@@ -228,7 +232,7 @@ public class SSSP implements Serializable{
 		
 		System.out.println("Final value for complete bfs = "+finalvalues + " for node " + sourceNode);
 		double closeness = ((double)1/(double)finalvalues);
-		System.out.printf("dexp final ballay ballay: %f\n", round(closeness,100000));
+		System.out.printf("dexp final ballay ballay: %f\n", round(closeness,9));
 	}
 	public double round(double value, int places) {
 	    if (places < 0) throw new IllegalArgumentException();

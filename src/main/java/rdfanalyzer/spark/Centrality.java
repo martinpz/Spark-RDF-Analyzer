@@ -16,6 +16,9 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Encoder;
+import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.functions;
@@ -33,6 +36,7 @@ import scala.Tuple2;
 import scala.Tuple4;
 import ranking.ClosenessBean;
 import ranking.ClosenessCentrality;
+import static org.apache.spark.sql.functions.*;
 
 public class Centrality implements Serializable{
 	private final static Logger logger = Logger.getLogger(Centrality.class);
@@ -85,24 +89,273 @@ public class Centrality implements Serializable{
 		} else if (metricType.equals("4")) {
 		
 			
-			System.out.println("graph frame lines = "+ graphFrame.count());
-			graphFrame.show();
-			graphFrame.select("subject","object").toJavaRDD().mapToPair(new PairFunction<Row, String, String>() {
+//			RunAllPairShortestPathForAllNodes(nodeName);
+//			graphFrame.select("subject","object").toJavaRDD().mapToPair(new PairFunction<Row, String, String>() {
+//
+//				@Override
+//				public Tuple2<String, String> call(Row arg0) throws Exception {
+//					System.out.println("subject = "+arg0.getString(0) + " object = "+arg0.getString(1));
+//					return new Tuple2<String,String>(arg0.getString(0),arg0.getString(1));
+//				}
+//			});
 
-				@Override
-				public Tuple2<String, String> call(Row arg0) throws Exception {
-					System.out.println("subject = "+arg0.getString(0) + " object = "+arg0.getString(1));
-					return new Tuple2<String,String>(arg0.getString(0),arg0.getString(1));
-				}
-			});
+//			DataFrame uniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
+//					 + "Random10Nodes1.parquet");
+//			uniqueNodes.show();
 
-		
+			
+//			return10RandomNodes();
+			getFarthestNodes();
+//			CreateUniqueNodesWithoutQuotes();
 		} else if (metricType.equals("5")) {
 			System.out.println("[LOGS] Present in metric type 5");
 			return "<h1>" + calculateStartNode() + "</h1>";
 		}
 		return "none";
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public static void getFarthestNodes(){
+		
+		/*
+		 *  Top 5 nodes with maximum outdegrees. Add a column in the front with 1 that represents them as grey nodes.
+		 *  i.e the ones to be expanded next.
+		 */
+		DataFrame subjectOfObjectDF1 = Service.sqlCtx().sql("SELECT subject,COUNT(object) AS OutdegreeCount FROM Graph GROUP BY subject"
+				+ " ORDER BY OutdegreeCount DESC LIMIT 5");
+
+//		DataFrame completeDummyGraph = getDummyGraphFrame();
+//		completeDummyGraph.registerTempTable("DummyGraph");
+//
+//		DataFrame subjectOfObjectDF1 = Service.sqlCtx().sql("SELECT subject,COUNT(object) AS OutdegreeCount FROM DummyGraph GROUP BY subject"
+//		+ " ORDER BY OutdegreeCount DESC LIMIT 4");
+		
+		subjectOfObjectDF1.registerTempTable("sourceNodes");
+		
+		
+		Row[] listofsource = subjectOfObjectDF1.collect();
+		
+		int distancepath = 1;
+		
+		DataFrame masterDF = initEmptyDF();
+		DataFrame subjectOfObjectOfDF1 = initEmptyDF();
+		DataFrame source;
+
+		for(Row r: listofsource){
+			
+			source = Service.sqlCtx().sql("SELECT subject,OutdegreeCount FROM sourceNodes WHERE subject='"+r.getString(0)+"'");
+			
+			subjectOfObjectOfDF1 = initEmptyDF();
+			
+			// get names of subjects in terms of list.
+			Object[] subjects = getSubjectNames(source);
+			distancepath = 1;
+			
+			subjectOfObjectDF1 = graphFrame.select("object","subject")
+					.filter(col("object").isin(subjects))
+					.filter(col("object").notEqual(col("subject")))
+					.withColumn("distance", lit(distancepath));
+			
+			subjectOfObjectDF1.registerTempTable("frame1");
+
+			
+			boolean firstIteration = true;
+			
+			while(true){
+
+
+
+				if(firstIteration){
+					firstIteration = false;
+					subjects = getSubjectNames(subjectOfObjectDF1);
+				}
+				else{
+					subjects = getSubjectNames(subjectOfObjectOfDF1);
+				}
+				
+				distancepath += 1;
+
+				subjectOfObjectOfDF1 = graphFrame.select("subject","object")
+						.filter(col("object").isin(subjects))
+						.filter(col("object").notEqual(col("subject")))
+						.withColumn("distance", lit(distancepath));
+
+				subjectOfObjectOfDF1.registerTempTable("frame2");
+
+				
+				
+				if(subjectOfObjectOfDF1.count() == 0){
+					break;
+				}
+
+				
+				subjectOfObjectDF1 = Service.sqlCtx().sql("SELECT f1.object,f2.subject,f2.distance FROM frame1 f1 INNER JOIN frame2 f2 ON f1.subject=f2.object").unionAll(subjectOfObjectDF1);
+				subjectOfObjectDF1.registerTempTable("frame1");
+
+				
+			}
+			
+			masterDF = masterDF.unionAll(subjectOfObjectDF1);
+		}
+		masterDF.write().parquet(rdfanalyzer.spark.Configuration.storage() +
+				 "closenessList.parquet");
+		masterDF.show();
+	}
+	
+	public static Object[] getSubjectNames(DataFrame subjectRows){
+		
+		return subjectRows.select("subject").toJavaRDD().map(new Function<Row,String>() {
+
+			@Override
+			public String call(Row arg0) throws Exception {
+				
+				return arg0.getString(0);
+			}
+		}).collect().stream().toArray();
+	}
+	
+	public static DataFrame initEmptyDF(){
+		
+		// Edge column Creation with dataType:
+		List<StructField> EdgFields = new ArrayList<StructField>();
+		EdgFields.add(DataTypes.createStructField("subject", DataTypes.StringType, true));
+		EdgFields.add(DataTypes.createStructField("object", DataTypes.StringType, true));
+		EdgFields.add(DataTypes.createStructField("distance", DataTypes.IntegerType, true));
+
+		// Creating Schema:
+		StructType edgSchema = DataTypes.createStructType(EdgFields);
+		// Creating vertex DataFrame and edge DataFrame:
+		return Service.sqlCtx().createDataFrame(Service.sparkCtx().emptyRDD(), edgSchema);		
+	}
+
+	public static DataFrame getDummyGraphFrame(){
+		
+		JavaRDD<Row> relationsRow = Service.sparkCtx()
+				.parallelize(Arrays.asList(RowFactory.create("3L","4L"),
+						RowFactory.create("4L","100L"), RowFactory.create("2L","3L"),
+						RowFactory.create("4L","100L"), RowFactory.create("12L","2L"),
+						RowFactory.create("4L","100L"), RowFactory.create("1L","2L"),
+						RowFactory.create("4L","100L"), RowFactory.create("6L","5L"),RowFactory.create("4L","4L"),
+						RowFactory.create("4L","100L"), RowFactory.create("1L","6L"),
+						RowFactory.create("4L","100L"), RowFactory.create("1L","8L"),
+						RowFactory.create("4L","100L"), RowFactory.create("8L","9L"),
+						RowFactory.create("4L","100L"), RowFactory.create("11L","1L"),
+						RowFactory.create("4L","100L"), RowFactory.create("13L","11L"),
+						RowFactory.create("4L","100L"), RowFactory.create("10L","1L"),
+						RowFactory.create("5L","200L"), RowFactory.create("14L","10L"), RowFactory.create("10L","15L"),
+						RowFactory.create("5L","200L"), RowFactory.create("16L","14L"),
+						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
+						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
+						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
+						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
+						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
+						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
+						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
+						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
+						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
+						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
+						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
+						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
+						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
+						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
+						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
+						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
+						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
+						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
+						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
+						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
+						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
+						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
+						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
+						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L")
+						));
+
+		// Edge column Creation with dataType:
+		List<StructField> EdgFields = new ArrayList<StructField>();
+		EdgFields.add(DataTypes.createStructField("subject", DataTypes.StringType, true));
+		EdgFields.add(DataTypes.createStructField("object", DataTypes.StringType, true));
+
+		// Creating Schema:
+		StructType edgSchema = DataTypes.createStructType(EdgFields);
+
+		// Creating vertex DataFrame and edge DataFrame:
+		return Service.sqlCtx().createDataFrame(relationsRow, edgSchema);		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	public static String CalculateInDegree(String node) {
 
@@ -213,15 +466,27 @@ public class Centrality implements Serializable{
 		apsp.test();
 	}	
 	
-	public static DataFrame return10RandomNodes(){
+	public static void return10RandomNodes(){
 		
 		DataFrame uniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
 				 + "UniqueNodes.parquet");
 		uniqueNodes.registerTempTable("UniqueNodes");
+		uniqueNodes.show();
+
+		List<Long> ids = new ArrayList<Long>();
+		ids.add(197568495626L);
+		ids.add(850403524644L);
+		ids.add(927712936032L);
+		ids.add(575525618367L);
+		ids.add(1185410974699L);
+		ids.add(369367187909L);
+		ids.add(197568495640L);
+		ids.add(197568496296L);
 		
-		DataFrame top10 = uniqueNodes.sqlContext().sql("SELECT * FROM UniqueNodes ORDER BY RAND() LIMIT 10");
-		top10.write().parquet(rdfanalyzer.spark.Configuration.storage() + "Random10Nodes2.parquet");
-		return top10;
+		DataFrame top10 = uniqueNodes.select("*").filter(uniqueNodes.col("id").isin(ids.toArray()));
+		top10.write().parquet(rdfanalyzer.spark.Configuration.storage() + "Random10Nodes1.parquet");
+		
+		top10.show();
 	}
 	
 	public static void CreateUniqueNodesWithoutQuotes(){
@@ -232,31 +497,33 @@ public class Centrality implements Serializable{
 
 		DataFrame relations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
 				 + "relations.parquet");
+
 		relations.registerTempTable("relations");
 		
 		System.out.println(relations.count() +" is the count of relations.");
 		
-		
-//		JavaRDD<UniqueNodeCase> withoutquotesNodes = uniqueNodes.select("id","nodes").toJavaRDD().map(new Function<Row, UniqueNodeCase>() {
+		uniqueNodes.show();
+
+//		JavaRDD<UniqueNodeCase> withoutquotesNodes = uniqueNodes.select("nodes","id").toJavaRDD().map(new Function<Row, UniqueNodeCase>() {
 //
 //			@Override
 //			public UniqueNodeCase call(Row arg0) throws Exception {
 //				
 //				
-//				String nodeName = arg0.getString(1);
-//				
+//				String nodeName = arg0.getString(0);
+//				System.out.println("nodeNmae ye hai = "+nodeName);
 //				nodeName = nodeName.replace("\"", "");
 //				nodeName = nodeName.replace("'", "");
+//				System.out.println("hilgai = "+nodeName);
 //
 //				UniqueNodeCase casee = new UniqueNodeCase();
-//				casee.setNodeID(arg0.getLong(0));
+//				casee.setNodeID(arg0.getLong(1));
 //				casee.setNodeName(nodeName);
 //				
 //				return casee;
 //			}
 //		});
-//		
-//		
+
 //		System.out.println("creating Encoder with lines " + withoutquotesNodes.count());
 //		Encoder<UniqueNodeCase> encoder = Encoders.bean(UniqueNodeCase.class);
 //		System.out.println("created Encoder");
@@ -273,13 +540,19 @@ public class Centrality implements Serializable{
 		
 		DataFrame top10 = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
 				 + "Random10Nodes1.parquet");
-
+		
+		top10.show();
+		
 		Row[] rows = top10.collect();
 		
 		List<ClosenessBean> bean = new ArrayList<ClosenessBean>();
 		
+		System.out.println("Starting looper mozi " + rows[0].getString(0));
+		int i= 0;
 		for(Row r:rows){
-			bean.add(CalculateClosenessByHop(r.getString(0)));
+			if (i==0){
+				bean.add(CalculateClosenessByHop(r.getString(0)));
+			}
 		}
 		
 		
@@ -320,6 +593,7 @@ public class Centrality implements Serializable{
 		// [ subids, objids ]
 		DataFrame relations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
 				 + "relations.parquet");
+		relations.registerTempTable("relations");
 		
 		
 //		DataFrame selectedNodeid = Service.sqlCtx().sql("SELECT * FROM UniqueNodes WHERE nodes='"+nodeName+"'");
@@ -354,28 +628,32 @@ public class Centrality implements Serializable{
 
 		Row[] uniqueNodesRows = uniqueNodes.collect();
 		DataFramePartitionLooper partitionerLoop  = new DataFramePartitionLooper(relations,uniqueNodesRows);
-//
+
 //		double differenceDouble = (uniqueNodes.count()/partitionerLoop.NODE_DIVIDER);
 //		int difference = (int) differenceDouble;
 //
 //		Row firstRow = sortedUniqueNodes.first();
-//		
+//
 //		long lastId = firstRow.getLong(1);
+
+//		DataFrame ff = relations.sqlContext().sql("SELECT * FROM relations WHERE id = 214748366883");
 		
 		DataFrame top10 = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "Random10Nodes2.parquet");
-		
-		
-		Row[] rows = top10.collect();
-		
-		int i = 0;
-		for(Row r:rows){
+				 + "Random10Nodes1.parquet");
 
-			if(i==7){
-				partitionerLoop.run(r.getLong(1),i);
-			}
-			i++;
-		}
+//		Row[] rows = top10.collect();
+//		
+//		int i = 0;
+//		for(Row r:rows){
+//
+//			if(i==0){
+//				partitionerLoop.run(r.getLong(1),i);
+//			}
+//			i++;
+//		}
+		
+		
+		top10.show();
 		
 //		partitionerLoop.WriteDataToFile();
 
@@ -429,7 +707,7 @@ public class Centrality implements Serializable{
 		
 		JavaRDD<Row> verRow = Service.sparkCtx()
 				.parallelize(Arrays.asList(RowFactory.create("node1",1L), RowFactory.create("node2",2L),
-						RowFactory.create("node3",3L), RowFactory.create("node4",4L)));
+						RowFactory.create("node3",3L), RowFactory.create("node4","4L")));
 
 		// Creating column and declaring dataType for vertex:
 		List<StructField> verFields = new ArrayList<StructField>();
@@ -463,11 +741,11 @@ public class Centrality implements Serializable{
 
 		DataFrame resultsFrame = Service.sqlCtx().sql("SELECT * from Graph");
 		resultsFrame.cache();
+		resultsFrame.show();
 		System.out.println("logo = "+nodeName);
 		
 		ClosenessCentrality path = new ClosenessCentrality();
 		return path.calculateCloseness(resultsFrame, nodeName);
-
 	}
 
 	public static List<String> getListFromDatasetRows(DataFrame rows) {

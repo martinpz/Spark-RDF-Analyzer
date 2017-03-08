@@ -63,8 +63,8 @@ public class GraphLoader {
 		String[] rankingArguments = { Name };
 		CalculateRanking.main(rankingArguments);
 
-		RDFAnalyzerPageRank RDFAPR = new RDFAnalyzerPageRank(Name);
-		RDFAPR.PerformPageRank(schemaRDF);
+//		RDFAnalyzerPageRank RDFAPR = new RDFAnalyzerPageRank(Name);
+//		RDFAPR.PerformPageRank(schemaRDF);
 
 		return "Success";
 	}
