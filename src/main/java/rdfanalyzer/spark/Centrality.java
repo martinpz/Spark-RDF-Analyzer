@@ -106,6 +106,7 @@ public class Centrality implements Serializable{
 			
 //			return10RandomNodes();
 			getFarthestNodes();
+//			findNodeMaxCloseness();
 //			CreateUniqueNodesWithoutQuotes();
 		} else if (metricType.equals("5")) {
 			System.out.println("[LOGS] Present in metric type 5");
@@ -122,7 +123,20 @@ public class Centrality implements Serializable{
 	
 	
 	
-	
+	public static void findNodeMaxCloseness(){
+		
+		DataFrame df = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
+				 "closenessList.parquet");
+		df.registerTempTable("closeness");
+		
+		DataFrame df2 = df.sqlContext().sql("SELECT object,COUNT(subject) as intersection FROM closeness "
+				+ "GROUP BY object ORDER BY intersection DESC LIMIT 5");
+
+		Row[] finalNodes = df2.collect();
+		
+		// send these nodes to bfs algo.
+		
+	}
 	
 	
 	
@@ -140,48 +154,46 @@ public class Centrality implements Serializable{
 		 *  i.e the ones to be expanded next.
 		 */
 		DataFrame subjectOfObjectDF1 = Service.sqlCtx().sql("SELECT subject,COUNT(object) AS OutdegreeCount FROM Graph GROUP BY subject"
-				+ " ORDER BY OutdegreeCount DESC LIMIT 5");
+				+ " ORDER BY OutdegreeCount DESC LIMIT 1");
 
 //		DataFrame completeDummyGraph = getDummyGraphFrame();
 //		completeDummyGraph.registerTempTable("DummyGraph");
 //
 //		DataFrame subjectOfObjectDF1 = Service.sqlCtx().sql("SELECT subject,COUNT(object) AS OutdegreeCount FROM DummyGraph GROUP BY subject"
-//		+ " ORDER BY OutdegreeCount DESC LIMIT 4");
+//		+ " ORDER BY OutdegreeCount DESC LIMIT 3");
 		
 		subjectOfObjectDF1.registerTempTable("sourceNodes");
+		subjectOfObjectDF1.show();
 		
-		
-		Row[] listofsource = subjectOfObjectDF1.collect();
 		
 		int distancepath = 1;
 		
-		DataFrame masterDF = initEmptyDF();
 		DataFrame subjectOfObjectOfDF1 = initEmptyDF();
-		DataFrame source;
 
-		for(Row r: listofsource){
+//		for(Row r: listofsource){
 			
-			source = Service.sqlCtx().sql("SELECT subject,OutdegreeCount FROM sourceNodes WHERE subject='"+r.getString(0)+"'");
+//			source = Service.sqlCtx().sql("SELECT subject,OutdegreeCount FROM sourceNodes WHERE subject='"+r.getString(0)+"'");
 			
 			subjectOfObjectOfDF1 = initEmptyDF();
 			
 			// get names of subjects in terms of list.
-			Object[] subjects = getSubjectNames(source);
+			Object[] subjects = getSubjectNames(subjectOfObjectDF1);
 			distancepath = 1;
 			
-			subjectOfObjectDF1 = graphFrame.select("object","subject")
+			subjectOfObjectDF1 = graphFrame.select("subject","object")
 					.filter(col("object").isin(subjects))
 					.filter(col("object").notEqual(col("subject")))
 					.withColumn("distance", lit(distancepath));
 			
 			subjectOfObjectDF1.registerTempTable("frame1");
 
-			
+			subjectOfObjectDF1.show();
 			boolean firstIteration = true;
 			
+			long breaker = 0;
+			long lastcount = 0;
+			
 			while(true){
-
-
 
 				if(firstIteration){
 					firstIteration = false;
@@ -192,32 +204,64 @@ public class Centrality implements Serializable{
 				}
 				
 				distancepath += 1;
-
+				
+				for(Object r: subjects){
+					System.out.println("the string of subjects is"+ (String)r);
+				}
 				subjectOfObjectOfDF1 = graphFrame.select("subject","object")
 						.filter(col("object").isin(subjects))
 						.filter(col("object").notEqual(col("subject")))
 						.withColumn("distance", lit(distancepath));
 
 				subjectOfObjectOfDF1.registerTempTable("frame2");
+				subjectOfObjectOfDF1 = Service.sqlCtx().sql("SELECT DISTINCT * FROM frame2");
 
 				
-				
-				if(subjectOfObjectOfDF1.count() == 0){
-					break;
-				}
+
+				/*
+				 *  To avoid loops. We remove three kinds of rows from the dataframe.
+				 *  
+				 *  Case 1: When there are similar values of subject and object in a dataframe ( yes this case can occur too )
+				 *  Case 2: If we have a loop i.e a dataframe somehow ends up pointing to itself.
+				 *  
+				 */
 
 				
-				subjectOfObjectDF1 = Service.sqlCtx().sql("SELECT f1.object,f2.subject,f2.distance FROM frame1 f1 INNER JOIN frame2 f2 ON f1.subject=f2.object").unionAll(subjectOfObjectDF1);
+				subjectOfObjectDF1 = Service.sqlCtx().sql("SELECT f2.subject,f1.object,f2.distance FROM frame1 f1 INNER JOIN frame2 f2 ON f1.subject=f2.object").unionAll(subjectOfObjectDF1);
+				subjectOfObjectDF1.registerTempTable("unionedFrame");
+
+				
+				/*
+				 * case 1 : distinct clause.
+				 * case 2 : in where clause part two
+				 */
+				subjectOfObjectDF1 = Service.sqlCtx().sql("SELECT subject,object,MIN(distance) as distance FROM unionedFrame uf WHERE uf.subject!=uf.object GROUP BY"
+						+ " subject,object ");
+				subjectOfObjectDF1.show();
 				subjectOfObjectDF1.registerTempTable("frame1");
+				
 
 				
+				
+				System.out.println("subject after case 2");
+				/*
+				 *  The breaker will break us out of the loop if we get the same rows for 3 consecutive times.
+				 */
+				if(subjectOfObjectDF1.count() == lastcount){
+					
+						break;
+				}
+				
+				
+				lastcount = subjectOfObjectDF1.count();
 			}
 			
-			masterDF = masterDF.unionAll(subjectOfObjectDF1);
-		}
-		masterDF.write().parquet(rdfanalyzer.spark.Configuration.storage() +
-				 "closenessList.parquet");
-		masterDF.show();
+		subjectOfObjectDF1.show();
+			
+//			masterDF = masterDF.unionAll(subjectOfObjectDF1);
+//		masterDF.write().parquet(rdfanalyzer.spark.Configuration.storage() +
+//				 "closenessList.parquet");
+//		masterDF.show();
 	}
 	
 	public static Object[] getSubjectNames(DataFrame subjectRows){
@@ -250,18 +294,21 @@ public class Centrality implements Serializable{
 		
 		JavaRDD<Row> relationsRow = Service.sparkCtx()
 				.parallelize(Arrays.asList(RowFactory.create("3L","4L"),
-						RowFactory.create("4L","100L"), RowFactory.create("2L","3L"),
-						RowFactory.create("4L","100L"), RowFactory.create("12L","2L"),
+						RowFactory.create("4L","100L"), RowFactory.create("2L","3L"),RowFactory.create("3L","2L"),
+//						RowFactory.create("4L","100L"), RowFactory.create("12L","2L"),
 						RowFactory.create("4L","100L"), RowFactory.create("1L","2L"),
-						RowFactory.create("4L","100L"), RowFactory.create("6L","5L"),RowFactory.create("4L","4L"),
-						RowFactory.create("4L","100L"), RowFactory.create("1L","6L"),
-						RowFactory.create("4L","100L"), RowFactory.create("1L","8L"),
-						RowFactory.create("4L","100L"), RowFactory.create("8L","9L"),
-						RowFactory.create("4L","100L"), RowFactory.create("11L","1L"),
-						RowFactory.create("4L","100L"), RowFactory.create("13L","11L"),
-						RowFactory.create("4L","100L"), RowFactory.create("10L","1L"),
-						RowFactory.create("5L","200L"), RowFactory.create("14L","10L"), RowFactory.create("10L","15L"),
-						RowFactory.create("5L","200L"), RowFactory.create("16L","14L"),
+						RowFactory.create("4L","100L"), RowFactory.create("6L","5L"),RowFactory.create("1L","6L"),
+						RowFactory.create("4L","100L"), RowFactory.create("6L","1L"),
+						RowFactory.create("4L","100L"), RowFactory.create("1L","8L"),RowFactory.create("8L","9L"),
+						RowFactory.create("4L","100L"),
+
+//						RowFactory.create("4L","100L"), RowFactory.create("1L","8L"), RowFactory.create("1L","10L"),
+//						RowFactory.create("4L","100L"), RowFactory.create("8L","9L"),RowFactory.create("3L","2L"),
+//						RowFactory.create("4L","100L"), RowFactory.create("11L","1L"),RowFactory.create("6L","1L"),
+//						RowFactory.create("4L","100L"), RowFactory.create("13L","11L"),RowFactory.create("9L","1L"),
+//						RowFactory.create("4L","100L"), RowFactory.create("10L","1L"),RowFactory.create("8L","6L"),
+//						RowFactory.create("5L","200L"), RowFactory.create("14L","10L"), RowFactory.create("10L","15L"),
+//						RowFactory.create("5L","200L"), RowFactory.create("16L","14L"),
 						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
 						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
 						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
@@ -285,27 +332,27 @@ public class Centrality implements Serializable{
 						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
 						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
 						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
-						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
-						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-						RowFactory.create("15L","400L"), RowFactory.create("15L","400L")
+						RowFactory.create("9L","300L"), RowFactory.create("9L","300L")
+//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L")
 						));
 
 		// Edge column Creation with dataType:
