@@ -257,7 +257,10 @@ public class Centrality implements Serializable{
 			}
 			
 		subjectOfObjectDF1.show();
-			
+		
+		subjectOfObjectDF1.write().parquet(rdfanalyzer.spark.Configuration.storage() +
+				 "closenessList.parquet");
+		
 //			masterDF = masterDF.unionAll(subjectOfObjectDF1);
 //		masterDF.write().parquet(rdfanalyzer.spark.Configuration.storage() +
 //				 "closenessList.parquet");
