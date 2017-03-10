@@ -165,23 +165,12 @@ public class SSSP implements Serializable{
 			
 			adjacencyMatrixx = PerformBFSReduceOperation(mappedValues,i);
 			
-//			if(!fullBfs){
-//				/*
-//				 *  Get the grey nodes and check if they are already present in the master SSSP node parquet file.
-//				 */
-//				JavaPairRDD<Long, Tuple4<List<Long>, Integer, Integer, Integer>> pluckedGreyNodes = PluckGreyNodes(adjacencyMatrixx);
-//				
-//				
-//			}
 			
 			
-			if(i==2){
+			
+			if(breakloop(adjacencyMatrixx,i)){
 				break;
 			}
-			
-//			if(breakloop(adjacencyMatrixx,i)){
-//				break;
-//			}
 
 			i++;
 		}
@@ -200,7 +189,7 @@ public class SSSP implements Serializable{
 			
 		JavaPairRDD<Long, Tuple3<Long, Integer, Integer>> mappeddata = finalMap(adjacencyMatrixx, sourceNode);
 
-		printSumOfWholeBFS(mappeddata,sourceNode);
+//		printSumOfWholeBFS(mappeddata,sourceNode);
 
 		return mappeddata;
 	}

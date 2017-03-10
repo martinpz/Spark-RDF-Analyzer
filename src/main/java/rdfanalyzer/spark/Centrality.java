@@ -36,6 +36,8 @@ import scala.Tuple2;
 import scala.Tuple4;
 import ranking.ClosenessBean;
 import ranking.ClosenessCentrality;
+import ranking.ClosenessNodes;
+
 import static org.apache.spark.sql.functions.*;
 
 public class Centrality implements Serializable{
@@ -87,27 +89,11 @@ public class Centrality implements Serializable{
 			System.out.println("[LOGS] Present in metric type 3");
 			return CalculateBetweenness(nodeName);
 		} else if (metricType.equals("4")) {
-		
+			GenerateTopNodesCloseness();
 			
-//			RunAllPairShortestPathForAllNodes(nodeName);
-//			graphFrame.select("subject","object").toJavaRDD().mapToPair(new PairFunction<Row, String, String>() {
-//
-//				@Override
-//				public Tuple2<String, String> call(Row arg0) throws Exception {
-//					System.out.println("subject = "+arg0.getString(0) + " object = "+arg0.getString(1));
-//					return new Tuple2<String,String>(arg0.getString(0),arg0.getString(1));
-//				}
-//			});
-
-//			DataFrame uniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-//					 + "Random10Nodes1.parquet");
-//			uniqueNodes.show();
 
 			
-//			return10RandomNodes();
-			getFarthestNodes();
-//			findNodeMaxCloseness();
-//			CreateUniqueNodesWithoutQuotes();
+			
 		} else if (metricType.equals("5")) {
 			System.out.println("[LOGS] Present in metric type 5");
 			return "<h1>" + calculateStartNode() + "</h1>";
@@ -118,153 +104,52 @@ public class Centrality implements Serializable{
 	
 	
 	
-	
-	
-	
-	
-	
-	public static void findNodeMaxCloseness(){
+	public static void GenerateTopNodesCloseness() throws Exception{
 		
-		DataFrame df = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
-				 "closenessList.parquet");
-		df.registerTempTable("closeness");
+		// generate id based parquet files for this graph
+		generateDataFrame();
 		
-		DataFrame df2 = df.sqlContext().sql("SELECT object,COUNT(subject) as intersection FROM closeness "
-				+ "GROUP BY object ORDER BY intersection DESC LIMIT 5");
+		// retrive them
+		DataFrame uniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
+				 "UniqueNodes.parquet");
 
-		Row[] finalNodes = df2.collect();
-		
-		// send these nodes to bfs algo.
-		
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	public static void getFarthestNodes(){
-		
-		/*
-		 *  Top 5 nodes with maximum outdegrees. Add a column in the front with 1 that represents them as grey nodes.
-		 *  i.e the ones to be expanded next.
-		 */
-		DataFrame subjectOfObjectDF1 = Service.sqlCtx().sql("SELECT subject,COUNT(object) AS OutdegreeCount FROM Graph GROUP BY subject"
-				+ " ORDER BY OutdegreeCount DESC LIMIT 1");
+		DataFrame relations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
+				 "relations.parquet");
+				
+		uniqueNodes.registerTempTable("UniqueNodes");
 
-//		DataFrame completeDummyGraph = getDummyGraphFrame();
-//		completeDummyGraph.registerTempTable("DummyGraph");
-//
-//		DataFrame subjectOfObjectDF1 = Service.sqlCtx().sql("SELECT subject,COUNT(object) AS OutdegreeCount FROM DummyGraph GROUP BY subject"
-//		+ " ORDER BY OutdegreeCount DESC LIMIT 3");
-		
-		subjectOfObjectDF1.registerTempTable("sourceNodes");
-		subjectOfObjectDF1.show();
-		
-		
-		int distancepath = 1;
-		
-		DataFrame subjectOfObjectOfDF1 = initEmptyDF();
+		System.out.println("Running the ClosenessNodes");
+		// get nodes which will have the most closeness
+		DataFrame topCandidatesForCloseness = ClosenessNodes.run(graphFrame);
 
-//		for(Row r: listofsource){
+		System.out.println("getting ids of ClosenessNodes");
+		// get ids of those nodes.
+		DataFrame topCandidatesForClosenessIDs = uniqueNodes.select("id","nodes")
+				.filter(col("subject").isin(getNodeNames(topCandidatesForCloseness)));
+		
+
+		System.out.println("creating the AdjacencyMatrix");
+		DataFramePartitionLooper looper = new DataFramePartitionLooper(relations);
+		
+		Row[] items = topCandidatesForClosenessIDs.collect();
+		
+		boolean firstTime = true;
+		
+		System.out.println("looping the bfs.");
+		for(Row r:items){
 			
-//			source = Service.sqlCtx().sql("SELECT subject,OutdegreeCount FROM sourceNodes WHERE subject='"+r.getString(0)+"'");
+			looper.run(r.getLong(0), firstTime);
 			
-			subjectOfObjectOfDF1 = initEmptyDF();
-			
-			// get names of subjects in terms of list.
-			Object[] subjects = getSubjectNames(subjectOfObjectDF1);
-			distancepath = 1;
-			
-			subjectOfObjectDF1 = graphFrame.select("subject","object")
-					.filter(col("object").isin(subjects))
-					.filter(col("object").notEqual(col("subject")))
-					.withColumn("distance", lit(distancepath));
-			
-			subjectOfObjectDF1.registerTempTable("frame1");
-
-			boolean firstIteration = true;
-			
-			long lastcount = 0;
-			
-			while(true){
-
-				if(firstIteration){
-					firstIteration = false;
-					subjects = getSubjectNames(subjectOfObjectDF1);
-				}
-				else{
-					subjects = getSubjectNames(subjectOfObjectOfDF1);
-				}
-				
-				distancepath += 1;
-				
-				for(Object r: subjects){
-					System.out.println("the string of subjects is"+ (String)r);
-				}
-				subjectOfObjectOfDF1 = graphFrame.select("subject","object")
-						.filter(col("object").isin(subjects))
-						.filter(col("object").notEqual(col("subject")))
-						.withColumn("distance", lit(distancepath));
-
-				subjectOfObjectOfDF1.registerTempTable("frame2");
-				subjectOfObjectOfDF1 = Service.sqlCtx().sql("SELECT DISTINCT * FROM frame2");
-
-				
-
-				/*
-				 *  To avoid loops. We remove three kinds of rows from the dataframe.
-				 *  
-				 *  Case 1: When there are similar values of subject and object in a dataframe ( yes this case can occur too )
-				 *  Case 2: If we have a loop i.e a dataframe somehow ends up pointing to itself.
-				 *  
-				 */
-
-				
-				subjectOfObjectDF1 = Service.sqlCtx().sql("SELECT f2.subject,f1.object,f2.distance FROM frame1 f1 INNER JOIN frame2 f2 ON f1.subject=f2.object").unionAll(subjectOfObjectDF1);
-				subjectOfObjectDF1.registerTempTable("unionedFrame");
-
-				
-				/*
-				 * case 1 : distinct clause.
-				 * case 2 : in where clause part two
-				 */
-				subjectOfObjectDF1 = Service.sqlCtx().sql("SELECT subject,object,MIN(distance) as distance FROM unionedFrame uf WHERE uf.subject!=uf.object GROUP BY"
-						+ " subject,object ");
-				subjectOfObjectDF1.registerTempTable("frame1");
-				
-
-				
-				
-				System.out.println("subject after case 2");
-				/*
-				 *  The breaker will break us out of the loop if we get the same rows for 3 consecutive times.
-				 */
-				if(subjectOfObjectDF1.count() == lastcount){
-					
-						break;
-				}
-				
-				
-				lastcount = subjectOfObjectDF1.count();
+			if(firstTime){
+				firstTime = false;
 			}
-			
-		subjectOfObjectDF1.show();
+		}
 		
-		subjectOfObjectDF1.write().parquet(rdfanalyzer.spark.Configuration.storage() +
-				 "closenessList.parquet");
-		
-//			masterDF = masterDF.unionAll(subjectOfObjectDF1);
-//		masterDF.write().parquet(rdfanalyzer.spark.Configuration.storage() +
-//				 "closenessList.parquet");
-//		masterDF.show();
+		looper.WriteDataToFile();
 	}
 	
-	public static Object[] getSubjectNames(DataFrame subjectRows){
+	// convert subjects from DF to an array.
+	public static Object[] getNodeNames(DataFrame subjectRows){
 		
 		return subjectRows.select("subject").toJavaRDD().map(new Function<Row,String>() {
 
@@ -275,97 +160,21 @@ public class Centrality implements Serializable{
 			}
 		}).collect().stream().toArray();
 	}
+
 	
-	public static DataFrame initEmptyDF(){
-		
-		// Edge column Creation with dataType:
-		List<StructField> EdgFields = new ArrayList<StructField>();
-		EdgFields.add(DataTypes.createStructField("subject", DataTypes.StringType, true));
-		EdgFields.add(DataTypes.createStructField("object", DataTypes.StringType, true));
-		EdgFields.add(DataTypes.createStructField("distance", DataTypes.IntegerType, true));
-
-		// Creating Schema:
-		StructType edgSchema = DataTypes.createStructType(EdgFields);
-		// Creating vertex DataFrame and edge DataFrame:
-		return Service.sqlCtx().createDataFrame(Service.sparkCtx().emptyRDD(), edgSchema);		
-	}
-
-	public static DataFrame getDummyGraphFrame(){
-		
-		JavaRDD<Row> relationsRow = Service.sparkCtx()
-				.parallelize(Arrays.asList(RowFactory.create("3L","4L"),
-						RowFactory.create("4L","100L"), RowFactory.create("2L","3L"),RowFactory.create("3L","2L"),
-//						RowFactory.create("4L","100L"), RowFactory.create("12L","2L"),
-						RowFactory.create("4L","100L"), RowFactory.create("1L","2L"),
-						RowFactory.create("4L","100L"), RowFactory.create("6L","5L"),RowFactory.create("1L","6L"),
-						RowFactory.create("4L","100L"), RowFactory.create("6L","1L"),
-						RowFactory.create("4L","100L"), RowFactory.create("1L","8L"),RowFactory.create("8L","9L"),
-						RowFactory.create("4L","100L"),
-
-//						RowFactory.create("4L","100L"), RowFactory.create("1L","8L"), RowFactory.create("1L","10L"),
-//						RowFactory.create("4L","100L"), RowFactory.create("8L","9L"),RowFactory.create("3L","2L"),
-//						RowFactory.create("4L","100L"), RowFactory.create("11L","1L"),RowFactory.create("6L","1L"),
-//						RowFactory.create("4L","100L"), RowFactory.create("13L","11L"),RowFactory.create("9L","1L"),
-//						RowFactory.create("4L","100L"), RowFactory.create("10L","1L"),RowFactory.create("8L","6L"),
-//						RowFactory.create("5L","200L"), RowFactory.create("14L","10L"), RowFactory.create("10L","15L"),
-//						RowFactory.create("5L","200L"), RowFactory.create("16L","14L"),
-						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
-						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
-						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
-						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
-						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
-						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
-						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
-						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
-						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
-						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
-						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
-						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
-						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
-						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
-						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
-						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
-						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
-						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
-						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
-						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
-						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
-						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
-						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
-						RowFactory.create("9L","300L"), RowFactory.create("9L","300L")
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L")
-						));
-
-		// Edge column Creation with dataType:
-		List<StructField> EdgFields = new ArrayList<StructField>();
-		EdgFields.add(DataTypes.createStructField("subject", DataTypes.StringType, true));
-		EdgFields.add(DataTypes.createStructField("object", DataTypes.StringType, true));
-
-		// Creating Schema:
-		StructType edgSchema = DataTypes.createStructType(EdgFields);
-
-		// Creating vertex DataFrame and edge DataFrame:
-		return Service.sqlCtx().createDataFrame(relationsRow, edgSchema);		
-	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
@@ -433,42 +242,8 @@ public class Centrality implements Serializable{
 		return "betweenness";
 	}
 
-	public static String CalculateCloseness(String nodeName)  throws Exception{
-
-		
-//		relations.registerTempTable("relations");
-//		Service.sqlCtx().sql("select * from relations where subId=1460288880641").show();;
-
-		/*
-		 *  We'll loop the unique nodes to find APSP w.r.t each node
-		 *  
-		 *  but we'll create the adjacency matrix using the relations data.
-		 */
-
-		
-//		ReadAllPairShortestPathSingleNode();
-//
-//		ReadAllPairShortestPathAllNode();
-//		generateDataFrame();
-		RunAllPairShortestPathForAllNodes(nodeName);
-//		RunAllPairShortestPathWithTestData();
-		
-//		uniqueNodes.foreachPartition(partitionerLoop);
-		
-		// step 1
-		 
-		
-		
-//		relationsFrame.foreachPartition(new DataFramePartitionLooper());		
-
-		
-		
-//		RDFAnalyzerPageRank rank  = new RDFAnalyzerPageRank();
-//		rank.PerformPageRank(resultFrame);
-		return "";
-	}
 	
-	public static void generateDataFrame(){
+	public static DataFrame generateDataFrame(){
 		
 		DataFrame uniqueFrame = Service.sqlCtx().sql(""
 		 + "SELECT DISTINCT"
@@ -491,21 +266,10 @@ public class Centrality implements Serializable{
 		 + "WHERE g.subject != g.object");
 		 relationsFrame.write().parquet(rdfanalyzer.spark.Configuration.storage()
 		 + "relations.parquet");
+		 
+		 return relationsFrame;
 	}
 
-	public static void ReadAllPairShortestPathSingleNode() throws Exception{
-		DataFrame singleNodeAPSP = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "sib200APSP.parquet");
-		singleNodeAPSP.show();
-		System.out.println("The count of single node is "+singleNodeAPSP.count());
-	}	
-	public static void ReadAllPairShortestPathAllNode() throws Exception{
-		DataFrame allNodeAPSP = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "sib200APSPAll.parquet");
-		allNodeAPSP.show();
-		
-		System.out.println("The count of all nodes is "+allNodeAPSP.count());
-	}	
 
 	public static void RunAllPairShortestPathWithTestData() throws Exception{
 		// This is for testing with small graph
@@ -513,240 +277,7 @@ public class Centrality implements Serializable{
 		apsp.test();
 	}	
 	
-	public static void return10RandomNodes(){
-		
-		DataFrame uniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "UniqueNodes.parquet");
-		uniqueNodes.registerTempTable("UniqueNodes");
-		uniqueNodes.show();
 
-		List<Long> ids = new ArrayList<Long>();
-		ids.add(197568495626L);
-		ids.add(850403524644L);
-		ids.add(927712936032L);
-		ids.add(575525618367L);
-		ids.add(1185410974699L);
-		ids.add(369367187909L);
-		ids.add(197568495640L);
-		ids.add(197568496296L);
-		
-		DataFrame top10 = uniqueNodes.select("*").filter(uniqueNodes.col("id").isin(ids.toArray()));
-		top10.write().parquet(rdfanalyzer.spark.Configuration.storage() + "Random10Nodes1.parquet");
-		
-		top10.show();
-	}
-	
-	public static void CreateUniqueNodesWithoutQuotes(){
-		
-		DataFrame uniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "UniqueNodes.parquet");
-		uniqueNodes.registerTempTable("UniqueNodes");
-
-		DataFrame relations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "relations.parquet");
-
-		relations.registerTempTable("relations");
-		
-		System.out.println(relations.count() +" is the count of relations.");
-		
-		uniqueNodes.show();
-
-//		JavaRDD<UniqueNodeCase> withoutquotesNodes = uniqueNodes.select("nodes","id").toJavaRDD().map(new Function<Row, UniqueNodeCase>() {
-//
-//			@Override
-//			public UniqueNodeCase call(Row arg0) throws Exception {
-//				
-//				
-//				String nodeName = arg0.getString(0);
-//				System.out.println("nodeNmae ye hai = "+nodeName);
-//				nodeName = nodeName.replace("\"", "");
-//				nodeName = nodeName.replace("'", "");
-//				System.out.println("hilgai = "+nodeName);
-//
-//				UniqueNodeCase casee = new UniqueNodeCase();
-//				casee.setNodeID(arg0.getLong(1));
-//				casee.setNodeName(nodeName);
-//				
-//				return casee;
-//			}
-//		});
-
-//		System.out.println("creating Encoder with lines " + withoutquotesNodes.count());
-//		Encoder<UniqueNodeCase> encoder = Encoders.bean(UniqueNodeCase.class);
-//		System.out.println("created Encoder");
-//		Dataset<UniqueNodeCase> javaBeanDS = Service.sqlCtx().createDataset(
-//		  withoutquotesNodes.collect(),
-//		  encoder
-//		);
-//		System.out.println("creating dataset");
-//		javaBeanDS.toDF().write().parquet(rdfanalyzer.spark.Configuration.storage() + "uniqueNodesWithoutQuotes.parquet");
-	}
-	
-	public static void ApplyHopBFS() throws Exception{
-
-		
-		DataFrame top10 = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "Random10Nodes1.parquet");
-		
-		top10.show();
-		
-		Row[] rows = top10.collect();
-		
-		List<ClosenessBean> bean = new ArrayList<ClosenessBean>();
-		
-		System.out.println("Starting looper mozi " + rows[0].getString(0));
-		int i= 0;
-		for(Row r:rows){
-			if (i==0){
-				bean.add(CalculateClosenessByHop(r.getString(0)));
-			}
-		}
-		
-		
-		for(ClosenessBean b:bean){
-			System.out.println("NodeName = "+b.getNode() + " ||||||||||||   6 hop Centrality = "+b.getCloseness());
-		}
-		
-	}
-	
-	private static String readNodeFullCentrality(){
-		
-		DataFrame fullCentrality = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "sib200SSSP10Nodes.parquet");
-		
-		fullCentrality.registerTempTable("fullCentrality");
-		
-		DataFrame explodedCol = fullCentrality.withColumn("explodednodeDistancess", org.apache.spark.sql.functions.explode(fullCentrality.col("nodeDistances")));
-		explodedCol.registerTempTable("registeredTable");
-		DataFrame summedData = explodedCol.sqlContext().sql("SELECT sum(explodednodeDistancess),sourceNodes FROM registeredTable group by sourceNodes");
-		
-		summedData.show();
-		
-		
-		
-		return "";
-	}
-
-	public static void RunAllPairShortestPathForAllNodes(String nodeName) throws Exception{
-		// responsible for dividing the number unique nodes into subnodes.
-		// so that we can solve the problem individually and merge all 10 in the end together.
-		
-		
-		// [ nodes, ids ]
-		DataFrame uniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "UniqueNodes.parquet");
-		uniqueNodes.registerTempTable("UniqueNodes");
-		
-		// [ subids, objids ]
-		DataFrame relations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "relations.parquet");
-		relations.registerTempTable("relations");
-		
-		
-//		DataFrame selectedNodeid = Service.sqlCtx().sql("SELECT * FROM UniqueNodes WHERE nodes='"+nodeName+"'");
-//		selectedNodeid.show();
-		
-		
-//		DataFrame uniqueNodes = DummyUniqueDataForInterimFile();
-//		DataFrame relations = DummyRelationDataForInterimFile();
-
-//		uniqueNodes.registerTempTable("UniqueNodes");
-
-
-//		DataFrame sortedUniqueNodes = uniqueNodes.sqlContext().sql("SELECT * FROM UniqueNodes ORDER BY id DESC");
-//		sortedUniqueNodes.show();
-//
-//		// this column will help us distinguish the keys in bfs because we assigned a unique constant to each key.
-//		sortedUniqueNodes = sortedUniqueNodes.withColumn("randomConstants", functions.monotonically_increasing_id());
-//		sortedUniqueNodes.registerTempTable("SortedUniqueNodes");
-		
-		
-//		DataFrame subNodes;
-//		Row[] lastRow = null;
-		
-		
-		/*
-		 *  we need to find the first row id. This will help us set the initial condition on the query i.e from which
-		 *  id should be our id less than
-		 */
-		
-
-
-
-		Row[] uniqueNodesRows = uniqueNodes.collect();
-		DataFramePartitionLooper partitionerLoop  = new DataFramePartitionLooper(relations,uniqueNodesRows);
-
-//		double differenceDouble = (uniqueNodes.count()/partitionerLoop.NODE_DIVIDER);
-//		int difference = (int) differenceDouble;
-//
-//		Row firstRow = sortedUniqueNodes.first();
-//
-//		long lastId = firstRow.getLong(1);
-
-//		DataFrame ff = relations.sqlContext().sql("SELECT * FROM relations WHERE id = 214748366883");
-		
-		DataFrame top10 = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "Random10Nodes1.parquet");
-
-//		Row[] rows = top10.collect();
-//		
-//		int i = 0;
-//		for(Row r:rows){
-//
-//			if(i==0){
-//				partitionerLoop.run(r.getLong(1),i);
-//			}
-//			i++;
-//		}
-		
-		
-		top10.show();
-		
-//		partitionerLoop.WriteDataToFile();
-
-//		for(int i=0;i<partitionerLoop.NODE_DIVIDER;i++){
-//			
-//			/*
-//			 *  Suppose we've total 1000 nodes which means adjacency matrix has 1000 rows and we've to populate an RDD
-//			 *  of 1000*1000. So what we did is that we will divide 1000 by 10 i.e 1000/10 = 100. And solve bfs for those
-//			 *  100 nodes this makes the number of rows in the rdd to 1000*100. Once done we generate a parquet file with 
-//			 *  it and than we generate the next 100 and so on until all the files are generated. In the end we merge all 
-//			 *  the data to get our final result.
-//			 */
-//			
-//			
-//			subNodes = sortedUniqueNodes.sqlContext().sql("SELECT * FROM SortedUniqueNodes WHERE id < "+ lastId +" LIMIT "+ difference);
-//			subNodes.show();
-//			/*
-//			 *  Calculate the bfs for these subNodes and generate a parquet file of the result.
-//			 */
-//			partitionerLoop.CreateInterimFilesForBFS(subNodes,i);
-//			
-//			
-//			/*
-//			 *  Set the last id as the last record in the subNodes DF
-//			 */
-//			
-//			System.out.print("coming here");
-//			lastRow = subNodes.collect();
-//
-//			lastId = lastRow[lastRow.length - 1].getLong(1);
-//			break;
-//		}
-		
-		
-		
-//		uniqueNodes.show();
-		
-
-//		for(int i=0;i<uniqueNodesRows.length;i++){
-//			long nodeid =  uniqueNodesRows[i].getLong(1);
-//			partitionerLoop.ApplyBFS(nodeid);
-//			System.out.println("roribaba"+nodeid);
-//			break;
-//		}
-		
-	}
 	
 	
 	
