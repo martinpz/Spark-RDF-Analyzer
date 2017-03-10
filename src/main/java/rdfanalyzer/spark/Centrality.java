@@ -187,10 +187,8 @@ public class Centrality implements Serializable{
 			
 			subjectOfObjectDF1.registerTempTable("frame1");
 
-			subjectOfObjectDF1.show();
 			boolean firstIteration = true;
 			
-			long breaker = 0;
 			long lastcount = 0;
 			
 			while(true){
@@ -237,7 +235,6 @@ public class Centrality implements Serializable{
 				 */
 				subjectOfObjectDF1 = Service.sqlCtx().sql("SELECT subject,object,MIN(distance) as distance FROM unionedFrame uf WHERE uf.subject!=uf.object GROUP BY"
 						+ " subject,object ");
-				subjectOfObjectDF1.show();
 				subjectOfObjectDF1.registerTempTable("frame1");
 				
 
