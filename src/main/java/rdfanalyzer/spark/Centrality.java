@@ -89,8 +89,8 @@ public class Centrality implements Serializable{
 			System.out.println("[LOGS] Present in metric type 3");
 			return CalculateBetweenness(nodeName);
 		} else if (metricType.equals("4")) {
-			GenerateTopNodesCloseness();
-			CalculateCentralityFromDistances();
+			GenerateTopNodesCloseness(dataset);
+			CalculateCentralityFromDistances(dataset);
 			
 			
 		} else if (metricType.equals("5")) {
@@ -113,23 +113,23 @@ public class Centrality implements Serializable{
 		}).collect().stream().toArray();
 	}
 
-	public static void CalculateCentralityFromDistances() throws Exception{
+	public static void CalculateCentralityFromDistances(String dataset) throws Exception{
 
 		
-		DataFrame topClosenessNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
-				 "sib200TopClosenessNodes.parquet");
+		DataFrame topClosenessNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() + dataset +
+				 "TopClosenessNodes.parquet");
 
 		
 		topClosenessNodes.withColumn("nodeDistances", explode(topClosenessNodes.col("nodeDistances"))).registerTempTable("explodedNodes");
 		
 		topClosenessNodes.sqlContext().sql("SELECT sourceNodes,SUM(nodeDistances) FROM explodedNodes GROUP BY sourceNodes").write()
-		.parquet(rdfanalyzer.spark.Configuration.storage() +
-				 "sib200FinalclosenessCentralNodes.parquet");
+		.parquet(rdfanalyzer.spark.Configuration.storage() + dataset +
+				 "FinalclosenessCentralNodes.parquet");
 		
 		
 	}
 	
-	public static void GenerateTopNodesCloseness() throws Exception{
+	public static void GenerateTopNodesCloseness(String dataset) throws Exception{
 		
 		// generate id based parquet files for this graph
 		generateDataFrame();
@@ -145,7 +145,7 @@ public class Centrality implements Serializable{
 
 		System.out.println("Running the ClosenessNodes");
 		// get nodes which will have the most closeness
-		DataFrame topCandidatesForCloseness = ClosenessNodes.run(graphFrame);
+		DataFrame topCandidatesForCloseness = ClosenessNodes.run(graphFrame, dataset);
 
 		System.out.println("getting ids of ClosenessNodes");
 		// get ids of those nodes.
@@ -170,7 +170,7 @@ public class Centrality implements Serializable{
 			}
 		}
 		
-		looper.WriteDataToFile();
+		looper.WriteDataToFile(dataset);
 	}
 	
 	

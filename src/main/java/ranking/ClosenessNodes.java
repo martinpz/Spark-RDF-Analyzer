@@ -20,11 +20,11 @@ import rdfanalyzer.spark.Service;
 
 public class ClosenessNodes {
 	
-	public static DataFrame run(DataFrame graphFrame){
-		return getFarthestNodes(getClosenessCandidates(),graphFrame);
+	public static DataFrame run(DataFrame graphFrame, String dataset){
+		return getFarthestNodes(getClosenessCandidates(),graphFrame, dataset);
 	}
 
-	public static DataFrame getFarthestNodes(DataFrame nodesWithHighestOutDegree,DataFrame graphFrame){
+	public static DataFrame getFarthestNodes(DataFrame nodesWithHighestOutDegree,DataFrame graphFrame, String dataset){
 		
 		/*
 		 *  Top 10 nodes with maximum outdegrees. Add a column in the front with 1 that represents them as grey nodes.
@@ -126,7 +126,7 @@ public class ClosenessNodes {
 		subjectOfObjectDF1 = Service.sqlCtx().sql("SELECT subject,COUNT(object) as intersections FROM frame1 Group By subject "
 				+ " ORDER BY intersections DESC LIMIT 10");
 		
-		subjectOfObjectDF1.write().parquet(rdfanalyzer.spark.Configuration.storage() +
+		subjectOfObjectDF1.write().parquet(rdfanalyzer.spark.Configuration.storage() + dataset +
 				 "closenessList.parquet");
 		
 		return subjectOfObjectDF1;
