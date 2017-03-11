@@ -189,7 +189,7 @@ public class SSSP implements Serializable{
 			
 		JavaPairRDD<Long, Tuple3<Long, Integer, Integer>> mappeddata = finalMap(adjacencyMatrixx, sourceNode);
 
-//		printSumOfWholeBFS(mappeddata,sourceNode);
+		printSumOfWholeBFS(mappeddata,sourceNode);
 
 		return mappeddata;
 	}

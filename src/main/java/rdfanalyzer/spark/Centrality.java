@@ -90,8 +90,7 @@ public class Centrality implements Serializable{
 			return CalculateBetweenness(nodeName);
 		} else if (metricType.equals("4")) {
 			GenerateTopNodesCloseness();
-			
-
+			CalculateCentralityFromDistances();
 			
 			
 		} else if (metricType.equals("5")) {
@@ -101,8 +100,34 @@ public class Centrality implements Serializable{
 		return "none";
 	}
 	
-	
-	
+	// convert subjects from DF to an array.
+	public static Object[] getSubjectNames(DataFrame subjectRows){
+		
+		return subjectRows.select("subject").toJavaRDD().map(new Function<Row,String>() {
+
+			@Override
+			public String call(Row arg0) throws Exception {
+				
+				return arg0.getString(0);
+			}
+		}).collect().stream().toArray();
+	}
+
+	public static void CalculateCentralityFromDistances() throws Exception{
+
+		
+		DataFrame topClosenessNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
+				 "sib200TopClosenessNodes.parquet");
+
+		
+		topClosenessNodes.withColumn("nodeDistances", explode(topClosenessNodes.col("nodeDistances"))).registerTempTable("explodedNodes");
+		
+		topClosenessNodes.sqlContext().sql("SELECT sourceNodes,SUM(nodeDistances) FROM explodedNodes GROUP BY sourceNodes").write()
+		.parquet(rdfanalyzer.spark.Configuration.storage() +
+				 "sib200FinalclosenessCentralNodes.parquet");
+		
+		
+	}
 	
 	public static void GenerateTopNodesCloseness() throws Exception{
 		
@@ -125,7 +150,7 @@ public class Centrality implements Serializable{
 		System.out.println("getting ids of ClosenessNodes");
 		// get ids of those nodes.
 		DataFrame topCandidatesForClosenessIDs = uniqueNodes.select("id","nodes")
-				.filter(col("subject").isin(getNodeNames(topCandidatesForCloseness)));
+				.filter(col("nodes").isin(getNodeNames(topCandidatesForCloseness)));
 		
 
 		System.out.println("creating the AdjacencyMatrix");
@@ -148,6 +173,26 @@ public class Centrality implements Serializable{
 		looper.WriteDataToFile();
 	}
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	// convert subjects from DF to an array.
 	public static Object[] getNodeNames(DataFrame subjectRows){
 		
@@ -160,59 +205,7 @@ public class Centrality implements Serializable{
 			}
 		}).collect().stream().toArray();
 	}
-
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
 	public static String CalculateInDegree(String node) {
 
 		String result = "";

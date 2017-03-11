@@ -112,8 +112,10 @@ implements Serializable {
 	public void run(long nodeid,boolean firstTime) throws Exception{
 
 			if(firstTime){
-				result = this.apsp.finalReduce
-						(this.apsp.applyBFSForNode(nodeid, adjacencyMatrix));
+//				result = this.apsp.finalReduce
+//						(this.apsp.applyBFSForNode(nodeid, adjacencyMatrix));
+				
+				this.apsp.applyBFSForNode(nodeid, adjacencyMatrix);
 			}
 			else{
 				result = result.union(this.apsp.finalReduce
