@@ -79,6 +79,9 @@ function getCytoscapeInstance(graphElements, layoutToUse) {
             selector: 'edge',
             style: {
                 'width': 3,
+                'content': 'data(label)',
+                'font-size': '8px',
+                'edge-text-rotation': 'autorotate',
                 'line-color': '#ccc',
                 'target-arrow-color': '#ccc',
                 'target-arrow-shape': 'triangle'
