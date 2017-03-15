@@ -59,7 +59,7 @@ public class Centrality implements Serializable{
 	public static final int LIMIT_DELTA = 80;
 
 	public static String main(String metricType, String dataset, String nodeName) throws Exception {
-		graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + dataset + ".parquet");
+		graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + "DBpedia.parquet");
 		graphFrame.cache().registerTempTable("Graph");
 		/**********************************************************************/
 		// DataFrame resultsFrame = Service.sqlCtx().sql("SELECT * FROM Graph");
@@ -89,10 +89,10 @@ public class Centrality implements Serializable{
 			System.out.println("[LOGS] Present in metric type 3");
 			return CalculateBetweenness(nodeName);
 		} else if (metricType.equals("4")) {
-			GenerateTopNodesCloseness();
-			CalculateCentralityFromDistances();
-			
-			
+//			GenerateTopNodesCloseness();
+//			CalculateCentralityFromDistances();
+//			createManualParquet();			
+			getTop10Nodes();
 		} else if (metricType.equals("5")) {
 			System.out.println("[LOGS] Present in metric type 5");
 			return "<h1>" + calculateStartNode() + "</h1>";
@@ -103,28 +103,97 @@ public class Centrality implements Serializable{
 	// convert subjects from DF to an array.
 	public static Object[] getSubjectNames(DataFrame subjectRows){
 		
-		return subjectRows.select("subject").toJavaRDD().map(new Function<Row,String>() {
+		return subjectRows.select("subject").toJavaRDD().map(new Function<Row,Long>() {
 
 			@Override
-			public String call(Row arg0) throws Exception {
+			public Long call(Row arg0) throws Exception {
 				
-				return arg0.getString(0);
+				return arg0.getLong(0);
 			}
 		}).collect().stream().toArray();
+	}
+	
+	
+	
+	public static void getTop10Nodes() throws Exception{
+		
+		DataFrame daqlUniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
+				 "DBpediaUniqueNodes.parquet");
+		DataFrame daqlrelations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
+				 "DBpediarelations.parquet");
+		daqlrelations.registerTempTable("daqlrelations");
+		
+		DataFrame top10 = daqlrelations.sqlContext().sql("SELECT subId as subject,COUNT(*) as counts FROM "
+				+ "daqlrelations GROUP BY subId ORDER BY counts DESC LIMIT 10");
+		
+		top10.show();
+		
+		Row[] items = top10.collect();
+
+		DataFramePartitionLooper looper = new DataFramePartitionLooper(daqlrelations);
+
+		int i=0;
+		for(Row r:items){
+
+			if(i==0)
+			{
+				looper.run(r.getLong(0), true);
+			}
+			i++;
+		}
+		
+//		DataFrame nodes = daqlUniqueNodes.filter(col("id").isin(getSubjectNames(top10)));
+//		Row[] items = nodes.collect();
+//		for(Row r:items){
+//			System.out.println("This is the node name = "+r.getString(0)+ " = with id = "+r.getLong(1));
+//		}
+		
 	}
 
 	public static void CalculateCentralityFromDistances() throws Exception{
 
-		
 		DataFrame topClosenessNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
-				 "sib200TopClosenessNodes.parquet");
+				 "sib200closenessList.parquet");
+		
+		topClosenessNodes.show();
+		
+//				topClosenessNodes.registerTempTable("frame1");
+//				
+//				DataFrame top10ClosenessNodes = topClosenessNodes.sqlContext().sql("SELECT subject,COUNT(object) as intersections FROM frame1 Group By subject "
+//						+ " ORDER BY intersections DESC LIMIT 10");
 
 		
-		topClosenessNodes.withColumn("nodeDistances", explode(topClosenessNodes.col("nodeDistances"))).registerTempTable("explodedNodes");
+//		DataFrame uniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
+//						 "UniqueNodes.parquet");
+//
+//				DataFrame relations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
+//						 "relations.parquet");
+//				
+//				DataFrame real = uniqueNodes.select("id","nodes").filter(col("nodes").isin(getSubjectNames(topClosenessNodes)));
+//				Row[] items = real.collect();
+//				
+//				DataFramePartitionLooper looper = new DataFramePartitionLooper(relations);
+//				int i=0;
+//				for(Row r:items){
+//					
+//					if(i==9)
+//					{
+//						looper.run(r.getLong(0), true);
+//					}
+//					i++;
+//				}
+				
+				
+
+				
+//				top10ClosenessNodes.show();
 		
-		topClosenessNodes.sqlContext().sql("SELECT sourceNodes,SUM(nodeDistances) FROM explodedNodes GROUP BY sourceNodes").write()
-		.parquet(rdfanalyzer.spark.Configuration.storage() +
-				 "sib200FinalclosenessCentralNodes.parquet");
+//		DataFrame topClosenessNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
+//				 "sib200TopClosenessNodes.parquet");
+//		topClosenessNodes.withColumn("nodeDistances", explode(topClosenessNodes.col("nodeDistances"))).registerTempTable("explodedNodes");
+//		topClosenessNodes.sqlContext().sql("SELECT sourceNodes,SUM(nodeDistances) FROM explodedNodes GROUP BY sourceNodes").write()
+//		.parquet(rdfanalyzer.spark.Configuration.storage() +
+//				 "sib200FinalclosenessCentralNodes.parquet");
 		
 		
 	}
@@ -148,6 +217,7 @@ public class Centrality implements Serializable{
 		DataFrame topCandidatesForCloseness = ClosenessNodes.run(graphFrame);
 
 		System.out.println("getting ids of ClosenessNodes");
+
 		// get ids of those nodes.
 		DataFrame topCandidatesForClosenessIDs = uniqueNodes.select("id","nodes")
 				.filter(col("nodes").isin(getNodeNames(topCandidatesForCloseness)));
@@ -170,7 +240,38 @@ public class Centrality implements Serializable{
 			}
 		}
 		
+		
+		
 		looper.WriteDataToFile();
+	}
+	
+	
+	private static void createManualParquet(){
+		
+		
+		JavaRDD<Row> verRow = Service.sparkCtx()
+				.parallelize(Arrays.asList(
+						RowFactory.create("<http://dbpedia.org/resource/Being_Beige>",0.000008033), 
+						RowFactory.create("<http://dbpedia.org/resource/Forever_(Sevendust_song)>",0.000008183),
+						RowFactory.create("<http://dbpedia.org/resource/Lets_Stick_Together>",0.000008793), 
+						RowFactory.create("<http://dbpedia.org/resource/Interstellar_Slunk>",0.000008331),
+						RowFactory.create("<http://dbpedia.org/resource/Live_&_Solo:_The_Yes_Collection>",0.000008854),
+						RowFactory.create("<http://dbpedia.org/resource/Left_Behind_(CSS_song)>",0.000009407),
+						RowFactory.create("<http://dbpedia.org/resource/Evildoers_Beware!>",0.000008854),
+						RowFactory.create("<http://dbpedia.org/resource/Wait_(Earshot_song)>",0.000009053),
+						RowFactory.create("The Thirteenth Tale",0.000008544),
+						RowFactory.create("<http://dbpedia.org/resource/Neurosonic>",0.000008232)
+						));
+
+		// Creating column and declaring dataType for vertex:
+		List<StructField> verFields = new ArrayList<StructField>();
+		verFields.add(DataTypes.createStructField("node", DataTypes.StringType, true));
+		verFields.add(DataTypes.createStructField("closeness", DataTypes.DoubleType, true));
+		StructType verSchema = DataTypes.createStructType(verFields);
+		DataFrame df = Service.sqlCtx().createDataFrame(verRow, verSchema);
+		df.write().parquet(rdfanalyzer.spark.Configuration.storage() +
+				 "dqlcloseness.parquet");
+		
 	}
 	
 	
