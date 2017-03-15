@@ -89,10 +89,10 @@ public class Centrality implements Serializable{
 			System.out.println("[LOGS] Present in metric type 3");
 			return CalculateBetweenness(nodeName);
 		} else if (metricType.equals("4")) {
-//			GenerateTopNodesCloseness();
-//			CalculateCentralityFromDistances();
-//			createManualParquet();			
-			getTop10Nodes();
+			GenerateTopNodesCloseness();
+			CalculateCentralityFromDistances();
+			
+			
 		} else if (metricType.equals("5")) {
 			System.out.println("[LOGS] Present in metric type 5");
 			return "<h1>" + calculateStartNode() + "</h1>";
@@ -112,93 +112,24 @@ public class Centrality implements Serializable{
 			}
 		}).collect().stream().toArray();
 	}
-	
-	
-	
-	public static void getTop10Nodes() throws Exception{
-		
-		DataFrame daqlUniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
-				 "DBpediaUniqueNodes.parquet");
-		DataFrame daqlrelations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
-				 "DBpediarelations.parquet");
-		daqlrelations.registerTempTable("daqlrelations");
-		
-		DataFrame top10 = daqlrelations.sqlContext().sql("SELECT subId as subject,COUNT(*) as counts FROM "
-				+ "daqlrelations GROUP BY subId ORDER BY counts DESC LIMIT 10");
-		
-		top10.show();
-		
-		Row[] items = top10.collect();
-
-		DataFramePartitionLooper looper = new DataFramePartitionLooper(daqlrelations);
-
-		int i=0;
-		for(Row r:items){
-
-			if(i==0)
-			{
-				looper.run(r.getLong(0), true);
-			}
-			i++;
-		}
-		
-//		DataFrame nodes = daqlUniqueNodes.filter(col("id").isin(getSubjectNames(top10)));
-//		Row[] items = nodes.collect();
-//		for(Row r:items){
-//			System.out.println("This is the node name = "+r.getString(0)+ " = with id = "+r.getLong(1));
-//		}
-		
-	}
 
 	public static void CalculateCentralityFromDistances() throws Exception{
 
+		
 		DataFrame topClosenessNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
-				 "sib200closenessList.parquet");
-		
-		topClosenessNodes.show();
-		
-//				topClosenessNodes.registerTempTable("frame1");
-//				
-//				DataFrame top10ClosenessNodes = topClosenessNodes.sqlContext().sql("SELECT subject,COUNT(object) as intersections FROM frame1 Group By subject "
-//						+ " ORDER BY intersections DESC LIMIT 10");
+				 "sib200TopClosenessNodes.parquet");
 
 		
-//		DataFrame uniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
-//						 "UniqueNodes.parquet");
-//
-//				DataFrame relations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
-//						 "relations.parquet");
-//				
-//				DataFrame real = uniqueNodes.select("id","nodes").filter(col("nodes").isin(getSubjectNames(topClosenessNodes)));
-//				Row[] items = real.collect();
-//				
-//				DataFramePartitionLooper looper = new DataFramePartitionLooper(relations);
-//				int i=0;
-//				for(Row r:items){
-//					
-//					if(i==9)
-//					{
-//						looper.run(r.getLong(0), true);
-//					}
-//					i++;
-//				}
-				
-				
-
-				
-//				top10ClosenessNodes.show();
+		topClosenessNodes.withColumn("nodeDistances", explode(topClosenessNodes.col("nodeDistances"))).registerTempTable("explodedNodes");
 		
-//		DataFrame topClosenessNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
-//				 "sib200TopClosenessNodes.parquet");
-//		topClosenessNodes.withColumn("nodeDistances", explode(topClosenessNodes.col("nodeDistances"))).registerTempTable("explodedNodes");
-//		topClosenessNodes.sqlContext().sql("SELECT sourceNodes,SUM(nodeDistances) FROM explodedNodes GROUP BY sourceNodes").write()
-//		.parquet(rdfanalyzer.spark.Configuration.storage() +
-//				 "sib200FinalclosenessCentralNodes.parquet");
+		topClosenessNodes.sqlContext().sql("SELECT sourceNodes,SUM(nodeDistances) FROM explodedNodes GROUP BY sourceNodes").write()
+		.parquet(rdfanalyzer.spark.Configuration.storage() +
+				 "sib200FinalclosenessCentralNodes.parquet");
 		
 		
 	}
 	
-	public static void GenerateTopNodesCloseness() throws Exception{
+	public static void GenerateTopNodesCloseness(String dataset) throws Exception{
 		
 		// generate id based parquet files for this graph
 		generateDataFrame();
@@ -214,7 +145,7 @@ public class Centrality implements Serializable{
 
 		System.out.println("Running the ClosenessNodes");
 		// get nodes which will have the most closeness
-		DataFrame topCandidatesForCloseness = ClosenessNodes.run(graphFrame);
+		DataFrame topCandidatesForCloseness = ClosenessNodes.run(graphFrame, dataset);
 
 		System.out.println("getting ids of ClosenessNodes");
 
@@ -239,8 +170,6 @@ public class Centrality implements Serializable{
 				firstTime = false;
 			}
 		}
-		
-		
 		
 		looper.WriteDataToFile();
 	}

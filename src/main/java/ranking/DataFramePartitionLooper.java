@@ -74,12 +74,12 @@ implements Serializable {
 	}
 
 	
-	public void WriteDataToFile(){
+	public void WriteDataToFile(String dataset){
 		JavaRDD<SSSPCase> apspRDD = ConvertPairRDDToCaseRDD(result);
-		WriteInfoToParquet(apspRDD);
+		WriteInfoToParquet(apspRDD, dataset);
 	}
 	
-	private void WriteInfoToParquet(JavaRDD<SSSPCase> finalData){
+	private void WriteInfoToParquet(JavaRDD<SSSPCase> finalData, String dataset){
 
 		try{
 			org.apache.spark.sql.catalyst.encoders.OuterScopes.addOuterScope(this);
@@ -89,7 +89,7 @@ implements Serializable {
 			  finalData.collect(),
 			  encoder
 			);
-			javaBeanDS.toDF().write().parquet(rdfanalyzer.spark.Configuration.storage() + "TopClosenessNodes.parquet");
+			javaBeanDS.toDF().write().parquet(rdfanalyzer.spark.Configuration.storage() + dataset + "TopClosenessNodes.parquet");
 		}
 		catch(NullPointerException e){
 			System.out.println("We are in the error");

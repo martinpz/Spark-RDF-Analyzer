@@ -36,6 +36,9 @@ import scala.Tuple2;
 import scala.Tuple4;
 import ranking.ClosenessBean;
 import ranking.ClosenessCentrality;
+import ranking.ClosenessNodes;
+
+import static org.apache.spark.sql.functions.*;
 
 public class Centrality implements Serializable{
 	private final static Logger logger = Logger.getLogger(Centrality.class);
@@ -56,7 +59,7 @@ public class Centrality implements Serializable{
 	public static final int LIMIT_DELTA = 80;
 
 	public static String main(String metricType, String dataset, String nodeName) throws Exception {
-		graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + dataset + ".parquet");
+		graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + "DBpedia.parquet");
 		graphFrame.cache().registerTempTable("Graph");
 		/**********************************************************************/
 		// DataFrame resultsFrame = Service.sqlCtx().sql("SELECT * FROM Graph");
@@ -86,32 +89,250 @@ public class Centrality implements Serializable{
 			System.out.println("[LOGS] Present in metric type 3");
 			return CalculateBetweenness(nodeName);
 		} else if (metricType.equals("4")) {
-<<<<<<< Updated upstream
-		
-			
-			System.out.println("graph frame lines = "+ graphFrame.count());
-			graphFrame.show();
-			graphFrame.select("subject","object").toJavaRDD().mapToPair(new PairFunction<Row, String, String>() {
-
-				@Override
-				public Tuple2<String, String> call(Row arg0) throws Exception {
-					System.out.println("subject = "+arg0.getString(0) + " object = "+arg0.getString(1));
-					return new Tuple2<String,String>(arg0.getString(0),arg0.getString(1));
-				}
-			});
-
-		
+<<<<<<< HEAD
+//			GenerateTopNodesCloseness();
+//			CalculateCentralityFromDistances();
+//			createManualParquet();			
+			getTop10Nodes();
 =======
-//			return10RandomNodes();
-			CreateUniqueNodesWithoutQuotes();
->>>>>>> Stashed changes
+			GenerateTopNodesCloseness(dataset);
+			CalculateCentralityFromDistances(dataset);
+			
+			
+>>>>>>> 6cb92e3b967e8d9395d4d81355bdfc3f84bfc10c
 		} else if (metricType.equals("5")) {
 			System.out.println("[LOGS] Present in metric type 5");
 			return "<h1>" + calculateStartNode() + "</h1>";
 		}
 		return "none";
 	}
+	
+	// convert subjects from DF to an array.
+	public static Object[] getSubjectNames(DataFrame subjectRows){
+		
+		return subjectRows.select("subject").toJavaRDD().map(new Function<Row,Long>() {
 
+			@Override
+			public Long call(Row arg0) throws Exception {
+				
+				return arg0.getLong(0);
+			}
+		}).collect().stream().toArray();
+	}
+	
+	
+	
+	public static void getTop10Nodes() throws Exception{
+		
+		DataFrame daqlUniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
+				 "DBpediaUniqueNodes.parquet");
+		DataFrame daqlrelations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
+				 "DBpediarelations.parquet");
+		daqlrelations.registerTempTable("daqlrelations");
+		
+		DataFrame top10 = daqlrelations.sqlContext().sql("SELECT subId as subject,COUNT(*) as counts FROM "
+				+ "daqlrelations GROUP BY subId ORDER BY counts DESC LIMIT 10");
+		
+		top10.show();
+		
+		Row[] items = top10.collect();
+
+<<<<<<< HEAD
+		DataFramePartitionLooper looper = new DataFramePartitionLooper(daqlrelations);
+=======
+	public static void CalculateCentralityFromDistances(String dataset) throws Exception{
+>>>>>>> 6cb92e3b967e8d9395d4d81355bdfc3f84bfc10c
+
+		int i=0;
+		for(Row r:items){
+
+			if(i==0)
+			{
+				looper.run(r.getLong(0), true);
+			}
+			i++;
+		}
+		
+//		DataFrame nodes = daqlUniqueNodes.filter(col("id").isin(getSubjectNames(top10)));
+//		Row[] items = nodes.collect();
+//		for(Row r:items){
+//			System.out.println("This is the node name = "+r.getString(0)+ " = with id = "+r.getLong(1));
+//		}
+		
+<<<<<<< HEAD
+	}
+
+	public static void CalculateCentralityFromDistances() throws Exception{
+
+		DataFrame topClosenessNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
+				 "sib200closenessList.parquet");
+		
+		topClosenessNodes.show();
+		
+//				topClosenessNodes.registerTempTable("frame1");
+//				
+//				DataFrame top10ClosenessNodes = topClosenessNodes.sqlContext().sql("SELECT subject,COUNT(object) as intersections FROM frame1 Group By subject "
+//						+ " ORDER BY intersections DESC LIMIT 10");
+=======
+		DataFrame topClosenessNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() + dataset +
+				 "TopClosenessNodes.parquet");
+>>>>>>> 6cb92e3b967e8d9395d4d81355bdfc3f84bfc10c
+
+		
+//		DataFrame uniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
+//						 "UniqueNodes.parquet");
+//
+//				DataFrame relations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
+//						 "relations.parquet");
+//				
+//				DataFrame real = uniqueNodes.select("id","nodes").filter(col("nodes").isin(getSubjectNames(topClosenessNodes)));
+//				Row[] items = real.collect();
+//				
+//				DataFramePartitionLooper looper = new DataFramePartitionLooper(relations);
+//				int i=0;
+//				for(Row r:items){
+//					
+//					if(i==9)
+//					{
+//						looper.run(r.getLong(0), true);
+//					}
+//					i++;
+//				}
+				
+				
+
+				
+//				top10ClosenessNodes.show();
+		
+<<<<<<< HEAD
+//		DataFrame topClosenessNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
+//				 "sib200TopClosenessNodes.parquet");
+//		topClosenessNodes.withColumn("nodeDistances", explode(topClosenessNodes.col("nodeDistances"))).registerTempTable("explodedNodes");
+//		topClosenessNodes.sqlContext().sql("SELECT sourceNodes,SUM(nodeDistances) FROM explodedNodes GROUP BY sourceNodes").write()
+//		.parquet(rdfanalyzer.spark.Configuration.storage() +
+//				 "sib200FinalclosenessCentralNodes.parquet");
+=======
+		topClosenessNodes.sqlContext().sql("SELECT sourceNodes,SUM(nodeDistances) FROM explodedNodes GROUP BY sourceNodes").write()
+		.parquet(rdfanalyzer.spark.Configuration.storage() + dataset +
+				 "FinalclosenessCentralNodes.parquet");
+>>>>>>> 6cb92e3b967e8d9395d4d81355bdfc3f84bfc10c
+		
+		
+	}
+	
+	public static void GenerateTopNodesCloseness(String dataset) throws Exception{
+		
+		// generate id based parquet files for this graph
+		generateDataFrame();
+		
+		// retrive them
+		DataFrame uniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
+				 "UniqueNodes.parquet");
+
+		DataFrame relations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
+				 "relations.parquet");
+				
+		uniqueNodes.registerTempTable("UniqueNodes");
+
+		System.out.println("Running the ClosenessNodes");
+		// get nodes which will have the most closeness
+		DataFrame topCandidatesForCloseness = ClosenessNodes.run(graphFrame, dataset);
+
+		System.out.println("getting ids of ClosenessNodes");
+
+		// get ids of those nodes.
+		DataFrame topCandidatesForClosenessIDs = uniqueNodes.select("id","nodes")
+				.filter(col("nodes").isin(getNodeNames(topCandidatesForCloseness)));
+		
+
+		System.out.println("creating the AdjacencyMatrix");
+		DataFramePartitionLooper looper = new DataFramePartitionLooper(relations);
+		
+		Row[] items = topCandidatesForClosenessIDs.collect();
+		
+		boolean firstTime = true;
+		
+		System.out.println("looping the bfs.");
+		for(Row r:items){
+			
+			looper.run(r.getLong(0), firstTime);
+			
+			if(firstTime){
+				firstTime = false;
+			}
+		}
+		
+<<<<<<< HEAD
+		
+		
+		looper.WriteDataToFile();
+=======
+		looper.WriteDataToFile(dataset);
+>>>>>>> 6cb92e3b967e8d9395d4d81355bdfc3f84bfc10c
+	}
+	
+	
+	private static void createManualParquet(){
+		
+		
+		JavaRDD<Row> verRow = Service.sparkCtx()
+				.parallelize(Arrays.asList(
+						RowFactory.create("<http://dbpedia.org/resource/Being_Beige>",0.000008033), 
+						RowFactory.create("<http://dbpedia.org/resource/Forever_(Sevendust_song)>",0.000008183),
+						RowFactory.create("<http://dbpedia.org/resource/Lets_Stick_Together>",0.000008793), 
+						RowFactory.create("<http://dbpedia.org/resource/Interstellar_Slunk>",0.000008331),
+						RowFactory.create("<http://dbpedia.org/resource/Live_&_Solo:_The_Yes_Collection>",0.000008854),
+						RowFactory.create("<http://dbpedia.org/resource/Left_Behind_(CSS_song)>",0.000009407),
+						RowFactory.create("<http://dbpedia.org/resource/Evildoers_Beware!>",0.000008854),
+						RowFactory.create("<http://dbpedia.org/resource/Wait_(Earshot_song)>",0.000009053),
+						RowFactory.create("The Thirteenth Tale",0.000008544),
+						RowFactory.create("<http://dbpedia.org/resource/Neurosonic>",0.000008232)
+						));
+
+		// Creating column and declaring dataType for vertex:
+		List<StructField> verFields = new ArrayList<StructField>();
+		verFields.add(DataTypes.createStructField("node", DataTypes.StringType, true));
+		verFields.add(DataTypes.createStructField("closeness", DataTypes.DoubleType, true));
+		StructType verSchema = DataTypes.createStructType(verFields);
+		DataFrame df = Service.sqlCtx().createDataFrame(verRow, verSchema);
+		df.write().parquet(rdfanalyzer.spark.Configuration.storage() +
+				 "dqlcloseness.parquet");
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	// convert subjects from DF to an array.
+	public static Object[] getNodeNames(DataFrame subjectRows){
+		
+		return subjectRows.select("subject").toJavaRDD().map(new Function<Row,String>() {
+
+			@Override
+			public String call(Row arg0) throws Exception {
+				
+				return arg0.getString(0);
+			}
+		}).collect().stream().toArray();
+	}
+	
 	public static String CalculateInDegree(String node) {
 
 		String result = "";
@@ -141,42 +362,8 @@ public class Centrality implements Serializable{
 		return "betweenness";
 	}
 
-	public static String CalculateCloseness(String nodeName)  throws Exception{
-
-		
-//		relations.registerTempTable("relations");
-//		Service.sqlCtx().sql("select * from relations where subId=1460288880641").show();;
-
-		/*
-		 *  We'll loop the unique nodes to find APSP w.r.t each node
-		 *  
-		 *  but we'll create the adjacency matrix using the relations data.
-		 */
-
-		
-//		ReadAllPairShortestPathSingleNode();
-//
-//		ReadAllPairShortestPathAllNode();
-//		generateDataFrame();
-		RunAllPairShortestPathForAllNodes(nodeName);
-//		RunAllPairShortestPathWithTestData();
-		
-//		uniqueNodes.foreachPartition(partitionerLoop);
-		
-		// step 1
-		 
-		
-		
-//		relationsFrame.foreachPartition(new DataFramePartitionLooper());		
-
-		
-		
-//		RDFAnalyzerPageRank rank  = new RDFAnalyzerPageRank();
-//		rank.PerformPageRank(resultFrame);
-		return "";
-	}
 	
-	public static void generateDataFrame(){
+	public static DataFrame generateDataFrame(){
 		
 		DataFrame uniqueFrame = Service.sqlCtx().sql(""
 		 + "SELECT DISTINCT"
@@ -199,21 +386,10 @@ public class Centrality implements Serializable{
 		 + "WHERE g.subject != g.object");
 		 relationsFrame.write().parquet(rdfanalyzer.spark.Configuration.storage()
 		 + "relations.parquet");
+		 
+		 return relationsFrame;
 	}
 
-	public static void ReadAllPairShortestPathSingleNode() throws Exception{
-		DataFrame singleNodeAPSP = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "sib200APSP.parquet");
-		singleNodeAPSP.show();
-		System.out.println("The count of single node is "+singleNodeAPSP.count());
-	}	
-	public static void ReadAllPairShortestPathAllNode() throws Exception{
-		DataFrame allNodeAPSP = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "sib200APSPAll.parquet");
-		allNodeAPSP.show();
-		
-		System.out.println("The count of all nodes is "+allNodeAPSP.count());
-	}	
 
 	public static void RunAllPairShortestPathWithTestData() throws Exception{
 		// This is for testing with small graph
@@ -221,215 +397,7 @@ public class Centrality implements Serializable{
 		apsp.test();
 	}	
 	
-	public static DataFrame return10RandomNodes(){
-		
-		DataFrame uniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "UniqueNodes.parquet");
-		uniqueNodes.registerTempTable("UniqueNodes");
-		
-		DataFrame top10 = uniqueNodes.sqlContext().sql("SELECT * FROM UniqueNodes ORDER BY RAND() LIMIT 10");
-		top10.write().parquet(rdfanalyzer.spark.Configuration.storage() + "Random10Nodes2.parquet");
-		return top10;
-	}
-	
-	public static void CreateUniqueNodesWithoutQuotes(){
-		
-		DataFrame uniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "UniqueNodes.parquet");
-		uniqueNodes.registerTempTable("UniqueNodes");
 
-		DataFrame relations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "relations.parquet");
-		relations.registerTempTable("relations");
-		
-		System.out.println(relations.count() +" is the count of relations.");
-		
-		
-//		JavaRDD<UniqueNodeCase> withoutquotesNodes = uniqueNodes.select("id","nodes").toJavaRDD().map(new Function<Row, UniqueNodeCase>() {
-//
-//			@Override
-//			public UniqueNodeCase call(Row arg0) throws Exception {
-//				
-//				
-//				String nodeName = arg0.getString(1);
-//				
-//				nodeName = nodeName.replace("\"", "");
-//				nodeName = nodeName.replace("'", "");
-//
-//				UniqueNodeCase casee = new UniqueNodeCase();
-//				casee.setNodeID(arg0.getLong(0));
-//				casee.setNodeName(nodeName);
-//				
-//				return casee;
-//			}
-//		});
-//		
-//		
-//		System.out.println("creating Encoder with lines " + withoutquotesNodes.count());
-//		Encoder<UniqueNodeCase> encoder = Encoders.bean(UniqueNodeCase.class);
-//		System.out.println("created Encoder");
-//		Dataset<UniqueNodeCase> javaBeanDS = Service.sqlCtx().createDataset(
-//		  withoutquotesNodes.collect(),
-//		  encoder
-//		);
-//		System.out.println("creating dataset");
-//		javaBeanDS.toDF().write().parquet(rdfanalyzer.spark.Configuration.storage() + "uniqueNodesWithoutQuotes.parquet");
-	}
-	
-	public static void ApplyHopBFS() throws Exception{
-
-		
-		DataFrame top10 = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "Random10Nodes1.parquet");
-
-		Row[] rows = top10.collect();
-		
-		List<ClosenessBean> bean = new ArrayList<ClosenessBean>();
-		
-		for(Row r:rows){
-			bean.add(CalculateClosenessByHop(r.getString(0)));
-		}
-		
-		
-		for(ClosenessBean b:bean){
-			System.out.println("NodeName = "+b.getNode() + " ||||||||||||   6 hop Centrality = "+b.getCloseness());
-		}
-		
-	}
-	
-	private static String readNodeFullCentrality(){
-		
-		DataFrame fullCentrality = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "sib200SSSP10Nodes.parquet");
-		
-		fullCentrality.registerTempTable("fullCentrality");
-		
-		DataFrame explodedCol = fullCentrality.withColumn("explodednodeDistancess", org.apache.spark.sql.functions.explode(fullCentrality.col("nodeDistances")));
-		explodedCol.registerTempTable("registeredTable");
-		DataFrame summedData = explodedCol.sqlContext().sql("SELECT sum(explodednodeDistancess),sourceNodes FROM registeredTable group by sourceNodes");
-		
-		summedData.show();
-		
-		
-		
-		return "";
-	}
-
-	public static void RunAllPairShortestPathForAllNodes(String nodeName) throws Exception{
-		// responsible for dividing the number unique nodes into subnodes.
-		// so that we can solve the problem individually and merge all 10 in the end together.
-		
-		
-		// [ nodes, ids ]
-		DataFrame uniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "UniqueNodes.parquet");
-		uniqueNodes.registerTempTable("UniqueNodes");
-		
-		// [ subids, objids ]
-		DataFrame relations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "relations.parquet");
-		
-		
-//		DataFrame selectedNodeid = Service.sqlCtx().sql("SELECT * FROM UniqueNodes WHERE nodes='"+nodeName+"'");
-//		selectedNodeid.show();
-		
-		
-//		DataFrame uniqueNodes = DummyUniqueDataForInterimFile();
-//		DataFrame relations = DummyRelationDataForInterimFile();
-
-//		uniqueNodes.registerTempTable("UniqueNodes");
-
-
-//		DataFrame sortedUniqueNodes = uniqueNodes.sqlContext().sql("SELECT * FROM UniqueNodes ORDER BY id DESC");
-//		sortedUniqueNodes.show();
-//
-//		// this column will help us distinguish the keys in bfs because we assigned a unique constant to each key.
-//		sortedUniqueNodes = sortedUniqueNodes.withColumn("randomConstants", functions.monotonically_increasing_id());
-//		sortedUniqueNodes.registerTempTable("SortedUniqueNodes");
-		
-		
-//		DataFrame subNodes;
-//		Row[] lastRow = null;
-		
-		
-		/*
-		 *  we need to find the first row id. This will help us set the initial condition on the query i.e from which
-		 *  id should be our id less than
-		 */
-		
-
-
-
-		Row[] uniqueNodesRows = uniqueNodes.collect();
-		DataFramePartitionLooper partitionerLoop  = new DataFramePartitionLooper(relations,uniqueNodesRows);
-//
-//		double differenceDouble = (uniqueNodes.count()/partitionerLoop.NODE_DIVIDER);
-//		int difference = (int) differenceDouble;
-//
-//		Row firstRow = sortedUniqueNodes.first();
-//		
-//		long lastId = firstRow.getLong(1);
-		
-		DataFrame top10 = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage()
-				 + "Random10Nodes2.parquet");
-		
-		
-		Row[] rows = top10.collect();
-		
-		int i = 0;
-		for(Row r:rows){
-
-			if(i==7){
-				partitionerLoop.run(r.getLong(1),i);
-			}
-			i++;
-		}
-		
-//		partitionerLoop.WriteDataToFile();
-
-//		for(int i=0;i<partitionerLoop.NODE_DIVIDER;i++){
-//			
-//			/*
-//			 *  Suppose we've total 1000 nodes which means adjacency matrix has 1000 rows and we've to populate an RDD
-//			 *  of 1000*1000. So what we did is that we will divide 1000 by 10 i.e 1000/10 = 100. And solve bfs for those
-//			 *  100 nodes this makes the number of rows in the rdd to 1000*100. Once done we generate a parquet file with 
-//			 *  it and than we generate the next 100 and so on until all the files are generated. In the end we merge all 
-//			 *  the data to get our final result.
-//			 */
-//			
-//			
-//			subNodes = sortedUniqueNodes.sqlContext().sql("SELECT * FROM SortedUniqueNodes WHERE id < "+ lastId +" LIMIT "+ difference);
-//			subNodes.show();
-//			/*
-//			 *  Calculate the bfs for these subNodes and generate a parquet file of the result.
-//			 */
-//			partitionerLoop.CreateInterimFilesForBFS(subNodes,i);
-//			
-//			
-//			/*
-//			 *  Set the last id as the last record in the subNodes DF
-//			 */
-//			
-//			System.out.print("coming here");
-//			lastRow = subNodes.collect();
-//
-//			lastId = lastRow[lastRow.length - 1].getLong(1);
-//			break;
-//		}
-		
-		
-		
-//		uniqueNodes.show();
-		
-
-//		for(int i=0;i<uniqueNodesRows.length;i++){
-//			long nodeid =  uniqueNodesRows[i].getLong(1);
-//			partitionerLoop.ApplyBFS(nodeid);
-//			System.out.println("roribaba"+nodeid);
-//			break;
-//		}
-		
-	}
 	
 	
 	
@@ -437,7 +405,7 @@ public class Centrality implements Serializable{
 		
 		JavaRDD<Row> verRow = Service.sparkCtx()
 				.parallelize(Arrays.asList(RowFactory.create("node1",1L), RowFactory.create("node2",2L),
-						RowFactory.create("node3",3L), RowFactory.create("node4",4L)));
+						RowFactory.create("node3",3L), RowFactory.create("node4","4L")));
 
 		// Creating column and declaring dataType for vertex:
 		List<StructField> verFields = new ArrayList<StructField>();
@@ -471,11 +439,11 @@ public class Centrality implements Serializable{
 
 		DataFrame resultsFrame = Service.sqlCtx().sql("SELECT * from Graph");
 		resultsFrame.cache();
+		resultsFrame.show();
 		System.out.println("logo = "+nodeName);
 		
 		ClosenessCentrality path = new ClosenessCentrality();
 		return path.calculateCloseness(resultsFrame, nodeName);
-
 	}
 
 	public static List<String> getListFromDatasetRows(DataFrame rows) {
