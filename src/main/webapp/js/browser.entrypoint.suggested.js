@@ -34,7 +34,7 @@ function displaySuggestedEntryPoints(suggestions, displayTarget) {
 		var entryOBJ = JSON.parse(entryJSON);
 		var entryHTML = '<li>';
 		entryHTML += '<a href="#" onclick="startBrowsingWithSuggestedEntryPoint(\'' + entryOBJ.name + '\', \'' + entryOBJ.URI + '\')">';
-		entryHTML += entryOBJ.name + '<br>[' + entryOBJ.importance.toFixed(3) + ']';
+		entryHTML += entryOBJ.name + '<br>[' + entryOBJ.importance.toFixed(8) + ']';
 		entryHTML += '</a></li>';
 		return entryHTML;
 	}).join(' ');
