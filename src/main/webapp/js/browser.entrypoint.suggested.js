@@ -1,11 +1,11 @@
 // ########################## RDF Browser Suggested Entry Point ##########################
 function getSuggestedEntryPoints() {
-	const NUM_SUGGESTIONS = 10;
+	const NUM_SUGGESTIONS = 6;
 	const RANKING_METHODS = [{
 		name: 'PageRanking',
 		displayTarget: 'suggestionsLeft'
 	}, {
-		name: 'TopClosenessNodes',
+		name: 'ClosenessRanking',
 		displayTarget: 'suggestionsRight'
 	}];
 
