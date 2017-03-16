@@ -44,12 +44,13 @@ public class EntryPoint {
 	 * @return A List of JSON represented neighbors.
 	 */
 	private static List<String> querySuggestions(String graph, int num) {
+		final String tmpGraphName = "RankingGraph" + graph;
 		DataFrame graphFrame = Service.sqlCtx().parquetFile(Configuration.storage() + graph + ".parquet");
-		graphFrame.cache().registerTempTable("RankingGraph");
+		graphFrame.cache().registerTempTable(tmpGraphName);
 
 		// Only select valid URIs from the data.
-		DataFrame resultsFrame = Service.sqlCtx()
-				.sql("SELECT * FROM RankingGraph WHERE node LIKE '<%' ORDER BY importance DESC LIMIT " + num);
+		DataFrame resultsFrame = Service.sqlCtx().sql("SELECT node, importance FROM " + tmpGraphName
+				+ " WHERE node LIKE '<%' ORDER BY importance DESC LIMIT " + num);
 
 		@SuppressWarnings("serial")
 		List<String> neighbors = resultsFrame.javaRDD().map(new Function<Row, String>() {
@@ -74,8 +75,8 @@ public class EntryPoint {
 	private static String convertSQLRowToJSON(Row row) {
 		JSONObject suggestion = new JSONObject();
 
-		double importance = row.getDouble(0);
-		String URI = row.getString(1);
+		String URI = row.getString(0);
+		double importance = row.getDouble(1);
 
 		suggestion.put("URI", URI);
 		suggestion.put("name", RDFgraph.shortenURI(URI));
