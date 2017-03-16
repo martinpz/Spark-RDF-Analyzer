@@ -1,22 +1,5 @@
 // ########################## RDF Browser Cytoscape Instance Helper ##########################
 const LAYOUTS = {
-    RANDOM: {
-        name: 'random',
-        fit: true, // whether to fit to viewport
-        padding: 0 // fit padding
-    },
-    SPREAD: {
-        name: 'spread',
-        animate: false, // whether to show the layout as it's running
-        fit: true, // Reset viewport to fit default simulationBounds
-        padding: 0, // Padding
-        minDist: 40, // Minimum distance between nodes
-        expandingFactor: -1.0, // If the network does not satisfy the minDist criterium then it expands the network of this amount
-        // If it is set to -1.0 the amount of expansion is automatically calculated based on the minDist, the aspect ratio and the number of nodes
-        maxFruchtermanReingoldIterations: 100, // Maximum number of initial force-directed iterations
-        maxExpandIterations: 6, // Maximum number of expanding iterations
-        randomize: true // uses random initial node positions on true
-    },
     GRID: {
         name: 'grid',
         fit: true, // whether to fit the viewport to the graph
@@ -96,6 +79,9 @@ function getCytoscapeInstance(graphElements, layoutToUse) {
             selector: 'edge',
             style: {
                 'width': 3,
+                'content': 'data(label)',
+                'font-size': '8px',
+                'edge-text-rotation': 'autorotate',
                 'line-color': '#ccc',
                 'target-arrow-color': '#ccc',
                 'target-arrow-shape': 'triangle'
