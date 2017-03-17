@@ -242,7 +242,7 @@ public class ClosenessNodes {
 						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
 						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
 						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
-						RowFactory.create("9L","300L"), RowFactory.create("9L","300L")
+						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
 						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
 						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
 						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
