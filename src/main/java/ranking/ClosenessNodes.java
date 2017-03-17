@@ -30,14 +30,6 @@ public class ClosenessNodes {
 		 *  Top 10 nodes with maximum outdegrees. Add a column in the front with 1 that represents them as grey nodes.
 		 *  i.e the ones to be expanded next.
 		 */
-//		DataFrame subjectOfObjectDF1 = Service.sqlCtx().sql("SELECT subject,COUNT(object) AS OutdegreeCount FROM Graph GROUP BY subject"
-//				+ " ORDER BY OutdegreeCount DESC LIMIT 10");
-
-//		DataFrame completeDummyGraph = getDummyGraphFrame();
-//		completeDummyGraph.registerTempTable("DummyGraph");
-
-//		DataFrame subjectOfObjectDF1 = Service.sqlCtx().sql("SELECT subject,COUNT(object) AS OutdegreeCount FROM DummyGraph GROUP BY subject"
-//		+ " ORDER BY OutdegreeCount DESC LIMIT 3");
 		
 		
 		DataFrame subjectOfObjectDF1 = nodesWithHighestOutDegree;
@@ -64,6 +56,11 @@ public class ClosenessNodes {
 
 			boolean firstIteration = true;
 			
+			/**
+			 *  @lastcount keeps track of the sum of distances in the last iteration.
+			 *  It gets compared on every iteration with that iterations sum count. 
+			 *  If they are both the same. We break out of the loop.
+			 */
 			long lastcount = 0;
 			
 			while(true){
@@ -133,7 +130,10 @@ public class ClosenessNodes {
 		
 	}
 	
-	//finds the top 10% nodes with most outdegree values.
+	/**
+	 * finds the top 10% nodes with most outdegree values.
+	 * 
+	 */
 	public static DataFrame getClosenessCandidates(){
 
 //		// node with max outdegree
@@ -174,6 +174,9 @@ public class ClosenessNodes {
 		}).collect().stream().toArray();
 	}
 	
+	/** 
+	 * 	Creates an empty dataframe so that we can insert the 2nd dataframe values into it.
+	 */
 	public static DataFrame initEmptyDF(){
 		
 		// Edge column Creation with dataType:
@@ -188,25 +191,34 @@ public class ClosenessNodes {
 		return Service.sqlCtx().createDataFrame(Service.sparkCtx().emptyRDD(), edgSchema);		
 	}
 
+	
+	
+	/**
+	 * 
+	 * @return DataFrame
+	 * 
+	 * This function is to return a dummy graph that can be used to test our algorithm.
+	 * The highest outdegree nodes in this dataset can be seen as 4L,5L,15L,9L
+	 */
 	public static DataFrame getDummyGraphFrame(){
 		
 		JavaRDD<Row> relationsRow = Service.sparkCtx()
 				.parallelize(Arrays.asList(RowFactory.create("3L","4L"),
 						RowFactory.create("4L","100L"), RowFactory.create("2L","3L"),RowFactory.create("3L","2L"),
-//						RowFactory.create("4L","100L"), RowFactory.create("12L","2L"),
+						RowFactory.create("4L","100L"), RowFactory.create("12L","2L"),
 						RowFactory.create("4L","100L"), RowFactory.create("1L","2L"),
 						RowFactory.create("4L","100L"), RowFactory.create("6L","5L"),RowFactory.create("1L","6L"),
 						RowFactory.create("4L","100L"), RowFactory.create("6L","1L"),
 						RowFactory.create("4L","100L"), RowFactory.create("1L","8L"),RowFactory.create("8L","9L"),
 						RowFactory.create("4L","100L"),
 
-//						RowFactory.create("4L","100L"), RowFactory.create("1L","8L"), RowFactory.create("1L","10L"),
-//						RowFactory.create("4L","100L"), RowFactory.create("8L","9L"),RowFactory.create("3L","2L"),
-//						RowFactory.create("4L","100L"), RowFactory.create("11L","1L"),RowFactory.create("6L","1L"),
-//						RowFactory.create("4L","100L"), RowFactory.create("13L","11L"),RowFactory.create("9L","1L"),
-//						RowFactory.create("4L","100L"), RowFactory.create("10L","1L"),RowFactory.create("8L","6L"),
-//						RowFactory.create("5L","200L"), RowFactory.create("14L","10L"), RowFactory.create("10L","15L"),
-//						RowFactory.create("5L","200L"), RowFactory.create("16L","14L"),
+						RowFactory.create("4L","100L"), RowFactory.create("1L","8L"), RowFactory.create("1L","10L"),
+						RowFactory.create("4L","100L"), RowFactory.create("8L","9L"),RowFactory.create("3L","2L"),
+						RowFactory.create("4L","100L"), RowFactory.create("11L","1L"),RowFactory.create("6L","1L"),
+						RowFactory.create("4L","100L"), RowFactory.create("13L","11L"),RowFactory.create("9L","1L"),
+						RowFactory.create("4L","100L"), RowFactory.create("10L","1L"),RowFactory.create("8L","6L"),
+						RowFactory.create("5L","200L"), RowFactory.create("14L","10L"), RowFactory.create("10L","15L"),
+						RowFactory.create("5L","200L"), RowFactory.create("16L","14L"),
 						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
 						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
 						RowFactory.create("5L","200L"), RowFactory.create("5L","200L"),
@@ -231,26 +243,26 @@ public class ClosenessNodes {
 						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
 						RowFactory.create("9L","300L"), RowFactory.create("9L","300L"),
 						RowFactory.create("9L","300L"), RowFactory.create("9L","300L")
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
-//						RowFactory.create("15L","400L"), RowFactory.create("15L","400L")
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L"),
+						RowFactory.create("15L","400L"), RowFactory.create("15L","400L")
 						));
 
 		// Edge column Creation with dataType:
