@@ -1,44 +1,96 @@
 // ########################## RDF Browser Configuration ##########################
 const LOADER = '<div class="progress progress-striped active page-progress-bar"><div class="progress-bar" style="width: 100%;"></div></div>';
 const ANIMATION_SPEED = 'fast';
-const LAYOUT_ALGORITHMS = {
-	noverlap: 'NOverlap',
-	/*
-	forcelink: 'ForceLink',
-	fruchterman: 'Fruchterman-Reingold',
-	*/
-	none: 'None'
-};
 const COLORS = {
 	pastel: {
-		'central': '#fbb4ae',
-		'in': '#b3cde3',
-		'out': '#ccebc5',
-		'literal': '#decbe4'
+		central: {
+			back: '#fbb4ae',
+			text: 'black'
+		},
+		in: {
+			back: '#b3cde3',
+			text: 'black'
+		},
+		out: {
+			back: '#ccebc5',
+			text: 'black'
+		},
+		literal: {
+			back: '#decbe4',
+			text: 'black'
+		}
 	},
 	YlGn: {
-		'central': '#ffffcc',
-		'in': '#c2e699',
-		'out': '#78c679',
-		'literal': '#238443'
+		central: {
+			back: '#ffffcc',
+			text: 'black'
+		},
+		in: {
+			back: '#c2e699',
+			text: 'black'
+		},
+		out: {
+			back: '#78c679',
+			text: 'white'
+		},
+		literal: {
+			back: '#238443',
+			text: 'white'
+		}
 	},
 	oranges: {
-		'central': '#feedde',
-		'in': '#fdbe85',
-		'out': '#fd8d3c',
-		'literal': '#d94701'
+		central: {
+			back: '#feedde',
+			text: 'black'
+		},
+		in: {
+			back: '#fdbe85',
+			text: 'black'
+		},
+		out: {
+			back: '#fd8d3c',
+			text: 'white'
+		},
+		literal: {
+			back: '#d94701',
+			text: 'white'
+		}
 	},
 	purples: {
-		'central': '#f2f0f7',
-		'in': '#cbc9e2',
-		'out': '#9e9ac8',
-		'literal': '#6a51a3'
+		central: {
+			back: '#f2f0f7',
+			text: 'black'
+		},
+		in: {
+			back: '#cbc9e2',
+			text: 'black'
+		},
+		out: {
+			back: '#9e9ac8',
+			text: 'white'
+		},
+		literal: {
+			back: '#6a51a3',
+			text: 'white'
+		}
 	},
 	spectral: {
-		'central': '#d7191c',
-		'in': '#fdae61',
-		'out': '#abdda4',
-		'literal': '#2b83ba'
+		central: {
+			back: '#d7191c',
+			text: 'white'
+		},
+		in: {
+			back: '#fdae61',
+			text: 'white'
+		},
+		out: {
+			back: '#abdda4',
+			text: 'white'
+		},
+		literal: {
+			back: '#2b83ba',
+			text: 'white'
+		}
 	}
 };
 
@@ -55,11 +107,8 @@ function numNeighbors() {
 }
 
 function getColorScheme() {
-	return $('#colorSchemeSelection input:checked').val();
-}
-
-function getLayoutAlgorithm() {
-	return $('#layoutAlgorithmSelection input:checked').val();
+	const selectedColorScheme = $('#colorSchemeSelection input:checked').val();
+	return selectedColorScheme;
 }
 
 function getNeighborhoodRequest(centralNodeURI) {
@@ -99,22 +148,11 @@ $(document).ready(function () {
 		colorGroup += '<label><input type="radio" name="colorScheme" value="' + name + '">';
 
 		$.each(colorsForWhat, function (forWhat, hexCode) {
-			colorGroup += '<span style="background-color: ' + hexCode + '">&nbsp; &nbsp;</span>';
+			colorGroup += '<span style="background-color: ' + hexCode.back + '">&nbsp; &nbsp;</span>';
 		});
 
 		colorGroup += '</label></div>';
 	});
 	$('#colorSchemeSelection').html(colorGroup).append('<p>Select the color scheme you want to use.</p>');
 	$('#colorSchemeSelection input').first().attr('checked', true);
-
-	// Fill layout algorithm selection with options.
-	var layoutGroup = '';
-	$.each(LAYOUT_ALGORITHMS, function (layoutShortName, layoutName) {
-		layoutGroup += '<div class="radio-inline">';
-		layoutGroup += '<label><input type="radio" name="layoutAlgorithm" value="' + layoutShortName + '">';
-		layoutGroup += '<span>' + layoutName + '</span>';
-		layoutGroup += '</label></div>';
-	});
-	$('#layoutAlgorithmSelection').html(layoutGroup).append('<p>Select the graph layout algorithm you want to use.</p>');
-	$('#layoutAlgorithmSelection input').first().attr('checked', true);
 });
