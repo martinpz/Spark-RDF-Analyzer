@@ -131,7 +131,9 @@ public class ClosenessNodes {
 	}
 	
 	/**
-	 * finds the top 10% nodes with most outdegree values.
+	 * finds the top 10 nodes with highest out-degree.
+	 * 
+	 * The commented code finds the top 10% nodes.
 	 * 
 	 */
 	public static DataFrame getClosenessCandidates(){

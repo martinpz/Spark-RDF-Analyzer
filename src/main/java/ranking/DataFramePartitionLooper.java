@@ -42,6 +42,13 @@ implements Serializable {
 	
 	public final int NODE_DIVIDER = 1000;
 	
+	
+	/**
+	 *  
+	 * @param relations
+	 * 
+	 * initializes the SSSP algorithm and uses the SSSP function to create an initial adjacency Matrix of the dataset.
+	 */
 	public DataFramePartitionLooper(DataFrame relations) {
 		
 		apsp = new SSSP();
@@ -54,7 +61,14 @@ implements Serializable {
 	}
 
 
-	
+	/**
+	 * 
+	 * @param result
+	 * @return JavaRDD<SSSPCase>
+	 * 
+	 * Converts the JavaPairRDD data into case class based JavaRDD. This helps us revert the data into a DataFrame and
+	 * save it into a parquet file.
+	 */
 	private JavaRDD<SSSPCase> ConvertPairRDDToCaseRDD(JavaPairRDD<Long, Tuple3<List<Long>, List<Integer>, List<Integer>>> result){
 		return result.map(new Function<Tuple2<Long,Tuple3<List<Long>, List<Integer>, List<Integer>>>, SSSPCase>() {
 
@@ -73,12 +87,20 @@ implements Serializable {
 
 	}
 
-	
+	/**
+	 * 
+	 * @param dataset
+	 * 
+	 * Takes the dataset name, converts the data and saves it into a parquet file.
+	 */
 	public void WriteDataToFile(String dataset){
 		JavaRDD<SSSPCase> apspRDD = ConvertPairRDDToCaseRDD(result);
 		WriteInfoToParquet(apspRDD, dataset);
 	}
 	
+	/**
+	 * 	Writes the data into a parquet file.
+	 */
 	private void WriteInfoToParquet(JavaRDD<SSSPCase> finalData, String dataset){
 
 		try{
@@ -97,6 +119,13 @@ implements Serializable {
 		}
 	}
 
+	/**
+	 * 
+	 * @param relations
+	 * @return JavaPairRDD<Long,Long>
+	 * 
+	 * Converts the dataFrame into a subjectID,objectID based JavaPairRDD for further processing in the BFS.
+	 */
 	private JavaPairRDD<Long,Long> DFToRDD(DataFrame relations){
 		return relations.select("subId","objId").toJavaRDD().mapToPair(new PairFunction<Row, Long, Long>() {
 
@@ -109,11 +138,22 @@ implements Serializable {
 		});
 	}
 	
+	/**
+	 *  
+	 * @param nodeid
+	 * @param firstTime
+	 * @throws Exception
+	 * 
+	 * Main function for running the BFS. After calculating the BFs for first sourceNode. It assigns it to the result.
+	 * While for the next nodes it just unions it to the previous result giving us a final result of the form.
+	 * 
+	 *  sourceNodeID, [ array of nodes it can reach ], [ array of distances it can reach those nodes in ] , [ no. of shortest paths between the source and these nodes ].
+	 */
 	public void run(long nodeid,boolean firstTime) throws Exception{
 
 			if(firstTime){
-//				result = this.apsp.finalReduce
-//						(this.apsp.applyBFSForNode(nodeid, adjacencyMatrix));
+				result = this.apsp.finalReduce
+						(this.apsp.applyBFSForNode(nodeid, adjacencyMatrix));
 				
 				this.apsp.applyBFSForNode(nodeid, adjacencyMatrix);
 			}

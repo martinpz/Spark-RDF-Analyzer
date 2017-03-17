@@ -54,7 +54,7 @@
 			applyBFSForNode(1L, adjacencyMatrix);
 		}
 
-		/*
+		/**
 		 *  The function is responsible for summing the color columns of the bfs. This means if the sum of all the colors
 		 *  remains than no node has been further expanded. Hence we can return true i.e break out of the loop.
 		 */
@@ -68,7 +68,6 @@
 				}
 			}).values().collect().stream().mapToInt(Integer::intValue).sum();
 			
-//			System.out.println("Sum of breakloop = " +sumOfCOlorColumn);
 			
 			if(lastsumOfCOlorColumn == sumOfCOlorColumn){
 				return true;
