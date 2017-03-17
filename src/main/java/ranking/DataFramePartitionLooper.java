@@ -1,37 +1,25 @@
 package ranking;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import scala.Tuple2;
 import scala.Tuple3;
 import scala.Tuple4;
-import scala.Tuple5;
-import scala.Tuple6;
-import scala.collection.Iterator;
-import scala.runtime.AbstractFunction1;
-import scala.runtime.BoxedUnit;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoder;
 import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.types.StructType;
 
 import rdfanalyzer.spark.Service;
 
 public class DataFramePartitionLooper 
-//extends AbstractFunction1<Iterator<Row>, BoxedUnit> 
 implements Serializable {
 
 	private static final long serialVersionUID = -1919222653470217466L;
@@ -39,8 +27,6 @@ implements Serializable {
 	private SSSP apsp ;
 	private JavaPairRDD<Long, Tuple4<List<Long>,Integer,Integer, Integer>> adjacencyMatrix;
 	private JavaPairRDD<Long, Tuple3<List<Long>, List<Integer>, List<Integer>>> result;
-	
-	public final int NODE_DIVIDER = 1000;
 	
 	
 	/**
