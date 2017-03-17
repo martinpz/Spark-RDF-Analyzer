@@ -121,26 +121,28 @@ public class Centrality implements Serializable{
 				 "DBpediaUniqueNodes.parquet");
 		DataFrame daqlrelations = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
 				 "DBpediarelations.parquet");
-		daqlrelations.registerTempTable("daqlrelations");
+		daqlrelations.registerTempTable("dbpediarelations");
 		
-		DataFrame top10 = daqlrelations.sqlContext().sql("SELECT subId as subject,COUNT(*) as counts FROM "
-				+ "daqlrelations GROUP BY subId ORDER BY counts DESC LIMIT 10");
+//		DataFrame top10 = daqlrelations.sqlContext().sql("SELECT subId as subject,COUNT(*) as counts FROM "
+//				+ "dbpediarelations GROUP BY subId ORDER BY counts DESC LIMIT 10");
 		
-		top10.show();
+		graphFrame.show();
 		
-		Row[] items = top10.collect();
-
-		DataFramePartitionLooper looper = new DataFramePartitionLooper(daqlrelations);
-
-		int i=0;
-		for(Row r:items){
-
-			if(i==0)
-			{
-				looper.run(r.getLong(0), true);
-			}
-			i++;
-		}
+//		top10.show();
+		
+//		Row[] items = top10.collect();
+//
+//		DataFramePartitionLooper looper = new DataFramePartitionLooper(daqlrelations);
+//
+//		int i=0;
+//		for(Row r:items){
+//
+//			if(i==1)
+//			{
+//				looper.run(r.getLong(0), true);
+//			}
+//			i++;
+//		}
 		
 //		DataFrame nodes = daqlUniqueNodes.filter(col("id").isin(getSubjectNames(top10)));
 //		Row[] items = nodes.collect();
@@ -214,35 +216,35 @@ public class Centrality implements Serializable{
 
 		System.out.println("Running the ClosenessNodes");
 		// get nodes which will have the most closeness
-		DataFrame topCandidatesForCloseness = ClosenessNodes.run(graphFrame);
+//		DataFrame topCandidatesForCloseness = ClosenessNodes.run(graphFrame);
 
 		System.out.println("getting ids of ClosenessNodes");
 
 		// get ids of those nodes.
-		DataFrame topCandidatesForClosenessIDs = uniqueNodes.select("id","nodes")
-				.filter(col("nodes").isin(getNodeNames(topCandidatesForCloseness)));
+//		DataFrame topCandidatesForClosenessIDs = uniqueNodes.select("id","nodes")
+//				.filter(col("nodes").isin(getNodeNames(topCandidatesForCloseness)));
 		
 
-		System.out.println("creating the AdjacencyMatrix");
-		DataFramePartitionLooper looper = new DataFramePartitionLooper(relations);
+//		System.out.println("creating the AdjacencyMatrix");
+//		DataFramePartitionLooper looper = new DataFramePartitionLooper(relations);
+//		
+//		Row[] items = topCandidatesForClosenessIDs.collect();
+//		
+//		boolean firstTime = true;
+//		
+//		System.out.println("looping the bfs.");
+//		for(Row r:items){
+//			
+//			looper.run(r.getLong(0), firstTime);
+//			
+//			if(firstTime){
+//				firstTime = false;
+//			}
+//		}
 		
-		Row[] items = topCandidatesForClosenessIDs.collect();
-		
-		boolean firstTime = true;
-		
-		System.out.println("looping the bfs.");
-		for(Row r:items){
-			
-			looper.run(r.getLong(0), firstTime);
-			
-			if(firstTime){
-				firstTime = false;
-			}
-		}
 		
 		
-		
-		looper.WriteDataToFile();
+//		looper.WriteDataToFile();
 	}
 	
 	
