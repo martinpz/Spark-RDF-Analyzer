@@ -58,7 +58,7 @@
 		 *  The function is responsible for summing the color columns of the bfs. This means if the sum of all the colors
 		 *  remains than no node has been further expanded. Hence we can return true i.e break out of the loop.
 		 */
-		private boolean breakloop(JavaPairRDD<Long, Tuple4<List<Long>,Integer,Integer, Integer>> adjacencyMatrix,final int index){
+		private boolean breakloop(JavaPairRDD<Long, Tuple4<List<Long>,Integer,Integer, Integer>> adjacencyMatrix){
 			
 			sumOfCOlorColumn = adjacencyMatrix.mapValues(new Function<Tuple4<List<Long>,Integer,Integer,Integer>, Integer>() {
 
@@ -101,9 +101,7 @@
 			 *  itemCount * 2. And once we reduce we will check if we get this value from our reducer than we'll break.
 			 */
 
-			int i=0;
 
-			System.out.println("mapreduce job loop working");
 			while(true){
 				
 				
@@ -118,18 +116,16 @@
 				/**
 				 *  Check the comments defined inside this function.
 				 */
-				adjacencyMatrixx = PerformBFSReduceOperation(mappedValues,i);
+				adjacencyMatrixx = PerformBFSReduceOperation(mappedValues);
 				
 				
 				
 				
-				if(breakloop(adjacencyMatrixx,i)){
+				if(breakloop(adjacencyMatrixx)){
 					break;
 				}
 
-				i++;
 			}
-			System.out.println("mapreduce job loop finished");
 			
 			adjacencyMatrixx.cache();
 			
@@ -292,7 +288,7 @@
 			return finalMappedData.combineByKey(createCombiner, merger, mergeCombiners);
 		}
 		
-		private JavaPairRDD<Long, Tuple4<List<Long>, Integer, Integer, Integer>> PerformBFSReduceOperation(JavaPairRDD<Long,Tuple4<List<Long>,Integer,Integer,Integer>> mappedValues,final int iteration){
+		private JavaPairRDD<Long, Tuple4<List<Long>, Integer, Integer, Integer>> PerformBFSReduceOperation(JavaPairRDD<Long,Tuple4<List<Long>,Integer,Integer,Integer>> mappedValues){
 			
 			Function<Tuple4<List<Long>,Integer,Integer,Integer>,Tuple4<List<Long>,Integer,Integer,Integer>> createCombiner 
 							= new Function<Tuple4<List<Long>,Integer,Integer,Integer>,Tuple4<List<Long>,Integer,Integer,Integer>>() {
