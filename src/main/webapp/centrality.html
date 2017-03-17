@@ -257,10 +257,7 @@ keyframes ellipsis {to { width:20px;
 							  <label><input type="radio" value="2" name="metricRadio">Out degree</label>
 							</div>
 							<div class="radio">
-							  <label><input type="radio" value="3" name="metricRadio">Betweenness Centrality</label>
-							</div>
-							<div class="radio">
-							  <label><input type="radio" value="4" name="metricRadio">Closeness Centrality</label>
+							  <label><input type="radio" value="4" name="metricRadio">Closeness Centrality (parquet file)</label>
 							</div>
 							<div class="radio">
 							  <label><input type="radio" value="5" name="metricRadio">Start Node</label>
@@ -276,11 +273,8 @@ keyframes ellipsis {to { width:20px;
 				</div>
 			</div>
 			<div class="form-group" style="margin: 20px">
-				<label> <a class="btn btn-success" id="btnSubmit" role="button" data-loading-text="Searching for connectons..."
+				<label> <a class="btn btn-success" id="btnSubmit" role="button" data-loading-text="Calculating..."
 					onClick="calculateCentralityMetric1()"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Calculate</a>
-				</label>
-				<label> <a class="btn btn-success" id="btnSubmit" role="button" data-loading-text="Searching for connectons..."
-					onClick="calculateCentralityMetric2()"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Calculate</a>
 				</label>
 			</div>
 			<div id="divSearch" style="visibility: hidden;" class="loading">

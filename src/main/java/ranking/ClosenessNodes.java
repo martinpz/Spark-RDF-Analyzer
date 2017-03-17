@@ -26,7 +26,7 @@ public class ClosenessNodes {
 
 	public static DataFrame getFarthestNodes(DataFrame nodesWithHighestOutDegree,DataFrame graphFrame, String dataset){
 		
-		/*
+		/**
 		 *  Top 10 nodes with maximum outdegrees. Add a column in the front with 1 that represents them as grey nodes.
 		 *  i.e the ones to be expanded next.
 		 */
@@ -85,7 +85,7 @@ public class ClosenessNodes {
 
 				
 
-				/*
+				/**
 				 *  To avoid loops. We remove three kinds of rows from the dataframe.
 				 *  
 				 *  Case 1: When there are similar values of subject and object in a dataframe ( yes this case can occur too )
@@ -98,7 +98,7 @@ public class ClosenessNodes {
 				subjectOfObjectDF1.registerTempTable("unionedFrame");
 
 				
-				/*
+				/**
 				 * case 1 : distinct clause.
 				 * case 2 : in where clause part two
 				 */
@@ -109,7 +109,7 @@ public class ClosenessNodes {
 
 				
 				
-				/*
+				/**
 				 *  The breaker will break us out of the loop if we get the same rows for 3 consecutive times.
 				 */
 				if(subjectOfObjectDF1.count() == lastcount){

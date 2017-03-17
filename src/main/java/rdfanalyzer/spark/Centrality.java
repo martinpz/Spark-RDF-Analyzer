@@ -1,41 +1,18 @@
 package rdfanalyzer.spark;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
-import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.sql.DataFrame;
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Encoder;
-import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.functions;
-import org.apache.spark.sql.types.DataTypes;
-import org.apache.spark.sql.types.StructField;
-import org.apache.spark.sql.types.StructType;
 
-import com.google.common.io.Resources;
 
 import ranking.DataFramePartitionLooper;
-import ranking.RepeatedRowsCase;
-import ranking.SSSP;
-import ranking.UniqueNodeCase;
 import scala.Tuple2;
-import scala.Tuple4;
 import ranking.ClosenessBean;
-import ranking.ClosenessCentrality;
 import ranking.ClosenessNodes;
 
 import static org.apache.spark.sql.functions.*;

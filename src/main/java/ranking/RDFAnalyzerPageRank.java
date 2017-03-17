@@ -29,13 +29,13 @@ public class RDFAnalyzerPageRank implements Serializable{
 	public List<Tuple2<String,String>> list = new ArrayList<>();
 	
 	
-	/*
+	/**
 	 *  If our overall rank decreases by less than this delta_threshold
 	 *  we will stop calculating pagerank.
 	 */
 	public final int DELTA_THRESHOLD = 10;
 
-    /*
+    /**
 	 * We use this last score to find out by how much % our new score is decreased.
 	 * If it is decreased by <= 20% than we stop.
 	 */
@@ -104,16 +104,13 @@ public class RDFAnalyzerPageRank implements Serializable{
 		 
 		 shuffledwithnumbers = performFinalCombiner(doo);
 		} // for loop
-
-//		JavaRDD<PageRanksCase> finalData = GetTopNNodes(pairedrddd);
-//		WriteInfoToParquet(finalData);
 	}
 	
 	
 	
 	
 	
-	/*
+	/**
 	 ***********************************************************************************************************
 	 **********************************************  Functions  ************************************************
 	 ***********************************************************************************************************
@@ -314,7 +311,7 @@ public class RDFAnalyzerPageRank implements Serializable{
 	}
 	
 
-	/*
+	/**
 	 * Converts keys to values and array of values to keys. For Step 1 mentioned on stackoverflow question.
 	 */
 	public  JavaPairRDD<String,Tuple3<String,Double,Double>> PerformOperationReshuffle(JavaPairRDD<String,Tuple3<ArrayList<String>,Double,Double>> list){
@@ -327,7 +324,7 @@ public class RDFAnalyzerPageRank implements Serializable{
 				List<Tuple2<String, Tuple3<String,Double,Double>>> results = new ArrayList<>();
 				
 				
-				/*
+				/**
 				 * flattedData._1 = values
 				 * flattedData._2._1() = keys
 				 * flattedData._2._2() = pj

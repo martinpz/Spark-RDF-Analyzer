@@ -3,11 +3,11 @@ package ranking;
 public class ClosenessBean {
 
 	private String node;
-	private double closeness;
+	private double importance;
 	
 	public ClosenessBean(String node,double closeness){
 		this.node = node;
-		this.closeness = closeness;
+		this.importance = closeness;
 	}
 
 	public String getNode() {
@@ -19,11 +19,11 @@ public class ClosenessBean {
 	}
 
 	public double getCloseness() {
-		return closeness;
+		return importance;
 	}
 
 	public void setCloseness(double closeness) {
-		this.closeness = closeness;
+		this.importance = closeness;
 	}
 
 	
