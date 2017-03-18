@@ -33,7 +33,7 @@ public class RDFAnalyzerPageRank implements Serializable{
 	 *  If our overall rank decreases by less than this delta_threshold
 	 *  we will stop calculating pagerank.
 	 */
-	public final int DELTA_THRESHOLD = 10;
+	public final int DELTA_THRESHOLD = 5;
 
     /**
 	 * We use this last score to find out by how much % our new score is decreased.
@@ -75,6 +75,10 @@ public class RDFAnalyzerPageRank implements Serializable{
 		// here we created the new pjs by multiplying the values.
 		pairedrdd = returnNewPjsForKeys(shuffledwithnumbers);
 
+		/* If the percentage change in the ranks from previous step is less than
+		 * the defined DELTA_THRESHOLD, then the algorithm stops, organizes the data
+		 * and writes it to a parquet file.
+		 */
 		if(getDeltaScore(pairedrdd) <= DELTA_THRESHOLD){
 			// stop
 			JavaRDD<PageRanksCase> finalData = ConvertPairRDDToRDD(pairedrdd);
@@ -107,9 +111,6 @@ public class RDFAnalyzerPageRank implements Serializable{
 	}
 	
 	
-	
-	
-	
 	/**
 	 ***********************************************************************************************************
 	 **********************************************  Functions  ************************************************
@@ -117,10 +118,9 @@ public class RDFAnalyzerPageRank implements Serializable{
 	 ***********************************************************************************************************
 	 */
 	
-	
+	// Calculates the percentage change in the ranks
 	public Double getDeltaScore(JavaPairRDD<String,Double> pairedrdd){
 
-		double value = 0;
 		List<Double> items = pairedrdd.values().collect();
 		Double score = items.stream().mapToDouble(Double::doubleValue).sum();
 
@@ -465,7 +465,7 @@ public class RDFAnalyzerPageRank implements Serializable{
 		return counters.combineByKey(createCombiner, merger, mergeCombiners);
 	}
 
-	
+	// for testing purposes only
 	public  void createData(){
 		
 		list.add(new Tuple2<String,String>("node1","node2"));

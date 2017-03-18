@@ -42,12 +42,10 @@
 		 */
 
 		public void test() throws Exception{
-			
-
+	
 			createVertices();
 			
 			JavaPairRDD<Long,Long> distData = Service.sparkCtx().parallelizePairs(vertices);
-
 			
 			JavaPairRDD<Long, Tuple4<List<Long>,Integer,Integer, Integer>> adjacencyMatrix = reduceToAdjacencyMatrix(distData);
 
@@ -79,15 +77,12 @@
 		}
 
 		
-		
 		/**
 		 * Convert <Key,[Neighbors]> To <key, Tuple4 < [Neighbors] , Distance, Color, ShortestPaths >
 		 */
 		
 		public JavaPairRDD<Long, Tuple3<Long, Integer, Integer>> applyBFSForNode(long sourceNode, JavaPairRDD<Long, Tuple4<List<Long>,Integer,Integer, Integer>> adjacencyMatrixx){
-
-			
-			
+	
 			/**
 			 *  We won't have any grey nodes in the initial dataset hence we'll never go inside the if condition defined below.
 			 *  So our initial grey node is the sourceNode. Hence this check will only run for the first time.
@@ -100,10 +95,8 @@
 			 *  itemCount * 2. And once we reduce we will check if we get this value from our reducer than we'll break.
 			 */
 
-
 			while(true){
-				
-				
+								
 				/**
 				 *  This function does the following.
 				 *  
@@ -116,10 +109,7 @@
 				 *  Check the comments defined inside this function.
 				 */
 				adjacencyMatrixx = PerformBFSReduceOperation(mappedValues);
-				
-				
-				
-				
+						
 				if(breakloop(adjacencyMatrixx)){
 					break;
 				}
@@ -206,7 +196,7 @@
 		}
 		
 		/**
-		 *  This reduces the final result retrieve from the map phase. Giving us the data in the following structure.
+		 *  This reduces the final result retrieved from the map phase, giving us the data in the following structure.
 		 *  node, [ array nodes it can reach ], [ array of distances it can reach those nodes in ] , [ no. of shortest paths between the source and these nodes ].
 		 *  
 		 *  note that the square brackets represents the array and the item at each index for each array will have values for the same nodes.
@@ -529,11 +519,13 @@
 		}
 		
 		
-		
-		
 		/**
 		 * Convert <Key,Value> to <Key,Tuple4<[Neighbors], Distance, Color, ShortestPaths >>  
 		 * 
+		 *  Where [Neighbors] contains the ids of the immediate neighbors of the particular node
+		 *  
+		 *  Where Distance is the distance from the source node
+		 *  
 		 *  Where @ShortestPaths represents the number of shortest paths between the 
 		 *  sourceKey(passed as param to this function) and this key.
 		 *  
@@ -597,18 +589,7 @@
 			return repeatedValues.combineByKey(createCombiner, merger, mergeCombiners);
 		}
 		
-		
-		
-		
-		
-		
-		
-		
-		
 		// for testing purposes only.
-		
-		
-
 		private  void createVertices(){
 			vertices.add(new Tuple2<Long,Long>(1L,3L));
 			vertices.add(new Tuple2<Long,Long>(1L,2L));

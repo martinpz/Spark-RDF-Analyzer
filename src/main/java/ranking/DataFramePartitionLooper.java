@@ -77,7 +77,7 @@ implements Serializable {
 	 * 
 	 * @param dataset
 	 * 
-	 * Takes the dataset name, converts the data and saves it into a parquet file.
+	 * Takes the dataset name and converts the data to write it into a parquet file.
 	 */
 	public void WriteDataToFile(String dataset){
 		JavaRDD<SSSPCase> apspRDD = ConvertPairRDDToCaseRDD(result);
@@ -130,8 +130,8 @@ implements Serializable {
 	 * @param firstTime
 	 * @throws Exception
 	 * 
-	 * Main function for running the BFS. After calculating the BFs for first sourceNode. It assigns it to the result.
-	 * While for the next nodes it just unions it to the previous result giving us a final result of the form.
+	 * Main function for running the BFS. After calculating the BFs for first sourceNode, it assigns it to the result.
+	 * While for the next nodes it just unions it to the previous result giving us a final result of the form:
 	 * 
 	 *  sourceNodeID, [ array of nodes it can reach ], [ array of distances it can reach those nodes in ] , [ no. of shortest paths between the source and these nodes ].
 	 */
@@ -149,9 +149,4 @@ implements Serializable {
 			}
 		
 	}
-	
-	
-
-
-
 }

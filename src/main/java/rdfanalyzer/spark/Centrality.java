@@ -71,15 +71,14 @@ public class Centrality implements Serializable{
 		}).collect().stream().toArray();
 	}
 	
-	
 
-	
+	// Determine the top nodes and then calculate their closeness
 	public static void GenerateTopNodesCloseness() throws Exception{
 		
-		// generate id based uniqeuNodes parquet files and relation parquet files.
+		// generate id based uniqeNodes parquet files and relation parquet files.
 		generateDataFrame();
 		
-		// retrive the generated files
+		// retrieve the generated files
 		DataFrame uniqueNodes = Service.sqlCtx().parquetFile(rdfanalyzer.spark.Configuration.storage() +
 				 dataset + "UniqueNodes.parquet");
 
@@ -183,8 +182,6 @@ public class Centrality implements Serializable{
 		return result;
 	}
 
-
-	
 	/**
 	 * 
 	 * @return DataFrame
@@ -251,11 +248,10 @@ public class Centrality implements Serializable{
 	}
 	
 	
-
 	/**
 	 * We calculate 4 different values because. It is not necessary that the
 	 * node which has highest in-degree also has highest outdegree. So if a
-	 * node has highest out-degree we also calculate it's in-degree. And the
+	 * node has highest out-degree we also calculate it's in-degree and sum. And the
 	 * other way around. Hence we end up with 4 values
 	 */
 	public static String calculateStartNode() {
@@ -274,9 +270,12 @@ public class Centrality implements Serializable{
 
 		List<Row> rowMaxInDegree = maxInDegreeFrame.collectAsList();
 		// out-degree of node with highest in-degree
-		String maxOutDegreeOfInDegree = CalculateInDegree(rowMaxInDegree.get(0).getString(0));
+		String maxOutDegreeOfInDegree = CalculateOutDegree(rowMaxInDegree.get(0).getString(0));
 
-		System.out.println("[LOG]Working until here yuppie");
+        /*
+         *  Perform sum of the values corresponding to each node and that node
+         *  which has larger sum is returned as start node
+         */
 		long maxOutdegreeTotal = rowMaxOutDegree.get(0).getLong(1) + Integer.parseInt(maxInDegreeOfOutDegree);
 		long maxIndegreeTotal = rowMaxInDegree.get(0).getLong(1) + Integer.parseInt(maxOutDegreeOfInDegree);
 		if (maxOutdegreeTotal < maxIndegreeTotal) {
