@@ -249,10 +249,10 @@ public class Centrality implements Serializable{
 	
 	
 	/**
-	 * We calculate 4 different values because. It is not necessary that the
-	 * node which has highest in-degree also has highest outdegree. So if a
-	 * node has highest out-degree we also calculate it's in-degree and sum. And the
-	 * other way around. Hence we end up with 4 values
+	 * We calculate 4 different values because it is not necessary that the
+	 * node which has highest in-degree also has highest out-degree. So if a
+	 * node has highest out-degree we also calculate it's in-degree and the
+	 * other way around. Hence we end up with 4 values.
 	 */
 	public static String calculateStartNode() {
 		// node with highest out-degree
