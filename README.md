@@ -47,6 +47,7 @@ docker run \
 	-dit \
 	--name tomcat \
 	-p 8080:8080 \
+	-p 8081:8081 \
 	-v /my/path/to/tomcat-users.xml:/usr/local/tomcat/conf/tomcat-users.xml \
 	-v /my/path/to/data:/home/data \
 	tomcat:jre8 \
