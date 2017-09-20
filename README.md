@@ -49,7 +49,7 @@ docker run \
 	-p 8080:8080 \
 	-v /my/path/to/tomcat-users.xml:/usr/local/tomcat/conf/tomcat-users.xml \
 	-v /my/path/to/data:/home/data \
-	tomcat:jre8 \
+	tomcat:8.0-jre8 \
 && docker logs -f tomcat
 ```
 
